@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aprende+ | Assistente Pedagógico</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f5f3ee;--surface:#ffffff;--surface2:#f0ede8;--border:#e0d9d0;
+  --accent:#2563eb;--accent2:#7c3aed;--accent3:#dc2626;
+  --text:#1a1814;--muted:#78716c;--card-bg:#ffffff;
+  --shadow:0 2px 12px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(124,58,237,.05) 0%,transparent 70%);pointer-events:none;z-index:0;}
+header{padding:20px 40px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(245,243,238,.95);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--border);}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.logo-text{font-family:'Fraunces',serif;font-size:26px;font-weight:900;letter-spacing:-1px;}
+.logo-text span{color:var(--accent);}
+.logo-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
+.main{max-width:840px;margin:0 auto;padding:48px 24px 80px;position:relative;z-index:1;}
+.hero{text-align:center;margin-bottom:44px;}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(30px,5vw,50px);font-weight:900;line-height:1.1;letter-spacing:-2px;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--accent);}
+.hero p{color:var(--muted);font-size:15px;font-weight:300;max-width:500px;margin:0 auto;line-height:1.6;}
+.input-tabs{display:flex;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.tab-btn{flex:1;padding:14px;background:var(--surface2);border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.tab-btn:first-child{border-right:1px solid var(--border);}
+.tab-btn.active{background:var(--surface);color:var(--accent);font-weight:600;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;margin-bottom:28px;box-shadow:var(--shadow);}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-label span{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:7px;}
+label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:500;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;transition:border-color .2s,box-shadow .2s;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+select option{background:var(--surface2);}
+textarea{resize:vertical;min-height:90px;line-height:1.6;}
+.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .25s;position:relative;background:var(--surface2);}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(37,99,235,.04);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:44px;margin-bottom:14px;display:block;}
+.upload-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:6px;}
+.upload-sub{font-size:13px;color:var(--muted);}
+.preview-img{width:100%;max-height:300px;object-fit:contain;border-radius:12px;border:1px solid var(--border);margin-top:16px;display:none;}
+.preview-img.visible{display:block;}
+.pdf-name{margin-top:12px;font-size:13px;color:var(--accent2);display:none;}
+.remove-img{margin-top:10px;padding:7px 16px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:8px;color:var(--accent3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:6px;}
+.remove-img.visible{display:inline-flex;}
+.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-top:12px;}
+.checkbox-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s,background .2s;user-select:none;}
+.checkbox-item:hover{border-color:var(--accent2);}
+.checkbox-item.checked{border-color:var(--accent);background:rgba(37,99,235,.06);}
+.checkbox-item input[type=checkbox]{display:none;}
+.check-icon{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .2s;}
+.checkbox-item.checked .check-icon{background:var(--accent);border-color:var(--accent);color:#fff;}
+.check-label{font-size:13px;line-height:1.3;}
+.btn-generate{width:100%;margin-top:28px;padding:16px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font-family:'Fraunces',serif;font-size:18px;font-weight:600;border:none;border-radius:12px;cursor:pointer;transition:transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:-.5px;}
+.btn-generate:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(37,99,235,.25);}
+.btn-generate:active{transform:translateY(0);}
+.loading{display:none;text-align:center;padding:50px 20px;}
+.loading.visible{display:block;}
+.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-main{color:var(--text);font-size:15px;margin-bottom:6px;}
+.loading-sub{font-size:13px;color:var(--muted);font-style:italic;}
+.progress-bar-wrap{width:220px;height:4px;background:var(--border);border-radius:4px;margin:16px auto 0;}
+.progress-bar{height:4px;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+#results{display:none;}
+#results.visible{display:block;}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.result-header h2{font-family:'Fraunces',serif;font-size:26px;font-weight:900;letter-spacing:-1px;}
+.result-header h2 span{color:var(--accent);}
+.result-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.btn-action{padding:9px 18px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.btn-pdf:hover{border-color:var(--accent3);color:var(--accent3);}
+.btn-word:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-new:hover{border-color:var(--muted);}
+.ref-tag{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);border-radius:20px;font-size:12px;color:var(--accent);margin-bottom:24px;}
+.modules{display:flex;flex-direction:column;gap:18px;}
+.module{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp .4s ease forwards;opacity:0;box-shadow:var(--shadow);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.module-header{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .2s;}
+.module-header:hover{background:var(--surface2);}
+.module-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.module-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;flex:1;}
+.module-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.chevron{color:var(--muted);transition:transform .3s;font-size:12px;}
+.module.open .chevron{transform:rotate(180deg);}
+.module-body{max-height:0;overflow:hidden;transition:max-height .5s ease;}
+.module.open .module-body{max-height:4000px;}
+.module-content{padding:22px;font-size:14px;line-height:1.9;color:#44403c;white-space:pre-wrap;}
+.module-content strong{color:var(--text);font-weight:600;}
+.copy-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin:0 22px 16px;transition:all .2s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(37,99,235,.05);}
+.skeleton{padding:22px;display:flex;flex-direction:column;gap:10px;}
+.sk-line{height:12px;background:linear-gradient(90deg,#f0ede8 25%,#e5e1db 50%,#f0ede8 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;}
+.sk-line.short{width:60%;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.mod-translate .module-icon{background:rgba(37,99,235,.08);}
+.mod-translate .module-badge{background:rgba(37,99,235,.08);color:var(--accent);}
+.mod-activities .module-icon{background:rgba(124,58,237,.08);}
+.mod-activities .module-badge{background:rgba(124,58,237,.08);color:var(--accent2);}
+.mod-sites .module-icon{background:rgba(255,107,107,.12);}
+.mod-sites .module-badge{background:rgba(255,107,107,.12);color:var(--accent3);}
+.mod-extra .module-icon{background:rgba(217,119,6,.08);}
+.mod-extra .module-badge{background:rgba(217,119,6,.08);color:#d97706;}
+.mod-lesson .module-icon{background:rgba(80,200,255,.12);}
+.mod-lesson .module-badge{background:rgba(80,200,255,.12);color:#50c8ff;}
+.error-box{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:12px;padding:20px;color:#dc2626;font-size:14px;line-height:1.6;display:none;margin-bottom:20px;}
+.error-box.visible{display:block;}
+.toast{position:fixed;bottom:28px;right:28px;background:#fff;border:1px solid rgba(37,99,235,.3);border-radius:12px;padding:12px 20px;font-size:14px;color:var(--accent);z-index:999;display:none;box-shadow:0 8px 30px rgba(0,0,0,.12);}
+.toast.visible{display:flex;align-items:center;gap:10px;animation:fadeUp .3s ease;}
+/* ── Tablet ── */
+@media(max-width:768px){
+  .main{padding:36px 20px 80px;}
+  .hero h1{letter-spacing:-1px;}
+  .result-actions{gap:8px;}
+  .btn-action{padding:8px 14px;font-size:12px;}
+}
+
+/* ── Mobile ── */
+@media(max-width:600px){
+  /* Header */
+  header{padding:14px 16px;}
+  .logo-text{font-size:22px;}
+  .logo-sub{display:none;}
+
+  /* Layout */
+  .main{padding:24px 14px 80px;}
+  .hero{margin-bottom:28px;}
+  .hero p{font-size:14px;}
+
+  /* Form */
+  .form-card{padding:20px 16px;border-radius:16px;}
+  .form-grid{grid-template-columns:1fr;}
+
+  /* Tabs */
+  .tab-btn{font-size:13px;padding:12px 8px;gap:5px;}
+
+  /* Upload */
+  .upload-zone{padding:28px 16px;}
+  .upload-icon{font-size:36px;margin-bottom:10px;}
+  .upload-title{font-size:16px;}
+
+  /* Checkboxes */
+  .checkbox-grid{grid-template-columns:1fr;}
+  .checkbox-item{padding:12px 14px;}
+
+  /* Generate button */
+  .btn-generate{font-size:16px;padding:14px;}
+
+  /* Results */
+  .result-header{flex-direction:column;align-items:flex-start;gap:14px;}
+  .result-header h2{font-size:22px;}
+  .result-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .btn-action{justify-content:center;font-size:12px;padding:10px 8px;}
+  .btn-new{grid-column:1/-1;}
+
+  /* Modules */
+  .module-header{padding:14px 16px;gap:10px;}
+  .module-title{font-size:14px;}
+  .module-badge{display:none;}
+  .module-content{padding:16px;font-size:13px;}
+  .copy-btn{margin:0 16px 14px;}
+
+  /* Ref tag + AI badge */
+  .ref-tag{font-size:11px;padding:5px 10px;}
+
+  /* Toast — bottom center no mobile */
+  .toast{left:16px;right:16px;bottom:20px;justify-content:center;text-align:center;}
+
+  /* Loading */
+  .loading-main{font-size:14px;}
+}
+
+/* Touch: aumenta área de toque em elementos interativos */
+@media(hover:none){
+  input,select,textarea{font-size:16px;} /* evita zoom automático no iOS */
+  .tab-btn,.checkbox-item,.btn-generate,.btn-action{-webkit-tap-highlight-color:transparent;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-icon">📚</div>
+  <div>
+    <div class="logo-text">Aprende<span>+</span></div>
+    <div class="logo-sub">Assistente Pedagógico com IA</div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <h1>Materiais didáticos<br><em>gerados por IA</em></h1>
+    <p>Envie uma foto da página ou descreva o conteúdo do Aprende Brasil e receba recursos pedagógicos completos para suas aulas.</p>
+  </div>
+
+  <div id="formSection">
+    <div class="input-tabs">
+      <button class="tab-btn active" id="tabManualBtn" onclick="switchTab('manual')">✏️ &nbsp;Descrever manualmente</button>
+      <button class="tab-btn" id="tabUploadBtn" onclick="switchTab('upload')">📷 &nbsp;Upload de foto / PDF</button>
+    </div>
+
+    <div class="form-card">
+      <div class="section-label"><span>1</span>Dados do Livro</div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Ano / Série</label>
+          <select id="ano">
+            <option value="">Selecione...</option>
+            <option>6º ano</option><option>7º ano</option><option>8º ano</option><option>9º ano</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Volume</label>
+          <select id="volume">
+            <option value="">Selecione...</option>
+            <option>Volume 1</option><option>Volume 2</option><option>Volume 3</option><option>Volume 4</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Página(s)</label>
+          <input type="text" id="pagina" placeholder="Ex: 42 ou 42-44">
+        </div>
+      </div>
+
+      <!-- MANUAL -->
+      <div id="tab-manual" class="tab-panel active" style="margin-top:20px">
+        <div class="section-label"><span>2</span>Conteúdo da Página</div>
+        <textarea id="descricao" style="min-height:110px" placeholder="Descreva os exercícios, textos, gramática ou vocabulário presentes na página. Ex: 'A página apresenta um diálogo entre dois amigos falando sobre férias, seguido de 4 exercícios de complete com o Simple Past...'"></textarea>
+      </div>
+
+      <!-- UPLOAD -->
+      <div id="tab-upload" class="tab-panel" style="margin-top:20px">
+        <div class="section-label"><span>2</span>Foto ou PDF da Página</div>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(event)">
+          <span class="upload-icon">🖼️</span>
+          <div class="upload-title">Arraste aqui ou clique para selecionar</div>
+          <div class="upload-sub">JPG, PNG, WEBP ou PDF &nbsp;·&nbsp; máx. 10 MB</div>
+        </div>
+        <img id="previewImg" class="preview-img" alt="Prévia">
+        <div id="pdfName" class="pdf-name"></div>
+        <button class="remove-img" id="removeImg" onclick="removeFile()">✕ &nbsp;Remover arquivo</button>
+        <div class="field" style="margin-top:14px">
+          <label>Observações adicionais (opcional)</label>
+          <textarea id="descExtra" placeholder="Ex: 'Foque nos verbos irregulares da caixa lateral'"></textarea>
+        </div>
+      </div>
+
+      <!-- RESOURCES -->
+      <div style="margin-top:24px">
+        <div class="section-label"><span>3</span>Recursos para gerar</div>
+        <div class="checkbox-grid" id="checkboxes">
+          <label class="checkbox-item checked" onclick="toggleCheck(this)"><input type="checkbox" value="traducao" checked><div class="check-icon">✓</div><span class="check-label">🌐 Tradução do conteúdo</span></label>
+          <label class="checkbox-item checked" onclick="toggleCheck(this)"><input type="checkbox" value="atividades" checked><div class="check-icon">✓</div><span class="check-label">✏️ Atividades pedagógicas</span></label>
+          <label class="checkbox-item checked" onclick="toggleCheck(this)"><input type="checkbox" value="complementar" checked><div class="check-icon">✓</div><span class="check-label">📎 Material complementar</span></label>
+        </div>
+      </div>
+
+      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar Materiais Pedagógicos</button>
+    </div>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p class="loading-main" id="loadingMain">Preparando...</p>
+    <p class="loading-sub" id="loadingSub">Gerando cada recurso separadamente para máxima qualidade ✨</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <div id="results">
+    <div class="result-header">
+      <h2>Materiais <span>Gerados</span></h2>
+      <div class="result-actions">
+        <button class="btn-action btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+        <button class="btn-action btn-word" onclick="exportWord()">📝 Exportar Word</button>
+        <button class="btn-action btn-new" onclick="resetForm()">← Nova consulta</button>
+      </div>
+    </div>
+    <div class="ref-tag" id="refTag"></div>
+    <div class="ref-tag" id="aiBadge" style="margin-left:8px">✦ Usando Claude</div>
+    <div class="modules" id="modules"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── State ── */
+let currentMode = 'manual';
+let uploadedB64 = null, uploadedMime = null;
+let generatedContent = {}, currentRef = '';
+
+const CFG = {
+  traducao:    {icon:'🌐', title:'Tradução do Conteúdo',    cls:'mod-translate',  badge:'Tradução'},
+  atividades:  {icon:'✏️', title:'Atividades Pedagógicas',  cls:'mod-activities', badge:'Atividades'},
+  complementar:{icon:'📎', title:'Material Complementar',    cls:'mod-extra',      badge:'Complementar'},
+};
+
+const RESOURCE_PROMPTS = {
+  traducao:    'Com base APENAS no conteúdo desta página específica do Aprende Brasil, faça a tradução para o português de todos os textos, diálogos, enunciados e instruções presentes. Explique o vocabulário-chave, as expressões idiomáticas e as estruturas gramaticais que aparecem nesta página. Não adicione conteúdo que não esteja na página.',
+  atividades:  'Com base APENAS no conteúdo desta página específica do Aprende Brasil, crie 1 atividade pedagógica para alunos do Ensino Fundamental II. A atividade deve usar diretamente os textos, vocabulário, diálogos ou estruturas gramaticais presentes nesta página — não invente temas diferentes. Inclua: nome da atividade, objetivo, passo a passo detalhado, tempo estimado e sugestão de avaliação. Seja completo e não corte o texto.',
+  complementar:'Com base APENAS no conteúdo desta página específica do Aprende Brasil, forneça material complementar que expanda o que está na página: explicações gramaticais adicionais sobre os pontos abordados, exemplos extras do mesmo vocabulário ou estrutura da página, curiosidades culturais diretamente relacionadas ao tema da página, e dicas práticas para o professor aprofundar o que já está no livro. Seja completo e não corte o texto.',
+};
+
+const KEYS = ['traducao','atividades','complementar'];
+
+/* ── Tabs ── */
+function switchTab(mode) {
+  currentMode = mode;
+  document.getElementById('tabManualBtn').classList.toggle('active', mode==='manual');
+  document.getElementById('tabUploadBtn').classList.toggle('active', mode==='upload');
+  document.getElementById('tab-manual').classList.toggle('active', mode==='manual');
+  document.getElementById('tab-upload').classList.toggle('active', mode==='upload');
+}
+
+/* ── File Upload ── */
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 10*1024*1024) { alert('Arquivo muito grande. Máximo: 10 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    uploadedB64 = ev.target.result.split(',')[1];
+    uploadedMime = file.type;
+    const img = document.getElementById('previewImg');
+    const pn = document.getElementById('pdfName');
+    if (file.type.startsWith('image/')) {
+      img.src = ev.target.result; img.classList.add('visible');
+      pn.style.display = 'none';
+    } else {
+      img.classList.remove('visible');
+      pn.textContent = '📄 ' + file.name; pn.style.display = 'block';
+    }
+    document.getElementById('removeImg').classList.add('visible');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFile() {
+  uploadedB64 = null; uploadedMime = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('previewImg').classList.remove('visible');
+  document.getElementById('removeImg').classList.remove('visible');
+  document.getElementById('pdfName').style.display = 'none';
+}
+
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) {
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    handleFile({target: {files: e.dataTransfer.files}});
+  }
+});
+
+/* ── Checkbox ── */
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.querySelector('.check-icon').textContent = cb.checked ? '✓' : '';
+}
+function getChecked() {
+  return [...document.querySelectorAll('#checkboxes input')].filter(c => c.checked).map(c => c.value);
+}
+
+/* ── Configuração das IAs ── */
+const SYSTEM_PROMPT = `Você é um assistente pedagógico especializado em inglês para o Ensino Fundamental II (6º ao 9º ano), com profundo conhecimento do sistema Aprende Brasil (Grupo Positivo).
+
+REGRA FUNDAMENTAL: Todos os materiais que você gerar devem ser baseados EXCLUSIVAMENTE no conteúdo real da página informada — seja a imagem/PDF enviado ou a descrição fornecida pelo professor. Nunca invente conteúdo, nunca generalize, nunca crie material sobre um tema diferente do que está na página. Se o conteúdo da página for sobre "Simple Past com verbos irregulares", tudo deve girar em torno disso especificamente. Se for um diálogo sobre compras, tudo deve partir daquele diálogo. O material complementar, as atividades, a tradução e o plano de aula devem sempre referenciar, citar ou expandir o que está explicitamente na página informada.
+
+Responda em texto puro, bem estruturado, em português (exceto exemplos em inglês). Sem JSON, sem markdown, sem asteriscos, sem backticks.`;
+
+/* ── API call — Gemini primário, OpenAI backup (chaves seguras no servidor) ── */
+let activeAI = 'gemini';
+
+async function callAPI(userContent) {
+  const res = await fetch('/api/generate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ userContent, systemPrompt: SYSTEM_PROMPT })
+  });
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  // Atualiza badge conforme qual IA respondeu
+  if (data.provider && data.provider !== activeAI) {
+    activeAI = data.provider;
+    updateAIBadge(data.provider);
+  }
+  return data.text;
+}
+
+function updateAIBadge(ai) {
+  const badge = document.getElementById('aiBadge');
+  if (!badge) return;
+  if (ai === 'openai') {
+    badge.textContent = '✦ Usando OpenAI (backup)';
+    badge.style.background = 'rgba(16,163,127,.08)';
+    badge.style.borderColor = 'rgba(16,163,127,.25)';
+    badge.style.color = '#059669';
+  } else {
+    badge.textContent = '✦ Usando Gemini';
+    badge.style.background = 'rgba(66,133,244,.08)';
+    badge.style.borderColor = 'rgba(66,133,244,.25)';
+    badge.style.color = '#2563eb';
+  }
+}
+
+/* ── Generate ── */
+async function generate() {
+  const ano = document.getElementById('ano').value;
+  const volume = document.getElementById('volume').value;
+  const pagina = document.getElementById('pagina').value;
+  const recursos = getChecked();
+
+  if (!ano) { alert('Por favor, selecione o ano/série.'); return; }
+  if (currentMode === 'manual' && !document.getElementById('descricao').value.trim()) {
+    alert('Por favor, descreva o conteúdo da página.'); return;
+  }
+  if (currentMode === 'upload' && !uploadedB64) {
+    alert('Por favor, faça upload de uma foto ou PDF da página.'); return;
+  }
+  if (recursos.length === 0) { alert('Selecione pelo menos um recurso.'); return; }
+
+  // Reset UI
+  document.getElementById('formSection').style.display = 'none';
+  document.getElementById('errorBox').classList.remove('visible');
+  document.getElementById('modules').innerHTML = '';
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('loading').classList.add('visible');
+  generatedContent = {};
+  activeAI = 'gemini';
+  updateAIBadge('gemini');
+
+  currentRef = `${ano} · ${volume || 'Vol. ?'} · Pág. ${pagina || '?'}`;
+  document.getElementById('refTag').textContent = '📖 ' + currentRef;
+
+  const descricao = currentMode === 'manual'
+    ? document.getElementById('descricao').value
+    : (document.getElementById('descExtra').value || '');
+
+  const contexto = `Livro Aprende Brasil — ${ano}, ${volume || '?'}, página ${pagina || '?'}.${descricao ? ' Observações: ' + descricao : ' Analise o conteúdo visual da imagem/PDF fornecido.'}`;
+
+  const buildContent = (prompt) => {
+    if (currentMode === 'upload') {
+      return [
+        { type: uploadedMime === 'application/pdf' ? 'document' : 'image',
+          source: {type: 'base64', media_type: uploadedMime, data: uploadedB64} },
+        { type: 'text', text: prompt }
+      ];
+    }
+    return prompt;
+  };
+
+  const loadingMain = document.getElementById('loadingMain');
+  const progressBar = document.getElementById('progressBar');
+
+  try {
+    document.getElementById('results').classList.add('visible');
+
+    for (let i = 0; i < recursos.length; i++) {
+      const key = recursos[i];
+      const c = CFG[key];
+
+      // Update progress
+      loadingMain.textContent = `Gerando ${i + 1} de ${recursos.length}: ${c.title}...`;
+      progressBar.style.width = ((i / recursos.length) * 100) + '%';
+
+      // Show skeleton while loading
+      appendSkeleton(key);
+
+      // Call API for this single resource
+      const prompt = contexto + '\n\n' + RESOURCE_PROMPTS[key];
+      const text = await callAPI(buildContent(prompt));
+      generatedContent[key] = text;
+
+      // Replace skeleton with real content
+      replaceSkeleton(key, text);
+    }
+
+    progressBar.style.width = '100%';
+    setTimeout(() => document.getElementById('loading').classList.remove('visible'), 400);
+
+  } catch (err) {
+    document.getElementById('loading').classList.remove('visible');
+    if (Object.keys(generatedContent).length === 0) {
+      document.getElementById('formSection').style.display = 'block';
+      document.getElementById('results').classList.remove('visible');
+    }
+    const eb = document.getElementById('errorBox');
+    eb.classList.add('visible');
+    eb.innerHTML = '⚠️ Erro: ' + err.message + '<br><small>Os recursos já gerados foram mantidos. Tente novamente para continuar.</small>';
+  }
+}
+
+/* ── Append skeleton placeholder ── */
+function appendSkeleton(key) {
+  const c = CFG[key];
+  const div = document.createElement('div');
+  div.className = `module ${c.cls} open`;
+  div.id = 'mod-' + key;
+  div.innerHTML = `
+    <div class="module-header">
+      <div class="module-icon">${c.icon}</div>
+      <div class="module-title">${c.title}</div>
+      <span class="module-badge">${c.badge}</span>
+      <span style="font-size:12px;color:var(--accent2)">Gerando...</span>
+    </div>
+    <div class="module-body" style="max-height:4000px">
+      <div class="skeleton">
+        <div class="sk-line"></div><div class="sk-line short"></div>
+        <div class="sk-line"></div><div class="sk-line"></div>
+        <div class="sk-line short"></div>
+      </div>
+    </div>`;
+  document.getElementById('modules').appendChild(div);
+  div.scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+/* ── Replace skeleton with real content ── */
+function replaceSkeleton(key, text) {
+  const c = CFG[key];
+  const div = document.getElementById('mod-' + key);
+  if (!div) return;
+  div.innerHTML = `
+    <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+      <div class="module-icon">${c.icon}</div>
+      <div class="module-title">${c.title}</div>
+      <span class="module-badge">${c.badge}</span>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="module-body">
+      <div class="module-content">${escHtml(text)}</div>
+      <button class="copy-btn" onclick="copyText(this, this.dataset.text)" data-text="${escAttr(text)}">📋 Copiar texto</button>
+    </div>`;
+  div.classList.add('open');
+}
+
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function escAttr(t) {
+  return t.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyText(btn, text) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ Copiado!';
+    setTimeout(() => btn.innerHTML = '📋 Copiar texto', 2000);
+  });
+}
+
+function resetForm() {
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('formSection').style.display = 'block';
+  document.getElementById('modules').innerHTML = '';
+  document.getElementById('errorBox').classList.remove('visible');
+  generatedContent = {};
+}
+
+/* ── Export PDF ── */
+function exportPDF() {
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF({unit:'mm', format:'a4'});
+  const W=210, M=18, cW=W-M*2;
+  let y = 24;
+
+  const write = (text, size, bold, rgb) => {
+    doc.setFontSize(size);
+    doc.setFont('helvetica', bold ? 'bold' : 'normal');
+    doc.setTextColor(...(rgb || [40,50,70]));
+    const lines = doc.splitTextToSize(String(text), cW);
+    lines.forEach(l => {
+      if (y > 275) { doc.addPage(); y = 20; }
+      doc.text(l, M, y);
+      y += size * 0.42;
+    });
+    y += 2;
+  };
+
+  doc.setFillColor(15,17,23);
+  doc.rect(0,0,W,14,'F');
+  doc.setFillColor(79,255,176);
+  doc.rect(0,0,4,14,'F');
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(79,255,176);
+  doc.text('APRENDE+', 8, 9);
+  doc.setTextColor(160,170,200); doc.setFont('helvetica','normal');
+  doc.text('Assistente Pedagógico de Inglês — Aprende Brasil', 38, 9);
+  y = 26;
+
+  write('Materiais Pedagógicos', 20, true, [20,30,80]);
+  write(currentRef, 10, false, [100,110,150]);
+  write('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [140,150,180]);
+  y += 4;
+
+  KEYS.forEach(key => {
+    if (!generatedContent[key]) return;
+    const c = CFG[key];
+    if (y > 260) { doc.addPage(); y = 24; }
+    doc.setFillColor(235,238,250);
+    doc.roundedRect(M-3, y-5, cW+6, 11, 2, 2, 'F');
+    write(c.title, 12, true, [30,40,100]);
+    y += 1;
+    write(generatedContent[key], 10, false, [55,65,90]);
+    y += 5;
+  });
+
+  const pg = doc.getNumberOfPages();
+  for (let i=1; i<=pg; i++) {
+    doc.setPage(i);
+    doc.setFontSize(8); doc.setTextColor(160,170,190);
+    doc.text('Aprende+ · ' + new Date().toLocaleDateString('pt-BR'), M, 290);
+    doc.text(i+'/'+pg, W-M, 290, {align:'right'});
+  }
+
+  doc.save('AprendeMais_' + currentRef.replace(/[·\s]+/g,'_') + '.pdf');
+  showToast('📄 PDF exportado com sucesso!');
+}
+
+/* ── Export Word ── */
+function exportWord() {
+  let sections = '';
+  KEYS.forEach(key => {
+    if (!generatedContent[key]) return;
+    const c = CFG[key];
+    const html = escHtml(generatedContent[key]).replace(/\n/g, '<br>');
+    sections += `<div style="margin-bottom:28px;page-break-inside:avoid">
+      <h2 style="color:#3949ab;border-bottom:2px solid #c5cae9;padding-bottom:8px;margin-bottom:12px">${c.icon} ${c.title}</h2>
+      <p style="line-height:1.8">${html}</p></div>`;
+  });
+
+  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8">
+<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#2c3e50;margin:50px 60px;}h1{font-size:20pt;color:#1a237e;}h2{font-size:13pt;}p{line-height:1.8;margin-bottom:10px;}.meta{color:#7986cb;font-size:10pt;}hr{border:none;border-top:2px solid #e8eaf6;margin:20px 0;}</style>
+</head><body>
+<h1>Materiais Pedagógicos — Aprende+</h1>
+<p class="meta">${currentRef}</p>
+<p class="meta">Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
+<hr>${sections}</body></html>`;
+
+  const blob = new Blob(['\ufeff', html], {type:'application/msword'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'AprendeMais_' + currentRef.replace(/[·\s]+/g,'_') + '.doc';
+  a.click(); URL.revokeObjectURL(url);
+  showToast('📝 Documento Word exportado!');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('visible');
+  setTimeout(() => t.classList.remove('visible'), 3000);
+}
+</script>
+</body>
+</html>
