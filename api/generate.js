@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
   }
 };
 
-/* ── Gemini 2.0 Flash (Google) — primário ── */
+/* ── Gemini 2.5 Flash (Google) — primário ── */
 async function callGemini(userContent, systemPrompt) {
   let textPrompt = '';
   let imagePart = null;
@@ -55,7 +55,7 @@ async function callGemini(userContent, systemPrompt) {
   parts.push({ text: systemPrompt + '\n\n' + textPrompt });
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
