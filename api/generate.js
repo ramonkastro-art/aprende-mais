@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
   }
 };
 
-/* ── Gemini 2.5 Flash (Google) — primário ── */
+/* ── Gemini 2.0 Flash (Google) — primário ── */
 async function callGemini(userContent, systemPrompt) {
   let textPrompt = '';
   let imagePart = null;
@@ -55,7 +55,7 @@ async function callGemini(userContent, systemPrompt) {
   parts.push({ text: systemPrompt + '\n\n' + textPrompt });
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -68,7 +68,6 @@ async function callGemini(userContent, systemPrompt) {
 
   const data = await response.json();
   console.log('Gemini status:', response.status);
-  console.log('Gemini response:', JSON.stringify(data).slice(0, 300));
   if (data.error) throw new Error(data.error.message);
   if (!data.candidates || !data.candidates[0]) throw new Error('Resposta vazia do Gemini');
   return data.candidates[0].content.parts[0].text.trim();
@@ -97,7 +96,7 @@ async function callOpenAI(userContent, systemPrompt) {
       if (part.type === 'document') {
         parts.push({
           type: 'text',
-          text: '[Arquivo PDF enviado. Analise com base nas observacoes do professor.]',
+          text: '[Arquivo PDF enviado. Analise com base na descrição e observações do professor.]',
         });
       }
     }
