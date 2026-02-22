@@ -62,6 +62,13 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
 .pdf-name{margin-top:12px;font-size:13px;color:var(--accent2);display:none;}
 .remove-img{margin-top:10px;padding:7px 16px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:8px;color:var(--accent3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:6px;}
 .remove-img.visible{display:inline-flex;}
+.photo-tips{margin-top:16px;background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.15);border-radius:12px;padding:16px 18px;}
+.photo-tips-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:12px;}
+.photo-tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.tip-item{font-size:12px;padding:5px 8px;border-radius:7px;line-height:1.4;}
+.tip-ok{background:rgba(16,185,129,.07);color:#065f46;}
+.tip-no{background:rgba(220,38,38,.06);color:#991b1b;}
+@media(max-width:480px){.photo-tips-grid{grid-template-columns:1fr;}}
 
 /* CHECKBOXES */
 .checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-top:12px;}
@@ -172,6 +179,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
   .loading-main{font-size:14px;}
 }
 
+footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-spacing:.5px;}
 @media(hover:none){
   input,select,textarea{font-size:16px;}
   .tab-btn,.checkbox-item,.btn-generate,.btn-action{-webkit-tap-highlight-color:transparent;}
@@ -218,6 +226,7 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
             <option>Arte</option>
             <option>Educação Física</option>
             <option>Ensino Religioso</option>
+            <option>Filosofia</option>
           </select>
         </div>
         <div class="field">
@@ -263,6 +272,19 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
           <span class="upload-icon">🖼️</span>
           <div class="upload-title">Arraste aqui ou clique para selecionar</div>
           <div class="upload-sub">JPG, PNG, WEBP ou PDF &nbsp;·&nbsp; máx. 10 MB</div>
+        </div>
+        <div class="photo-tips">
+          <div class="photo-tips-title">📸 Dicas para uma boa foto</div>
+          <div class="photo-tips-grid">
+            <div class="tip-item tip-ok">✅ Página plana e aberta</div>
+            <div class="tip-item tip-ok">✅ Boa iluminação, sem sombras</div>
+            <div class="tip-item tip-ok">✅ Texto totalmente legível</div>
+            <div class="tip-item tip-ok">✅ Foto centralizada na página</div>
+            <div class="tip-item tip-no">❌ Foto torta ou inclinada</div>
+            <div class="tip-item tip-no">❌ Dedo ou objeto cobrindo texto</div>
+            <div class="tip-item tip-no">❌ Imagem desfocada ou escura</div>
+            <div class="tip-item tip-no">❌ Página parcialmente cortada</div>
+          </div>
         </div>
         <img id="previewImg" class="preview-img" alt="Prévia">
         <div id="pdfName" class="pdf-name"></div>
@@ -321,6 +343,10 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<footer>
+  <p>Desenvolvido por Ramon Castro</p>
+</footer>
 
 <script>
 /* ── State ── */
@@ -399,11 +425,32 @@ function getChecked() {
 
 /* ── System prompt dinâmico por componente ── */
 function buildSystemPrompt(componente, ano) {
-  return `Você é um assistente pedagógico especializado no componente curricular de ${componente} para o Ensino Fundamental II (${ano}), com profundo conhecimento do sistema Aprende Brasil (Grupo Positivo), utilizado pela Rede Municipal de Ensino de Vacaria-RS.
+  return `PERSONA E ESPECIALIDADE
+Você é um assistente pedagógico sênior, especialista no Sistema de Ensino Aprende Brasil (Grupo Positivo) e consultor para a Rede Municipal de Ensino de Vacaria-RS. Seu foco é o Ensino Fundamental II, especificamente para o componente de ${componente} no ${ano}. Você domina as diretrizes da BNCC e, fundamentalmente, as novas normas da BNCC Computação.
 
-REGRA FUNDAMENTAL: Todos os materiais gerados devem ser baseados EXCLUSIVAMENTE no conteúdo real da página informada — seja pela imagem/PDF enviado ou pela descrição fornecida pelo professor. Nunca invente conteúdo, nunca generalize para outros temas. Tudo deve partir diretamente do que está naquela página específica do livro.
+MISSÃO E REGRAS DE OURO
+Sua função é transformar o conteúdo de uma página específica do livro didático em estratégias práticas de ensino.
+REGRA 1 — Fidelidade Total: O conteúdo base deve vir exclusivamente da página informada ou enviada. Não invente temas fora do que o livro propõe.
+REGRA 2 — Contextualização Local: Quando apropriado, considere o contexto de Vacaria-RS para exemplos práticos.
+REGRA 3 — Integração Tecnológica: Sempre sugira como conectar o tema da página com as competências da BNCC Computação (Pensamento Computacional, Mundo Digital ou Cultura Digital).
 
-Responda em texto puro, bem organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Use títulos em LETRAS MAIÚSCULAS para separar seções quando necessário.`;
+ESTRUTURA DA RESPOSTA
+Sempre organize sua resposta nas seguintes seções:
+
+1. ANÁLISE DO CONTEÚDO
+Resumo do que a página aborda e qual o objetivo pedagógico central segundo o sistema Aprende Brasil.
+
+2. DICAS PRÁTICAS DE MEDIAÇÃO
+Sugestões de como o professor pode abordar esse conteúdo em sala de aula para maximizar o uso do livro, incluindo perguntas disparadoras e dinâmicas de grupo.
+
+3. CONEXÃO COM BNCC COMPUTAÇÃO
+Indicação de como inserir conceitos de tecnologia ou lógica de forma desplugada ou plugada, aproveitando o gancho do tema da página.
+
+4. MATERIAL PEDAGÓGICO COMPLEMENTAR
+Criação de um exercício, atividade prática ou roteiro de pesquisa que expanda o que está no livro, mantendo o rigor conceitual.
+
+FORMATO DE SAÍDA
+Responda em texto puro, bem organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Use títulos em LETRAS MAIÚSCULAS para separar as seções.`;
 }
 
 /* ── Prompts por recurso e componente ── */
@@ -411,29 +458,39 @@ function buildResourcePrompt(key, componente, ano, contexto) {
   if (key === 'atividades') {
     return `${contexto}
 
-Com base APENAS no conteúdo desta página específica do livro de ${componente} (${ano}) do Aprende Brasil, crie 1 atividade pedagógica complementar para ser aplicada em sala de aula. A atividade deve aprofundar ou reforçar diretamente o que está nesta página — não invente temas diferentes.
+Com base APENAS no conteúdo desta página do livro de ${componente} (${ano}) do Aprende Brasil, gere uma resposta completa seguindo as 4 seções obrigatórias:
 
-Estruture da seguinte forma:
-NOME DA ATIVIDADE
-OBJETIVO DE APRENDIZAGEM
-TEMPO ESTIMADO
-MATERIAIS NECESSÁRIOS
-PASSO A PASSO (detalhado)
-SUGESTÃO DE AVALIAÇÃO
+1. ANÁLISE DO CONTEÚDO
+Resuma o que esta página aborda e qual o objetivo pedagógico central segundo o sistema Aprende Brasil.
 
-Seja completo. Não corte o texto.`;
+2. DICAS PRÁTICAS DE MEDIAÇÃO
+Sugira como o professor pode conduzir esse conteúdo em sala de aula, com pelo menos 2 perguntas disparadoras e 1 dinâmica de grupo baseadas nesta página.
+
+3. CONEXÃO COM BNCC COMPUTAÇÃO
+Indique como inserir conceitos de Pensamento Computacional, Mundo Digital ou Cultura Digital aproveitando o tema desta página. Pode ser uma atividade desplugada ou plugada.
+
+4. MATERIAL PEDAGÓGICO COMPLEMENTAR
+Crie 1 atividade prática ou roteiro de pesquisa que expanda o que está nesta página, com objetivo, passo a passo detalhado, tempo estimado e sugestão de avaliação.
+
+Seja completo. Não corte o texto. Use o contexto de Vacaria-RS quando for enriquecer os exemplos.`;
   }
 
   if (key === 'complementar') {
     return `${contexto}
 
-Com base APENAS no conteúdo desta página específica do livro de ${componente} (${ano}) do Aprende Brasil, forneça material complementar para o professor aprofundar o tema em sala de aula.
+Com base APENAS no conteúdo desta página do livro de ${componente} (${ano}) do Aprende Brasil, gere uma resposta completa seguindo as 4 seções obrigatórias:
 
-Estruture da seguinte forma:
-APROFUNDAMENTO DO CONTEÚDO (explicações adicionais sobre o tema desta página)
-EXEMPLOS EXTRAS (exemplos práticos relacionados ao conteúdo desta página)
-CURIOSIDADES E CONTEXTO (informações culturais, históricas ou científicas ligadas ao tema da página)
-DICAS PARA O PROFESSOR (sugestões práticas para explorar este conteúdo em sala)
+1. ANÁLISE DO CONTEÚDO
+Resuma o que esta página aborda e qual o objetivo pedagógico central segundo o sistema Aprende Brasil.
+
+2. DICAS PRÁTICAS DE MEDIAÇÃO
+Sugira perguntas disparadoras, dinâmicas e estratégias para o professor maximizar o uso desta página em sala.
+
+3. CONEXÃO COM BNCC COMPUTAÇÃO
+Explique como conectar o tema desta página com as competências de Pensamento Computacional, Mundo Digital ou Cultura Digital, de forma desplugada ou plugada.
+
+4. MATERIAL PEDAGÓGICO COMPLEMENTAR
+Forneça: explicações adicionais sobre os conceitos da página, exemplos práticos contextualizados em Vacaria-RS, curiosidades e aprofundamento do tema, e dicas concretas para o professor ir além do livro.
 
 Seja completo. Não corte o texto.`;
   }
