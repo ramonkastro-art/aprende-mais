@@ -450,32 +450,18 @@ function getChecked() {
 
 /* ── System prompt dinâmico por componente ── */
 function buildSystemPrompt(componente, ano) {
-  return `PERSONA E ESPECIALIDADE
-Você é um assistente pedagógico sênior, especialista no Sistema de Ensino Aprende Brasil (Grupo Positivo) e consultor para a Rede Municipal de Ensino de Vacaria-RS. Seu foco é o Ensino Fundamental II, especificamente para o componente de ${componente} no ${ano}. Você domina as diretrizes da BNCC e, fundamentalmente, as novas normas da BNCC Computação.
+  return `Você é um assistente pedagógico sênior, especialista no Sistema de Ensino Aprende Brasil (Grupo Positivo) e consultor para a Rede Municipal de Ensino de Vacaria-RS. Seu foco é o Ensino Fundamental II, componente de ${componente}, ${ano}.
 
-MISSÃO E REGRAS DE OURO
-Sua função é transformar o conteúdo de uma página específica do livro didático em estratégias práticas de ensino.
-REGRA 1 — Fidelidade Total: O conteúdo base deve vir exclusivamente da página informada ou enviada. Não invente temas fora do que o livro propõe.
-REGRA 2 — Contextualização Local: Quando apropriado, considere o contexto de Vacaria-RS para exemplos práticos.
-REGRA 3 — Integração Tecnológica: Sempre sugira como conectar o tema da página com as competências da BNCC Computação (Pensamento Computacional, Mundo Digital ou Cultura Digital).
-
-ESTRUTURA DA RESPOSTA
-Sempre organize sua resposta nas seguintes seções:
-
-1. ANÁLISE DO CONTEÚDO
-Resumo do que a página aborda e qual o objetivo pedagógico central segundo o sistema Aprende Brasil.
-
-2. DICAS PRÁTICAS DE MEDIAÇÃO
-Sugestões de como o professor pode abordar esse conteúdo em sala de aula para maximizar o uso do livro, incluindo perguntas disparadoras e dinâmicas de grupo.
-
-3. CONEXÃO COM BNCC COMPUTAÇÃO
-Indicação de como inserir conceitos de tecnologia ou lógica de forma desplugada ou plugada, aproveitando o gancho do tema da página.
-
-4. MATERIAL PEDAGÓGICO COMPLEMENTAR
-Criação de um exercício, atividade prática ou roteiro de pesquisa que expanda o que está no livro, mantendo o rigor conceitual.
+PRINCÍPIOS DE RESPOSTA
+— Seja sintético e direto. Professores têm pouco tempo: cada seção deve caber em 5 a 8 linhas no máximo.
+— Prefira listas curtas e exemplos concretos a parágrafos longos.
+— Quando citar um exemplo, use sempre a realidade de Vacaria-RS ou do cotidiano do aluno de 11 a 15 anos.
+— Sempre inclua ao menos 2 links reais e funcionais para sites externos com recursos visuais, atividades lúdicas ou conteúdo interativo relacionado ao tema da página (Khan Academy, Wordwall, Kahoot, Canva Edu, YouTube Educação, National Geographic, Britannica, entre outros).
+— Conecte o tema da página com a BNCC Computação (Pensamento Computacional, Mundo Digital ou Cultura Digital) em no máximo 3 linhas.
+— Nunca invente conteúdo fora do que a página propõe.
 
 FORMATO DE SAÍDA
-Responda em texto puro, bem organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Use títulos em LETRAS MAIÚSCULAS para separar as seções.`;
+Texto puro, organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Títulos em LETRAS MAIÚSCULAS. Máximo de 400 palavras por resposta.`;
 }
 
 /* ── Prompts por recurso e componente ── */
@@ -483,60 +469,54 @@ function buildResourcePrompt(key, componente, ano, contexto) {
   if (key === 'atividades') {
     return `${contexto}
 
-Com base APENAS no conteúdo desta página do livro de ${componente} (${ano}) do Aprende Brasil, gere uma resposta completa seguindo as 4 seções obrigatórias:
+Com base APENAS nesta página do livro de ${componente} (${ano}), gere uma resposta curta e prática com as 4 seções abaixo. Máximo de 400 palavras no total.
 
-1. ANÁLISE DO CONTEÚDO
-Resuma o que esta página aborda e qual o objetivo pedagógico central segundo o sistema Aprende Brasil.
+SOBRE ESTA PÁGINA
+Em 3 a 4 linhas: o que a página ensina e qual a habilidade da BNCC que ela desenvolve.
 
-2. DICAS PRÁTICAS DE MEDIAÇÃO
-Sugira como o professor pode conduzir esse conteúdo em sala de aula, com pelo menos 2 perguntas disparadoras e 1 dinâmica de grupo baseadas nesta página.
+COMO TRABALHAR EM SALA
+2 perguntas disparadoras + 1 dinâmica rápida (máx. 20 min) baseadas diretamente no conteúdo da página.
 
-3. CONEXÃO COM BNCC COMPUTAÇÃO
-Indique como inserir conceitos de Pensamento Computacional, Mundo Digital ou Cultura Digital aproveitando o tema desta página. Pode ser uma atividade desplugada ou plugada.
+CONEXÃO COM TECNOLOGIA
+Em 2 a 3 linhas: como relacionar o tema com Pensamento Computacional, Mundo Digital ou Cultura Digital. Sugira 1 ferramenta ou atividade desplugada.
 
-4. MATERIAL PEDAGÓGICO COMPLEMENTAR
-Crie 1 atividade prática ou roteiro de pesquisa que expanda o que está nesta página, com objetivo, passo a passo detalhado, tempo estimado e sugestão de avaliação.
-
-Seja completo. Não corte o texto. Use o contexto de Vacaria-RS quando for enriquecer os exemplos.`;
+ATIVIDADE COMPLEMENTAR
+1 atividade prática e objetiva: nome, objetivo, passo a passo em até 4 etapas, tempo estimado.
+Inclua 2 links reais de sites com recursos visuais ou lúdicos sobre o tema desta página.`;
   }
 
   if (key === 'traducao') {
     return `${contexto}
 
-Com base APENAS no conteúdo desta página do livro de Língua Inglesa (${ano}) do Aprende Brasil, faça a tradução completa para o português brasileiro de todos os textos, diálogos, enunciados e instruções presentes na página.
+Com base APENAS nesta página do livro de Língua Inglesa (${ano}), gere uma resposta objetiva com as 3 seções abaixo. Máximo de 350 palavras no total.
 
-Estruture da seguinte forma:
-
-TRADUÇÃO DO CONTEÚDO
-Traduza todos os textos e diálogos da página de forma fiel e natural.
+TRADUÇÃO
+Traduza os textos e diálogos da página de forma natural e fiel.
 
 VOCABULÁRIO-CHAVE
-Liste as palavras e expressões mais importantes da página com tradução e exemplo de uso em contexto.
+Liste até 8 palavras ou expressões importantes da página com tradução e 1 exemplo curto de uso.
 
-EXPRESSÕES IDIOMÁTICAS E ESTRUTURAS GRAMATICAIS
-Explique as estruturas gramaticais e expressões idiomáticas presentes nesta página específica.
-
-Seja completo. Não corte o texto.`;
+GRAMÁTICA EM FOCO
+Em 3 a 5 linhas: explique a estrutura gramatical principal da página com 1 exemplo prático.
+Inclua 1 link de site externo para praticar o conteúdo (ex: Wordwall, British Council, Duolingo for Schools).`;
   }
 
   if (key === 'complementar') {
     return `${contexto}
 
-Com base APENAS no conteúdo desta página do livro de ${componente} (${ano}) do Aprende Brasil, gere uma resposta completa seguindo as 4 seções obrigatórias:
+Com base APENAS nesta página do livro de ${componente} (${ano}), gere material complementar curto e útil com as 4 seções abaixo. Máximo de 400 palavras no total.
 
-1. ANÁLISE DO CONTEÚDO
-Resuma o que esta página aborda e qual o objetivo pedagógico central segundo o sistema Aprende Brasil.
+APROFUNDAMENTO RÁPIDO
+Em 4 a 5 linhas: explique o conceito da página de forma mais ampla, com 1 exemplo do cotidiano de Vacaria-RS.
 
-2. DICAS PRÁTICAS DE MEDIAÇÃO
-Sugira perguntas disparadoras, dinâmicas e estratégias para o professor maximizar o uso desta página em sala.
+CURIOSIDADE OU CONTEXTO
+1 fato interessante, dado atual ou conexão com o mundo real relacionado ao tema desta página.
 
-3. CONEXÃO COM BNCC COMPUTAÇÃO
-Explique como conectar o tema desta página com as competências de Pensamento Computacional, Mundo Digital ou Cultura Digital, de forma desplugada ou plugada.
+CONEXÃO COM TECNOLOGIA
+Em 2 a 3 linhas: como o tema da página se conecta com Pensamento Computacional, Mundo Digital ou Cultura Digital.
 
-4. MATERIAL PEDAGÓGICO COMPLEMENTAR
-Forneça: explicações adicionais sobre os conceitos da página, exemplos práticos contextualizados em Vacaria-RS, curiosidades e aprofundamento do tema, e dicas concretas para o professor ir além do livro.
-
-Seja completo. Não corte o texto.`;
+RECURSOS EXTERNOS
+Indique 2 a 3 links reais de sites com imagens, vídeos, jogos ou atividades lúdicas sobre o tema desta página (Khan Academy, National Geographic, Britannica, YouTube Educação, Canva Edu, Wordwall, etc.).`;
   }
 }
 
