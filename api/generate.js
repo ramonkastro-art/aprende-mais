@@ -29,7 +29,7 @@ module.exports = async function handler(req, res) {
   }
 };
 
-/* ── Gemini 2.5 Flash (Google) — primário ── */
+/* ── Gemini 2.0 Flash (Google) — primário ── */
 async function callGemini(userContent, systemPrompt) {
   let textPrompt = '';
   let imagePart = null;

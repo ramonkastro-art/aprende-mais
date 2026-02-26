@@ -181,6 +181,28 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
   .loading-main{font-size:14px;}
 }
 
+.history-btn{position:fixed;bottom:24px;left:24px;background:#fff;border:1px solid var(--border);border-radius:50px;padding:10px 18px;font-size:13px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;transition:all .2s;z-index:200;}
+.history-btn:hover{border-color:var(--accent);color:var(--accent);}
+.history-panel{position:fixed;inset:0;z-index:300;display:none;}
+.history-panel.open{display:flex;}
+.history-overlay{position:absolute;inset:0;background:rgba(0,0,0,.3);}
+.history-drawer{position:absolute;left:0;top:0;bottom:0;width:380px;max-width:95vw;background:#fff;box-shadow:4px 0 24px rgba(0,0,0,.1);display:flex;flex-direction:column;animation:slideIn .25s ease;}
+@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.history-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.history-head h3{font-family:'Fraunces',serif;font-size:18px;font-weight:700;}
+.history-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:4px;}
+.history-list{flex:1;overflow-y:auto;padding:12px;}
+.history-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
+.history-item{padding:14px 16px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all .2s;background:#fff;}
+.history-item:hover{border-color:var(--accent);background:rgba(37,99,235,.03);}
+.history-item-ref{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.history-item-date{font-size:11px;color:var(--muted);}
+.history-item-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.history-tag{font-size:11px;padding:2px 8px;background:rgba(37,99,235,.07);color:var(--accent);border-radius:20px;}
+.history-foot{padding:16px 24px;border-top:1px solid var(--border);}
+.history-clear{width:100%;padding:10px;background:none;border:1px solid rgba(220,38,38,.2);border-radius:10px;color:var(--accent3);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.history-clear:hover{background:rgba(220,38,38,.05);}
+@media(max-width:600px){.history-btn{bottom:16px;left:16px;padding:9px 14px;font-size:12px;}}
 footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-spacing:.5px;}
 @media(hover:none){
   input,select,textarea{font-size:16px;}
@@ -337,7 +359,6 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
       <h2>Materiais <span>Gerados</span></h2>
       <div class="result-actions">
         <button class="btn-action btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
-        <button class="btn-action btn-word" onclick="exportWord()">📝 Exportar Word</button>
         <button class="btn-action btn-new" onclick="resetForm()">← Nova consulta</button>
       </div>
     </div>
@@ -346,6 +367,22 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
       <div class="ref-tag" id="aiBadge">✦ Usando Gemini</div>
     </div>
     <div class="modules" id="modules"></div>
+  </div>
+</div>
+
+<button class="history-btn" onclick="openHistory()">🕘 &nbsp;Histórico</button>
+
+<div class="history-panel" id="historyPanel">
+  <div class="history-overlay" onclick="closeHistory()"></div>
+  <div class="history-drawer">
+    <div class="history-head">
+      <h3>Histórico de Consultas</h3>
+      <button class="history-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+    <div class="history-foot">
+      <button class="history-clear" onclick="clearHistory()">🗑️ Limpar histórico</button>
+    </div>
   </div>
 </div>
 
@@ -483,7 +520,12 @@ Em 2 a 3 linhas: como relacionar o tema com Pensamento Computacional, Mundo Digi
 
 ATIVIDADE COMPLEMENTAR
 1 atividade prática e objetiva: nome, objetivo, passo a passo em até 4 etapas, tempo estimado.
-Inclua 2 links reais de sites com recursos visuais ou lúdicos sobre o tema desta página.`;
+
+PARA PESQUISAR
+Sugira 2 termos de busca prontos para o professor pesquisar no YouTube ou Google — use o formato:
+YouTube: "titulo exato do video para buscar"
+Google: "termo de busca para encontrar atividade ou imagem"
+Escolha termos específicos que realmente existam e retornem bons resultados sobre o tema desta página.`;
   }
 
   if (key === 'traducao') {
@@ -499,7 +541,12 @@ Liste até 8 palavras ou expressões importantes da página com tradução e 1 e
 
 GRAMÁTICA EM FOCO
 Em 3 a 5 linhas: explique a estrutura gramatical principal da página com 1 exemplo prático.
-Inclua 1 link de site externo para praticar o conteúdo (ex: Wordwall, British Council, Duolingo for Schools).`;
+
+PARA PRATICAR
+Sugira 2 termos de busca para o professor encontrar exercícios ou jogos online — use o formato:
+Wordwall: "termo para buscar no wordwall.net"
+YouTube: "titulo de video em ingles para buscar"
+Escolha termos que realmente existam nessas plataformas.`;
   }
 
   if (key === 'complementar') {
@@ -516,8 +563,12 @@ CURIOSIDADE OU CONTEXTO
 CONEXÃO COM TECNOLOGIA
 Em 2 a 3 linhas: como o tema da página se conecta com Pensamento Computacional, Mundo Digital ou Cultura Digital.
 
-RECURSOS EXTERNOS
-Indique 2 a 3 links reais de sites com imagens, vídeos, jogos ou atividades lúdicas sobre o tema desta página (Khan Academy, National Geographic, Britannica, YouTube Educação, Canva Edu, Wordwall, etc.).`;
+PARA PESQUISAR
+Sugira 3 termos de busca que o professor pode usar para encontrar recursos de qualidade — use o formato:
+YouTube: "titulo de video para buscar"
+Google Imagens: "termo para encontrar imagem ou infografico"
+Khan Academy: "topico para buscar em pt.khanacademy.org"
+Escolha apenas plataformas conhecidas (YouTube, Khan Academy, Google, Wordwall, National Geographic, Britannica) e termos específicos que realmente existam sobre o tema desta página.`;
   }
 }
 
@@ -627,6 +678,8 @@ async function generate() {
     }
 
     progressBar.style.width = '100%';
+    saveToHistory();
+    registrarConsulta(document.getElementById('componente').value, document.getElementById('ano').value, document.getElementById('volume').value, document.getElementById('pagina').value, recursos);
     setTimeout(() => document.getElementById('loading').classList.remove('visible'), 400);
 
   } catch (err) {
@@ -713,137 +766,259 @@ function exportPDF() {
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({unit:'mm', format:'a4'});
   const W=210, M=20, cW=W-M*2;
-  let y = 32;
+  const PAGE_H = 297;
+  const FOOTER_H = 13;
+  const HEADER_H_P1 = 22;   // altura do cabeçalho na pág 1
+  const HEADER_H_REST = 12; // altura do cabeçalho nas demais páginas
+  const CONTENT_TOP_P1 = 34;
+  const CONTENT_TOP_REST = 22;
+  const BOTTOM_LIMIT = PAGE_H - FOOTER_H - 4;
 
-  // Remove emojis que corrompem o PDF
+  let y = CONTENT_TOP_P1;
+  let pageNum = 1;
+
+  // Remove emojis e URLs que corrompem ou quebram o PDF
   const sanitize = (text) => text
     .replace(/[\u{1F000}-\u{1FFFF}]/gu, '')
     .replace(/[\u2600-\u27BF]/gu, '')
     .replace(/✅|❌|📚|✏️|📎|🌐|📋|📄|📷|✨|⚠️|←/gu, '')
+    .replace(/https?:\/\/[^\s\n)\]>,"']*/g, '')
+    .replace(/www\.[^\s\n)\]>,"']*/g, '')
     .trim();
 
-  const write = (text, size, bold, rgb, lineH) => {
+  const drawHeader = (isFirst) => {
+    doc.setFillColor(37,99,235);
+    if (isFirst) {
+      doc.rect(0,0,W,HEADER_H_P1,'F');
+      doc.setFillColor(255,200,50);
+      doc.rect(0,0,5,HEADER_H_P1,'F');
+      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+      doc.text('APRENDE+', 10, 9);
+      doc.setFontSize(8); doc.setFont('helvetica','normal');
+      doc.text('Apoio Pedagogico - Rede Municipal de Ensino de Vacaria-RS', 10, 16);
+      try { doc.addImage(SMED_LOGO, 'PNG', W-28, 1, 20, 20); } catch(e) {}
+    } else {
+      doc.rect(0,0,W,HEADER_H_REST,'F');
+      doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+      doc.text('APRENDE+ · Apoio Pedagogico - Rede Municipal de Vacaria-RS', M, 7);
+      try { doc.addImage(SMED_LOGO, 'PNG', W-16, 0, 12, 12); } catch(e) {}
+    }
+  };
+
+  const drawFooter = () => {
+    const pg = doc.getNumberOfPages();
+    doc.setFillColor(248,249,252);
+    doc.rect(0,PAGE_H-FOOTER_H,W,FOOTER_H,'F');
+    doc.setDrawColor(210,215,230);
+    doc.setLineWidth(0.3);
+    doc.line(0,PAGE_H-FOOTER_H,W,PAGE_H-FOOTER_H);
+    doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(140,148,170);
+    doc.text('Aprende+ · Rede Municipal de Vacaria-RS · ' + new Date().toLocaleDateString('pt-BR'), M, PAGE_H-FOOTER_H+7);
+    doc.text(pg + ' / __TOTAL__', W-M, PAGE_H-FOOTER_H+7, {align:'right'});
+  };
+
+  const addPage = () => {
+    drawFooter();
+    doc.addPage();
+    pageNum++;
+    drawHeader(false);
+    y = CONTENT_TOP_REST;
+  };
+
+  const checkSpace = (needed) => {
+    if (y + needed > BOTTOM_LIMIT) addPage();
+  };
+
+  const writeLine = (text, size, bold, rgb) => {
     doc.setFontSize(size);
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
-    doc.setTextColor(...(rgb || [40,50,70]));
+    doc.setTextColor(...(rgb || [45,50,70]));
+    const lh = size * 0.45;
     const lines = doc.splitTextToSize(sanitize(String(text)), cW);
-    const lh = lineH || size * 0.45;
-    lines.forEach(l => {
-      if (y > 276) {
-        doc.addPage();
-        y = 24;
-        // Faixa azul no topo de cada página
-        doc.setFillColor(37,99,235);
-        doc.rect(0,0,W,12,'F');
-        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
-        doc.text('APRENDE+ · Apoio Pedagogico — Rede Municipal de Vacaria-RS', M, 7);
-        try { doc.addImage(SMED_LOGO, 'PNG', W-16, 0, 12, 12); } catch(e) {}
-        y = 22;
-      }
+    for (const l of lines) {
+      checkSpace(lh + 1);
       doc.text(l, M, y);
       y += lh;
-    });
+    }
     y += 2;
   };
 
-  // Cabeçalho
-  doc.setFillColor(37,99,235);
-  doc.rect(0,0,W,22,'F');
-  doc.setFillColor(255,200,50);
-  doc.rect(0,0,5,22,'F');
-  doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-  doc.text('APRENDE+', 10, 9);
-  doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('Apoio Pedagogico — Rede Municipal de Ensino de Vacaria-RS', 10, 16);
-  // Logo SMED no canto superior direito
-  try { doc.addImage(SMED_LOGO, 'PNG', W-28, 1, 20, 20); } catch(e) {}
+  // === PÁGINA 1 — Cabeçalho ===
+  drawHeader(true);
 
-  y = 34;
+  writeLine('Materiais Pedagogicos Complementares', 16, true, [20,40,100]);
+  writeLine(sanitize(currentRef), 11, false, [70,85,130]);
+  writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165]);
+  y += 3;
 
-  // Título e referência
-  write('Materiais Pedagogicos Complementares', 16, true, [20,40,100], 7.5);
-  write(sanitize(currentRef), 11, false, [70,85,130], 6);
-  write('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165], 5);
-  y += 5;
-
-  // Linha divisória
   doc.setDrawColor(220,225,240);
   doc.setLineWidth(0.4);
   doc.line(M, y, W-M, y);
-  y += 8;
+  y += 7;
 
+  // === SEÇÕES ===
   KEYS.forEach(key => {
     if (!generatedContent[key]) return;
     const c = CFG[key];
 
-    if (y > 255) { doc.addPage(); y = 24; }
+    // Cabeçalho da seção — garante espaço mínimo para título + pelo menos 2 linhas de conteúdo
+    checkSpace(18);
 
-    // Caixa do título da seção
+    // Caixa do título
     doc.setFillColor(240,244,255);
     doc.roundedRect(M-2, y-5, cW+4, 10, 2, 2, 'F');
     doc.setDrawColor(180,195,235);
     doc.setLineWidth(0.3);
     doc.roundedRect(M-2, y-5, cW+4, 10, 2, 2, 'S');
+    writeLine(c.title.toUpperCase(), 11, true, [25,55,140]);
+    y += 1;
 
-    write(c.title.toUpperCase(), 11, true, [25,55,140], 6);
-    y += 2;
+    // Conteúdo — processa parágrafo por parágrafo, linha por linha
+    const textoCompleto = sanitize(generatedContent[key]);
+    const paragrafos = textoCompleto.split('\n');
+    doc.setFontSize(11);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(45,50,65);
+    const lh = 11 * 0.45;
+    for (const par of paragrafos) {
+      const trimmed = par.trim();
+      if (!trimmed) { y += lh * 0.5; continue; } // linha em branco vira espaço pequeno
+      // Detecta se é título de seção (tudo maiúsculo) e formata diferente
+      const isTitle = trimmed === trimmed.toUpperCase() && trimmed.length > 3;
+      doc.setFont('helvetica', isTitle ? 'bold' : 'normal');
+      doc.setTextColor(...(isTitle ? [25,55,140] : [45,50,65]));
+      const linhas = doc.splitTextToSize(trimmed, cW);
+      for (const l of linhas) {
+        checkSpace(lh + 2);
+        doc.text(l, M, y);
+        y += lh;
+      }
+      if (isTitle) y += 1;
+    }
+    y += 8;
 
-    write(generatedContent[key], 11, false, [45,50,65], 6);
-    y += 6;
-
-    // Linha separadora entre seções
+    // Separador
+    checkSpace(6);
     doc.setDrawColor(230,233,242);
     doc.setLineWidth(0.3);
     doc.line(M, y-2, W-M, y-2);
     y += 4;
   });
 
-  // Rodapé em todas as páginas
-  const pg = doc.getNumberOfPages();
-  for (let i=1; i<=pg; i++) {
+  // Rodapé da última página + corrige total de páginas
+  drawFooter();
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    doc.setFillColor(248,249,252);
-    doc.rect(0,284,W,13,'F');
-    doc.setDrawColor(210,215,230);
-    doc.setLineWidth(0.3);
-    doc.line(0,284,W,284);
     doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(140,148,170);
-    doc.text('Aprende+ · Rede Municipal de Vacaria-RS · ' + new Date().toLocaleDateString('pt-BR'), M, 291);
-    doc.text(i + ' / ' + pg, W-M, 291, {align:'right'});
+    const footerText = W - M;
+    doc.text(i + ' / ' + totalPages, footerText, PAGE_H-FOOTER_H+7, {align:'right'});
   }
 
   doc.save('AprendeMais_' + sanitize(currentRef).replace(/[^a-zA-Z0-9]/g,'_') + '.pdf');
   showToast('PDF exportado com sucesso!');
 }
 
-/* ── Export Word ── */
-function exportWord() {
-  let sections = '';
+/* ── Histórico ── */
+const HISTORY_KEY = 'aprende_mais_history';
+const MAX_HISTORY = 20;
+
+function saveToHistory() {
+  if (!currentRef || Object.keys(generatedContent).length === 0) return;
+  const item = {
+    id: Date.now(),
+    ref: currentRef,
+    componente: currentComponente,
+    date: new Date().toLocaleString('pt-BR'),
+    recursos: Object.keys(generatedContent),
+    content: {...generatedContent}
+  };
+  const history = getHistory();
+  // Remove duplicata do mesmo ref se existir
+  const filtered = history.filter(h => h.ref !== currentRef);
+  filtered.unshift(item);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(filtered.slice(0, MAX_HISTORY)));
+}
+
+async function registrarConsulta(componente, ano, volume, pagina, recursos) {
+  try {
+    await fetch('/api/painel', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ componente, ano, volume, pagina, recursos })
+    });
+  } catch(e) { /* silencioso — não bloqueia o fluxo */ }
+}
+
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch { return []; }
+}
+
+function openHistory() {
+  renderHistory();
+  document.getElementById('historyPanel').classList.add('open');
+}
+
+function closeHistory() {
+  document.getElementById('historyPanel').classList.remove('open');
+}
+
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  const history = getHistory();
+  if (history.length === 0) {
+    list.innerHTML = '<div class="history-empty">📭<br><br>Nenhuma consulta ainda.<br>Gere seu primeiro material!</div>';
+    return;
+  }
+  list.innerHTML = history.map(item => `
+    <div class="history-item" onclick="loadFromHistory(${item.id})">
+      <div class="history-item-ref">📖 ${escHtml(item.ref)}</div>
+      <div class="history-item-date">🕘 ${item.date}</div>
+      <div class="history-item-tags">
+        ${item.recursos.map(r => `<span class="history-tag">${CFG[r]?.badge || r}</span>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadFromHistory(id) {
+  const history = getHistory();
+  const item = history.find(h => h.id === id);
+  if (!item) return;
+
+  closeHistory();
+
+  // Restaura estado
+  generatedContent = {...item.content};
+  currentRef = item.ref;
+  currentComponente = item.componente || '';
+
+  // Atualiza UI
+  document.getElementById('formSection').style.display = 'none';
+  document.getElementById('loading').classList.remove('visible');
+  document.getElementById('errorBox').classList.remove('visible');
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('refTag').textContent = '📖 ' + currentRef;
+  document.getElementById('modules').innerHTML = '';
+
   KEYS.forEach(key => {
     if (!generatedContent[key]) return;
     const c = CFG[key];
-    const html = escHtml(generatedContent[key]).replace(/\n/g, '<br>');
-    sections += `<div style="margin-bottom:28px;page-break-inside:avoid">
-      <h2 style="color:#1d4ed8;border-bottom:2px solid #dbeafe;padding-bottom:8px;margin-bottom:12px">${c.icon} ${c.title}</h2>
-      <p style="line-height:1.8">${html}</p></div>`;
+    const div = document.createElement('div');
+    div.className = `module ${c.cls}`;
+    div.id = 'mod-' + key;
+    document.getElementById('modules').appendChild(div);
+    replaceSkeleton(key, generatedContent[key]);
   });
 
-  const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
-<head><meta charset="UTF-8">
-<style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1c1917;margin:50px 60px;}h1{font-size:18pt;color:#1d4ed8;}h2{font-size:13pt;}p{line-height:1.8;margin-bottom:10px;}.meta{color:#6b7280;font-size:10pt;}hr{border:none;border-top:2px solid #dbeafe;margin:20px 0;}</style>
-</head><body>
-<h1>Materiais Pedagógicos Complementares — Aprende+</h1>
-<p class="meta">${currentRef}</p>
-<p class="meta">Rede Municipal de Ensino de Vacaria-RS</p>
-<p class="meta">Gerado em ${new Date().toLocaleDateString('pt-BR')}</p>
-<hr>${sections}</body></html>`;
+  showToast('📂 Consulta carregada do histórico!');
+}
 
-  const blob = new Blob(['\ufeff', html], {type:'application/msword'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'AprendeMais_' + currentRef.replace(/[·\s]+/g,'_') + '.doc';
-  a.click(); URL.revokeObjectURL(url);
-  showToast('📝 Documento Word exportado!');
+function clearHistory() {
+  if (!confirm('Limpar todo o histórico de consultas?')) return;
+  localStorage.removeItem(HISTORY_KEY);
+  renderHistory();
+  showToast('🗑️ Histórico limpo!');
 }
 
 function showToast(msg) {
