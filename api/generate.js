@@ -107,15 +107,20 @@ async function callGemini(userContent, systemPrompt) {
 /* ── Groq LLaMA (segundo fallback) ── */
 async function callGroq(userContent, systemPrompt) {
   let textPrompt = '';
+  let hasImage = false;
   if (typeof userContent === 'string') {
     textPrompt = userContent;
   } else {
     for (const part of userContent) {
       if (part.type === 'text') textPrompt += part.text;
       if (part.type === 'image' || part.type === 'document') {
-        textPrompt += '\n[Imagem enviada pelo professor — descreva o conteúdo pedagógico com base no contexto fornecido]';
+        hasImage = true;
+        textPrompt += '\n[ATENÇÃO: O professor enviou uma imagem da página do livro, mas este modelo não consegue visualizá-la. Use EXCLUSIVAMENTE as informações textuais fornecidas — componente, ano, volume e página — para gerar o material pedagógico. Seja específico ao máximo com base nesse contexto.]';
       }
     }
+  }
+  if (hasImage) {
+    textPrompt += '\n\nIMPORTANTE: Como não tenho acesso à imagem, baseie todo o material no componente curricular, ano e volume informados. Seja fiel ao conteúdo típico do Aprende Brasil para esse contexto específico.';
   }
 
   const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {

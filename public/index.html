@@ -643,6 +643,10 @@ function updateAIBadge(ai) {
     badge.style.background = 'rgba(37,99,235,.08)';
     badge.style.borderColor = 'rgba(37,99,235,.25)';
     badge.style.color = '#2563eb';
+    // Avisa se havia imagem anexada — Groq não processa imagens
+    if (uploadedB64) {
+      showToast('💡 Dica: o Groq não lê imagens. Para melhor resultado, use também a aba "Descrever o conteúdo".');
+    }
   } else if (ai === 'gemini') {
     badge.textContent = '✦ Usando Gemini (backup)';
     badge.style.background = 'rgba(66,133,244,.08)';
