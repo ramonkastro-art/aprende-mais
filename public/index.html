@@ -891,7 +891,7 @@ function exportPDF() {
     doc.setFontSize(size);
     doc.setFont('helvetica', bold ? 'bold' : 'normal');
     doc.setTextColor(...(rgb || [45,50,70]));
-    const lh = size * 0.45;
+    const lh = size * 0.52;
     const lines = doc.splitTextToSize(sanitize(String(text)), cW);
     for (const l of lines) {
       checkSpace(lh + 1);
@@ -904,9 +904,9 @@ function exportPDF() {
   // === PÁGINA 1 — Cabeçalho ===
   drawHeader(true);
 
-  writeLine('Materiais Pedagogicos Complementares', 16, true, [20,40,100]);
-  writeLine(sanitize(currentRef), 13, false, [70,85,130]);
-  writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 11, false, [150,155,165]);
+  writeLine('Materiais Pedagogicos Complementares', 14, true, [20,40,100]);
+  writeLine(sanitize(currentRef), 11, false, [70,85,130]);
+  writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165]);
   y += 3;
 
   doc.setDrawColor(220,225,240);
@@ -928,29 +928,40 @@ function exportPDF() {
     doc.setDrawColor(180,195,235);
     doc.setLineWidth(0.3);
     doc.roundedRect(M-2, y-5, cW+4, 10, 2, 2, 'S');
-    writeLine(c.title.toUpperCase(), 16, true, [25,55,140]);
+    writeLine(c.title.toUpperCase(), 13, true, [25,55,140]);
     y += 1;
 
     // Conteúdo — processa parágrafo por parágrafo, linha por linha
     const textoCompleto = sanitize(generatedContent[key]);
     const paragrafos = textoCompleto.split('\n');
-    doc.setFontSize(16);
-    doc.setFont('helvetica','normal');
-    doc.setTextColor(45,50,65);
-    const lh = 16 * 0.45;
+    const BODY_SIZE = 12;
+    const SUBTITLE_SIZE = 12;
+    const lh = BODY_SIZE * 0.52;
     for (const par of paragrafos) {
       const trimmed = par.trim();
-      if (!trimmed) { y += lh * 0.5; continue; } // linha em branco vira espaço pequeno
-      // Detecta se é título de seção (tudo maiúsculo) e formata diferente
-      const isTitle = trimmed === trimmed.toUpperCase() && trimmed.length > 3;
-      doc.setFont('helvetica', isTitle ? 'bold' : 'normal');
-      doc.setTextColor(...(isTitle ? [25,55,140] : [45,50,65]));
+      if (!trimmed) { y += lh * 0.4; continue; }
+      // Subtítulos internos: tudo maiúsculo, curtos (até 50 chars), sem pontuação final
+      const isSubtitle = trimmed === trimmed.toUpperCase()
+        && trimmed.length > 3
+        && trimmed.length < 50
+        && !/[.,;:!?]$/.test(trimmed);
+      if (isSubtitle) {
+        y += 2; // espaço antes do subtítulo
+        doc.setFontSize(SUBTITLE_SIZE);
+        doc.setFont('helvetica','bold');
+        doc.setTextColor(25,55,140);
+      } else {
+        doc.setFontSize(BODY_SIZE);
+        doc.setFont('helvetica','normal');
+        doc.setTextColor(45,50,65);
+      }
       const linhas = doc.splitTextToSize(trimmed, cW);
       for (const l of linhas) {
         checkSpace(lh + 2);
         doc.text(l, M, y);
         y += lh;
       }
+      if (isSubtitle) y += 1;
       if (isTitle) y += 1;
     }
     y += 8;
@@ -977,7 +988,7 @@ function exportPDF() {
     doc.setTextColor(140,148,170);
     doc.text(i + ' / ' + totalPages, W-M, PAGE_H-FOOTER_H+5, {align:'right'});
     // Restaura estado padrão do conteúdo nesta página
-    doc.setFontSize(16);
+    doc.setFontSize(12);
     doc.setFont('helvetica','normal');
     doc.setTextColor(45,50,65);
   }
