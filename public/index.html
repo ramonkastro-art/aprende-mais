@@ -859,7 +859,7 @@ function exportPDF() {
     doc.line(0,PAGE_H-FOOTER_H,W,PAGE_H-FOOTER_H);
     doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(140,148,170);
     doc.text('Aprende+ · Rede Municipal de Vacaria-RS · ' + new Date().toLocaleDateString('pt-BR'), M, PAGE_H-FOOTER_H+5);
-    doc.text(pg + ' / __TOTAL__', W-M, PAGE_H-FOOTER_H+5, {align:'right'});
+    // Paginação será escrita depois que soubermos o total
     doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(130,120,150);
     doc.text('Execute com autenticidade. Protagonize em sala.', W/2, PAGE_H-FOOTER_H+10, {align:'center'});
     doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(170,160,180);
@@ -957,24 +957,21 @@ function exportPDF() {
   // Rodapé da última página
   drawFooter();
 
-  // Corrige paginação em todas as páginas (substitui __TOTAL__ pelo total real)
+  // Escreve paginação em todas as páginas agora que sabemos o total
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    // Apaga o placeholder __TOTAL__ com um retângulo branco e reescreve
     doc.setFillColor(248,249,252);
-    doc.rect(W-M-20, PAGE_H-FOOTER_H+1, 22, 8, 'F');
+    doc.rect(W-M-24, PAGE_H-FOOTER_H+1, 26, 7, 'F');
     doc.setFontSize(8);
     doc.setFont('helvetica','normal');
     doc.setTextColor(140,148,170);
     doc.text(i + ' / ' + totalPages, W-M, PAGE_H-FOOTER_H+5, {align:'right'});
+    // Restaura estado padrão do conteúdo nesta página
+    doc.setFontSize(11);
+    doc.setFont('helvetica','normal');
+    doc.setTextColor(45,50,65);
   }
-
-  // Volta para a última página antes de salvar para não corromper o estado
-  doc.setPage(totalPages);
-  doc.setFontSize(11);
-  doc.setFont('helvetica','normal');
-  doc.setTextColor(45,50,65);
 
   doc.save('AprendeMais_' + sanitize(currentRef).replace(/[^a-zA-Z0-9]/g,'_') + '.pdf');
   showToast('PDF exportado com sucesso!');
