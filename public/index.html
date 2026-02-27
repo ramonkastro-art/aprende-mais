@@ -60,8 +60,25 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
 .preview-img{width:100%;max-height:300px;object-fit:contain;border-radius:12px;border:1px solid var(--border);margin-top:16px;display:none;}
 .preview-img.visible{display:block;}
 .pdf-name{margin-top:12px;font-size:13px;color:var(--accent2);display:none;}
+.camera-btn{margin-top:12px;width:100%;padding:11px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);border-radius:10px;color:var(--accent);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.camera-btn:hover{background:rgba(37,99,235,.12);}
 .remove-img{margin-top:10px;padding:7px 16px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:8px;color:var(--accent3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:6px;}
 .remove-img.visible{display:inline-flex;}
+/* ── Camera Modal ── */
+.camera-modal{position:fixed;inset:0;z-index:400;display:none;flex-direction:column;background:#000;}
+.camera-modal.open{display:flex;}
+.camera-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);}
+.camera-header span{color:#fff;font-size:15px;font-weight:500;}
+.camera-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 10px;}
+.camera-preview{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.camera-preview video{width:100%;height:100%;object-fit:cover;}
+.camera-preview canvas{display:none;}
+.camera-footer{padding:24px 20px;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;gap:24px;}
+.camera-capture{width:68px;height:68px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.4);cursor:pointer;transition:transform .15s;}
+.camera-capture:active{transform:scale(.92);}
+.camera-flip{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:46px;height:46px;color:#fff;font-size:20px;cursor:pointer;}
+.camera-retake{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:46px;height:46px;color:#fff;font-size:20px;cursor:pointer;display:none;}
+.camera-use{background:var(--accent);border:none;border-radius:24px;padding:12px 28px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:none;font-family:'DM Sans',sans-serif;}
 .photo-tips{margin-top:16px;background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.15);border-radius:12px;padding:16px 18px;}
 .photo-tips-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:12px;}
 .photo-tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
@@ -299,6 +316,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
           <div class="upload-title">Arraste aqui ou clique para selecionar</div>
           <div class="upload-sub">JPG, PNG, WEBP ou PDF &nbsp;·&nbsp; máx. 10 MB</div>
         </div>
+        <button type="button" class="camera-btn" onclick="openCamera()">📷 &nbsp;Tirar foto agora</button>
         <div class="photo-tips">
           <div class="photo-tips-title">📸 Dicas para uma boa foto</div>
           <div class="photo-tips-grid">
@@ -385,6 +403,23 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
     <div class="history-foot">
       <button class="history-clear" onclick="clearHistory()">🗑️ Limpar histórico</button>
     </div>
+  </div>
+</div>
+
+<div class="camera-modal" id="cameraModal">
+  <div class="camera-header">
+    <span>📷 Tirar foto da página</span>
+    <button class="camera-close" onclick="closeCamera()">✕</button>
+  </div>
+  <div class="camera-preview">
+    <video id="cameraVideo" autoplay playsinline></video>
+    <canvas id="cameraCanvas"></canvas>
+  </div>
+  <div class="camera-footer">
+    <button class="camera-flip" id="cameraFlip" onclick="flipCamera()" title="Virar câmera">🔄</button>
+    <button class="camera-capture" id="cameraCaptureBtn" onclick="capturePhoto()" title="Tirar foto"></button>
+    <button class="camera-retake" id="cameraRetake" onclick="retakePhoto()">🔁</button>
+    <button class="camera-use" id="cameraUse" onclick="usePhoto()">Usar foto ✓</button>
   </div>
 </div>
 
@@ -1021,6 +1056,109 @@ function clearHistory() {
   localStorage.removeItem(HISTORY_KEY);
   renderHistory();
   showToast('🗑️ Histórico limpo!');
+}
+
+/* ── Camera ── */
+let cameraStream = null;
+let cameraFacing = 'environment'; // traseira por padrão
+let capturedBlob = null;
+
+async function openCamera() {
+  const modal = document.getElementById('cameraModal');
+  modal.classList.add('open');
+  await startCamera();
+}
+
+async function startCamera() {
+  // Para stream anterior se existir
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+  }
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: cameraFacing, width: { ideal: 1920 }, height: { ideal: 1080 } },
+      audio: false
+    });
+    const video = document.getElementById('cameraVideo');
+    video.srcObject = cameraStream;
+    // Mostra botão flip só se houver mais de uma câmera
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.filter(d => d.kind === 'videoinput');
+    document.getElementById('cameraFlip').style.display = cameras.length > 1 ? 'flex' : 'none';
+    // Garante que capture/retake estejam no estado correto
+    document.getElementById('cameraCaptureBtn').style.display = 'block';
+    document.getElementById('cameraRetake').style.display = 'none';
+    document.getElementById('cameraUse').style.display = 'none';
+    capturedBlob = null;
+  } catch(e) {
+    alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.');
+    closeCamera();
+  }
+}
+
+async function flipCamera() {
+  cameraFacing = cameraFacing === 'environment' ? 'user' : 'environment';
+  await startCamera();
+}
+
+function capturePhoto() {
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('cameraCanvas');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  canvas.getContext('2d').drawImage(video, 0, 0);
+
+  // Pausa o stream para mostrar a foto capturada
+  cameraStream.getTracks().forEach(t => t.stop());
+  video.srcObject = null;
+  canvas.style.display = 'block';
+  video.style.display = 'none';
+
+  document.getElementById('cameraCaptureBtn').style.display = 'none';
+  document.getElementById('cameraFlip').style.display = 'none';
+  document.getElementById('cameraRetake').style.display = 'flex';
+  document.getElementById('cameraUse').style.display = 'flex';
+
+  canvas.toBlob(blob => { capturedBlob = blob; }, 'image/jpeg', 0.92);
+}
+
+async function retakePhoto() {
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('cameraCanvas');
+  canvas.style.display = 'none';
+  video.style.display = 'block';
+  capturedBlob = null;
+  await startCamera();
+}
+
+function usePhoto() {
+  if (!capturedBlob) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    uploadedB64 = ev.target.result.split(',')[1];
+    uploadedMime = 'image/jpeg';
+    const img = document.getElementById('previewImg');
+    img.src = ev.target.result;
+    img.classList.add('visible');
+    document.getElementById('pdfName').style.display = 'none';
+    document.getElementById('removeImg').classList.add('visible');
+    closeCamera();
+    showToast('📷 Foto capturada com sucesso!');
+  };
+  reader.readAsDataURL(capturedBlob);
+}
+
+function closeCamera() {
+  if (cameraStream) {
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  const video = document.getElementById('cameraVideo');
+  const canvas = document.getElementById('cameraCanvas');
+  video.srcObject = null;
+  video.style.display = 'block';
+  canvas.style.display = 'none';
+  document.getElementById('cameraModal').classList.remove('open');
 }
 
 function showToast(msg) {
