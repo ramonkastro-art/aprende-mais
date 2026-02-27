@@ -12,19 +12,25 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Parâmetros inválidos' });
   }
 
-  // Tenta Gemini primeiro, cai para OpenAI se falhar
+  // Tenta Groq → Gemini → OpenAI
   try {
-    const text = await callGemini(userContent, systemPrompt);
-    return res.status(200).json({ text, provider: 'gemini' });
-  } catch (geminiErr) {
-    console.warn('Gemini falhou, tentando OpenAI...', geminiErr.message);
+    const text = await callGroq(userContent, systemPrompt);
+    return res.status(200).json({ text, provider: 'groq' });
+  } catch (groqErr) {
+    console.warn('Groq falhou, tentando Gemini...', groqErr.message);
     try {
-      const text = await callOpenAI(userContent, systemPrompt);
-      return res.status(200).json({ text, provider: 'openai' });
-    } catch (openaiErr) {
-      return res.status(500).json({
-        error: `Gemini: ${geminiErr.message} | OpenAI: ${openaiErr.message}`,
-      });
+      const text = await callGemini(userContent, systemPrompt);
+      return res.status(200).json({ text, provider: 'gemini' });
+    } catch (geminiErr) {
+      console.warn('Gemini falhou, tentando OpenAI...', geminiErr.message);
+      try {
+        const text = await callOpenAI(userContent, systemPrompt);
+        return res.status(200).json({ text, provider: 'openai' });
+      } catch (openaiErr) {
+        return res.status(500).json({
+          error: `Groq: ${groqErr.message} | Gemini: ${geminiErr.message} | OpenAI: ${openaiErr.message}`,
+        });
+      }
     }
   }
 };
@@ -98,7 +104,47 @@ async function callGemini(userContent, systemPrompt) {
   return data.candidates[0].content.parts[0].text.trim();
 }
 
-/* ── OpenAI — backup ── */
+/* ── Groq LLaMA (segundo fallback) ── */
+async function callGroq(userContent, systemPrompt) {
+  let textPrompt = '';
+  if (typeof userContent === 'string') {
+    textPrompt = userContent;
+  } else {
+    for (const part of userContent) {
+      if (part.type === 'text') textPrompt += part.text;
+      if (part.type === 'image' || part.type === 'document') {
+        textPrompt += '\n[Imagem enviada pelo professor — descreva o conteúdo pedagógico com base no contexto fornecido]';
+      }
+    }
+  }
+
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 8192,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: textPrompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error?.message || `Groq HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.choices?.[0]?.message?.content) throw new Error('Groq retornou resposta vazia');
+  return data.choices[0].message.content.trim();
+}
+
+/* ── OpenAI — terceiro fallback ── */
 async function callOpenAI(userContent, systemPrompt) {
   let userMessage;
 

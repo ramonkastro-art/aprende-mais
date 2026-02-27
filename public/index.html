@@ -638,16 +638,21 @@ async function callAPI(userContent, systemPrompt) {
 function updateAIBadge(ai) {
   const badge = document.getElementById('aiBadge');
   if (!badge) return;
-  if (ai === 'openai') {
+  if (ai === 'groq') {
+    badge.textContent = '✦ Usando Groq';
+    badge.style.background = 'rgba(37,99,235,.08)';
+    badge.style.borderColor = 'rgba(37,99,235,.25)';
+    badge.style.color = '#2563eb';
+  } else if (ai === 'gemini') {
+    badge.textContent = '✦ Usando Gemini (backup)';
+    badge.style.background = 'rgba(66,133,244,.08)';
+    badge.style.borderColor = 'rgba(66,133,244,.25)';
+    badge.style.color = '#4285f4';
+  } else if (ai === 'openai') {
     badge.textContent = '✦ Usando OpenAI (backup)';
     badge.style.background = 'rgba(16,163,127,.08)';
     badge.style.borderColor = 'rgba(16,163,127,.25)';
     badge.style.color = '#059669';
-  } else {
-    badge.textContent = '✦ Usando Gemini';
-    badge.style.background = 'rgba(66,133,244,.08)';
-    badge.style.borderColor = 'rgba(66,133,244,.25)';
-    badge.style.color = '#2563eb';
   }
 }
 
