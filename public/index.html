@@ -810,7 +810,7 @@ function exportPDF() {
   const doc = new jsPDF({unit:'mm', format:'a4'});
   const W=210, M=20, cW=W-M*2;
   const PAGE_H = 297;
-  const FOOTER_H = 13;
+  const FOOTER_H = 18;
   const HEADER_H_P1 = 22;   // altura do cabeçalho na pág 1
   const HEADER_H_REST = 12; // altura do cabeçalho nas demais páginas
   const CONTENT_TOP_P1 = 34;
@@ -856,8 +856,12 @@ function exportPDF() {
     doc.setLineWidth(0.3);
     doc.line(0,PAGE_H-FOOTER_H,W,PAGE_H-FOOTER_H);
     doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(140,148,170);
-    doc.text('Aprende+ · Rede Municipal de Vacaria-RS · ' + new Date().toLocaleDateString('pt-BR'), M, PAGE_H-FOOTER_H+7);
-    doc.text(pg + ' / __TOTAL__', W-M, PAGE_H-FOOTER_H+7, {align:'right'});
+    doc.text('Aprende+ · Rede Municipal de Vacaria-RS · ' + new Date().toLocaleDateString('pt-BR'), M, PAGE_H-FOOTER_H+5);
+    doc.text(pg + ' / __TOTAL__', W-M, PAGE_H-FOOTER_H+5, {align:'right'});
+    doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(130,120,150);
+    doc.text('Execute com autenticidade. Protagonize em sala.', W/2, PAGE_H-FOOTER_H+10, {align:'center'});
+    doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(170,160,180);
+    doc.text('Desenvolvido por Ramon Castro', W/2, PAGE_H-FOOTER_H+15, {align:'center'});
   };
 
   const addPage = () => {
