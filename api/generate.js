@@ -68,8 +68,33 @@ async function callGemini(userContent, systemPrompt) {
 
   const data = await response.json();
   console.log('Gemini status:', response.status);
+
+  // Status HTTP de erro (429 = quota, 403 = auth, 500 = server)
+  if (!response.ok) {
+    const msg = data.error?.message || `Erro HTTP ${response.status}`;
+    throw new Error(msg);
+  }
+
+  // Erro explícito na resposta
   if (data.error) throw new Error(data.error.message);
-  if (!data.candidates || !data.candidates[0]) throw new Error('Resposta vazia do Gemini');
+
+  // Sem candidatos — pode ser bloqueio de segurança ou quota
+  if (!data.candidates || !data.candidates[0]) {
+    const reason = data.promptFeedback?.blockReason || 'Resposta vazia do Gemini';
+    throw new Error(reason);
+  }
+
+  // finishReason diferente de STOP indica problema
+  const finishReason = data.candidates[0].finishReason;
+  if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+    throw new Error(`Gemini encerrou com motivo: ${finishReason}`);
+  }
+
+  // Sem parts no conteúdo
+  if (!data.candidates[0].content?.parts?.[0]?.text) {
+    throw new Error('Gemini retornou conteúdo vazio');
+  }
+
   return data.candidates[0].content.parts[0].text.trim();
 }
 
