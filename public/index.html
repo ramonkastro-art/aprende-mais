@@ -841,23 +841,25 @@ function exportPDF() {
     .trim();
 
   const drawHeader = (isFirst) => {
-    doc.setFillColor(37,99,235);
+    // Faixa tricolor: azul petróleo | amarelo dourado | laranja
+    const third = W / 3;
+    const h = isFirst ? HEADER_H_P1 : HEADER_H_REST;
+    doc.setFillColor(31,119,150);  doc.rect(0, 0, third, h, 'F');
+    doc.setFillColor(230,185,55);  doc.rect(third, 0, third, h, 'F');
+    doc.setFillColor(214,120,40);  doc.rect(third*2, 0, third+1, h, 'F');
+
     if (isFirst) {
-      doc.rect(0,0,W,HEADER_H_P1,'F');
-      doc.setFillColor(255,200,50);
-      doc.rect(0,0,5,HEADER_H_P1,'F');
-      doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-      doc.text('APRENDE+', 10, 9);
-      doc.setFontSize(8); doc.setFont('helvetica','normal');
-      doc.text('Apoio Pedagogico - Rede Municipal de Ensino de Vacaria-RS', 10, 16);
-      try { doc.addImage(SMED_LOGO, 'PNG', W-28, 1, 20, 20); } catch(e) {}
+      try { doc.addImage(SMED_LOGO, 'PNG', W-26, 1, 18, 18); } catch(e) {}
+      doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+      doc.text('APRENDE+', M, 10);
+      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      doc.text('Apoio Pedagogico - Rede Municipal de Ensino de Vacaria-RS', M, 17);
     } else {
-      doc.rect(0,0,W,HEADER_H_REST,'F');
-      doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+      doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
       doc.text('APRENDE+ · Apoio Pedagogico - Rede Municipal de Vacaria-RS', M, 7);
-      try { doc.addImage(SMED_LOGO, 'PNG', W-16, 0, 12, 12); } catch(e) {}
+      try { doc.addImage(SMED_LOGO, 'PNG', W-14, 0, 11, 11); } catch(e) {}
     }
-  };
+  }
 
   const drawFooter = () => {
     const pg = doc.getNumberOfPages();
