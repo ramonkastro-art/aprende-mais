@@ -12,24 +12,54 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Parâmetros inválidos' });
   }
 
-  // Tenta Groq → Gemini → OpenAI
-  try {
-    const text = await callGroq(userContent, systemPrompt);
-    return res.status(200).json({ text, provider: 'groq' });
-  } catch (groqErr) {
-    console.warn('Groq falhou, tentando Gemini...', groqErr.message);
+  // Detecta se há imagem/PDF no conteúdo
+  const hasImage = Array.isArray(userContent) &&
+    userContent.some(p => p.type === 'image' || p.type === 'document');
+
+  if (hasImage) {
+    // Com imagem: Gemini primeiro (lê imagens) → Groq → OpenAI
+    console.log('Modo imagem: Gemini → Groq → OpenAI');
     try {
       const text = await callGemini(userContent, systemPrompt);
       return res.status(200).json({ text, provider: 'gemini' });
     } catch (geminiErr) {
-      console.warn('Gemini falhou, tentando OpenAI...', geminiErr.message);
+      console.warn('Gemini falhou, tentando Groq...', geminiErr.message);
       try {
-        const text = await callOpenAI(userContent, systemPrompt);
-        return res.status(200).json({ text, provider: 'openai' });
-      } catch (openaiErr) {
-        return res.status(500).json({
-          error: `Groq: ${groqErr.message} | Gemini: ${geminiErr.message} | OpenAI: ${openaiErr.message}`,
-        });
+        const text = await callGroq(userContent, systemPrompt);
+        return res.status(200).json({ text, provider: 'groq' });
+      } catch (groqErr) {
+        console.warn('Groq falhou, tentando OpenAI...', groqErr.message);
+        try {
+          const text = await callOpenAI(userContent, systemPrompt);
+          return res.status(200).json({ text, provider: 'openai' });
+        } catch (openaiErr) {
+          return res.status(500).json({
+            error: `Gemini: ${geminiErr.message} | Groq: ${groqErr.message} | OpenAI: ${openaiErr.message}`,
+          });
+        }
+      }
+    }
+  } else {
+    // Sem imagem: Groq primeiro (rápido e gratuito) → Gemini → OpenAI
+    console.log('Modo texto: Groq → Gemini → OpenAI');
+    try {
+      const text = await callGroq(userContent, systemPrompt);
+      return res.status(200).json({ text, provider: 'groq' });
+    } catch (groqErr) {
+      console.warn('Groq falhou, tentando Gemini...', groqErr.message);
+      try {
+        const text = await callGemini(userContent, systemPrompt);
+        return res.status(200).json({ text, provider: 'gemini' });
+      } catch (geminiErr) {
+        console.warn('Gemini falhou, tentando OpenAI...', geminiErr.message);
+        try {
+          const text = await callOpenAI(userContent, systemPrompt);
+          return res.status(200).json({ text, provider: 'openai' });
+        } catch (openaiErr) {
+          return res.status(500).json({
+            error: `Groq: ${groqErr.message} | Gemini: ${geminiErr.message} | OpenAI: ${openaiErr.message}`,
+          });
+        }
       }
     }
   }
