@@ -268,26 +268,48 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
           <label>Componente Curricular</label>
           <select id="componente">
             <option value="">Selecione...</option>
-            <option>Língua Portuguesa</option>
-            <option>Matemática</option>
-            <option>Ciências</option>
-            <option>História</option>
-            <option>Geografia</option>
-            <option>Língua Inglesa</option>
-            <option>Arte</option>
-            <option>Educação Física</option>
-            <option>Ensino Religioso</option>
-            <option>Filosofia</option>
+            <optgroup label="Anos Iniciais (1º-5º)" id="grp-ef1">
+              <option data-seg="ef1">Língua Portuguesa</option>
+              <option data-seg="ef1">Matemática</option>
+              <option data-seg="ef1">Ciências</option>
+              <option data-seg="ef1">História</option>
+              <option data-seg="ef1">Geografia</option>
+              <option data-seg="ef1">Arte</option>
+              <option data-seg="ef1">Educação Física</option>
+              <option data-seg="ef1">Ensino Religioso</option>
+              <option data-seg="ef1">Língua Inglesa</option>
+            </optgroup>
+            <optgroup label="Anos Finais (6º-9º)" id="grp-ef2">
+              <option data-seg="ef2">Língua Portuguesa</option>
+              <option data-seg="ef2">Matemática</option>
+              <option data-seg="ef2">Ciências</option>
+              <option data-seg="ef2">História</option>
+              <option data-seg="ef2">Geografia</option>
+              <option data-seg="ef2">Língua Inglesa</option>
+              <option data-seg="ef2">Arte</option>
+              <option data-seg="ef2">Educação Física</option>
+              <option data-seg="ef2">Ensino Religioso</option>
+              <option data-seg="ef2">Filosofia</option>
+            </optgroup>
           </select>
         </div>
         <div class="field">
           <label>Ano / Série</label>
           <select id="ano">
             <option value="">Selecione...</option>
-            <option>6º ano</option>
-            <option>7º ano</option>
-            <option>8º ano</option>
-            <option>9º ano</option>
+            <optgroup label="Anos Iniciais (EF1)">
+              <option>1º ano</option>
+              <option>2º ano</option>
+              <option>3º ano</option>
+              <option>4º ano</option>
+              <option>5º ano</option>
+            </optgroup>
+            <optgroup label="Anos Finais (EF2)">
+              <option>6º ano</option>
+              <option>7º ano</option>
+              <option>8º ano</option>
+              <option>9º ano</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -533,88 +555,113 @@ function getChecked() {
 
 /* ── System prompt dinâmico por componente ── */
 function buildSystemPrompt(componente, ano) {
-  return `Você é um assistente pedagógico sênior, especialista no Sistema de Ensino Aprende Brasil (Grupo Positivo) e consultor para a Rede Municipal de Ensino de Vacaria-RS. Seu foco é o Ensino Fundamental II, componente de ${componente}, ${ano}.
+  const EF1_ANOS = ['1º ano','2º ano','3º ano','4º ano','5º ano'];
+  const isEF1 = EF1_ANOS.includes(ano);
+  const faixa = isEF1 ? 'Ensino Fundamental I (Anos Iniciais)' : 'Ensino Fundamental II (Anos Finais)';
+  const idadeRef = isEF1
+    ? 'criancas de 6 a 10 anos — use linguagem simples, ludica e acolhedora, com frases curtas'
+    : 'alunos de 11 a 15 anos — use linguagem objetiva e contextualizada';
+  const cotidiano = isEF1
+    ? 'da realidade de Vacaria-RS e do cotidiano infantil (brincadeiras, familia, natureza, escola)'
+    : 'da realidade de Vacaria-RS e do cotidiano do adolescente';
 
-PRINCÍPIOS DE RESPOSTA
-— Seja sintético e direto. Professores têm pouco tempo: cada seção deve caber em 5 a 8 linhas no máximo.
-— Prefira listas curtas e exemplos concretos a parágrafos longos.
-— Quando citar um exemplo, use sempre a realidade de Vacaria-RS ou do cotidiano do aluno de 11 a 15 anos.
-— Sempre inclua ao menos 2 links reais e funcionais para sites externos com recursos visuais, atividades lúdicas ou conteúdo interativo relacionado ao tema da página (Khan Academy, Wordwall, Kahoot, Canva Edu, YouTube Educação, National Geographic, Britannica, entre outros).
-— Conecte o tema da página com a BNCC Computação (Pensamento Computacional, Mundo Digital ou Cultura Digital) em no máximo 3 linhas.
-— Nunca invente conteúdo fora do que a página propõe.
+  return `Voce e um assistente pedagogico senior, especialista no Sistema de Ensino Aprende Brasil (Grupo Positivo) e consultor para a Rede Municipal de Ensino de Vacaria-RS. Seu foco e o ${faixa}, componente de ${componente}, ${ano}.
 
-FORMATO DE SAÍDA
-Texto puro, organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Títulos em LETRAS MAIÚSCULAS. Máximo de 400 palavras por resposta.`;
+PRINCIPIOS DE RESPOSTA
+— Seja sintetico e direto. Professores tem pouco tempo: cada secao deve caber em 5 a 8 linhas no maximo.
+— Adapte toda a linguagem e os exemplos para ${idadeRef}.
+— Use sempre contextos ${cotidiano}.
+— Sugira termos de busca especificos para o professor encontrar recursos no YouTube e Google.
+— Conecte o tema com a BNCC Computacao (Pensamento Computacional, Mundo Digital ou Cultura Digital) em no maximo 3 linhas.
+— Nunca invente conteudo fora do que a pagina propoe.
+${isEF1 ? "— Para EF1: priorize atividades ludicas, concretas e visuais, adequadas para alfabetizacao e letramento." : ""}
+
+FORMATO DE SAIDA
+Texto puro, organizado, em portugues brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Titulos em LETRAS MAIUSCULAS. Maximo de 400 palavras por resposta.`;
 }
 
-/* ── Prompts por recurso e componente ── */
+
+
+/* ── Prompts por recurso ── */
 function buildResourcePrompt(key, componente, ano, contexto) {
+  const EF1_ANOS = ['1º ano','2º ano','3º ano','4º ano','5º ano'];
+  const isEF1 = EF1_ANOS.includes(ano);
+  const notaEF1 = isEF1 ? ' Use linguagem simples, exemplos ludicos e concretos adequados para criancas de 6 a 10 anos.' : '';
+  const dinamica = isEF1
+    ? '1 dinamica ludica e concreta (max. 20 min) com uso de objetos, desenho ou movimento'
+    : '1 dinamica rapida (max. 20 min) baseada diretamente no conteudo da pagina';
+  const atividadeExtra = isEF1
+    ? '1 atividade criativa: nome, objetivo, materiais simples, passo a passo em ate 4 etapas, tempo estimado'
+    : '1 atividade pratica e objetiva: nome, objetivo, passo a passo em ate 4 etapas, tempo estimado';
+
   if (key === 'atividades') {
     return `${contexto}
 
-Com base APENAS nesta página do livro de ${componente} (${ano}), gere uma resposta curta e prática com as 4 seções abaixo. Máximo de 400 palavras no total.
+Com base APENAS nesta pagina do livro de ${componente} (${ano}), gere uma resposta curta e pratica com as 4 secoes abaixo. Maximo de 400 palavras no total.${notaEF1}
 
-SOBRE ESTA PÁGINA
-Em 3 a 4 linhas: o que a página ensina e qual a habilidade da BNCC que ela desenvolve.
+SOBRE ESTA PAGINA
+Em 3 a 4 linhas: o que a pagina ensina e qual a habilidade da BNCC que ela desenvolve.
 
 COMO TRABALHAR EM SALA
-2 perguntas disparadoras + 1 dinâmica rápida (máx. 20 min) baseadas diretamente no conteúdo da página.
+2 perguntas disparadoras + ${dinamica}.
 
-CONEXÃO COM TECNOLOGIA
-Em 2 a 3 linhas: como relacionar o tema com Pensamento Computacional, Mundo Digital ou Cultura Digital. Sugira 1 ferramenta ou atividade desplugada.
+CONEXAO COM TECNOLOGIA
+Em 2 a 3 linhas: como relacionar o tema com Pensamento Computacional, Mundo Digital ou Cultura Digital. Sugira 1 ferramenta ou atividade desplugada${isEF1 ? ' adequada para criancas' : ''}.
 
 ATIVIDADE COMPLEMENTAR
-1 atividade prática e objetiva: nome, objetivo, passo a passo em até 4 etapas, tempo estimado.
+${atividadeExtra}.
 
 PARA PESQUISAR
 Sugira 2 termos de busca prontos para o professor pesquisar no YouTube ou Google — use o formato:
 YouTube: "titulo exato do video para buscar"
 Google: "termo de busca para encontrar atividade ou imagem"
-Escolha termos específicos que realmente existam e retornem bons resultados sobre o tema desta página.`;
+Escolha termos especificos que realmente existam sobre o tema desta pagina.`;
   }
 
   if (key === 'traducao') {
     return `${contexto}
 
-Com base APENAS nesta página do livro de Língua Inglesa (${ano}), gere uma resposta objetiva com as 3 seções abaixo. Máximo de 350 palavras no total.
+Com base APENAS nesta pagina do livro de Lingua Inglesa (${ano}), gere uma resposta objetiva com as 3 secoes abaixo. Maximo de 350 palavras no total.${notaEF1}
 
-TRADUÇÃO
-Traduza os textos e diálogos da página de forma natural e fiel.
+TRADUCAO
+Traduza os textos e dialogos da pagina de forma natural e fiel.
 
-VOCABULÁRIO-CHAVE
-Liste até 8 palavras ou expressões importantes da página com tradução e 1 exemplo curto de uso.
+VOCABULARIO-CHAVE
+Liste ate 8 palavras ou expressoes importantes da pagina com traducao e 1 exemplo curto de uso.
 
-GRAMÁTICA EM FOCO
-Em 3 a 5 linhas: explique a estrutura gramatical principal da página com 1 exemplo prático.
+GRAMATICA EM FOCO
+Em 3 a 5 linhas: explique a estrutura gramatical principal da pagina com 1 exemplo pratico.
 
 PARA PRATICAR
-Sugira 2 termos de busca para o professor encontrar exercícios ou jogos online — use o formato:
-Wordwall: "termo para buscar no wordwall.net"
-YouTube: "titulo de video em ingles para buscar"
-Escolha termos que realmente existam nessas plataformas.`;
+Sugira 2 termos de busca:
+YouTube: "titulo exato do video para buscar"
+Google: "termo de busca para encontrar exercicio ou jogo"`;
   }
 
-  if (key === 'complementar') {
+  if (key === 'material') {
     return `${contexto}
 
-Com base APENAS nesta página do livro de ${componente} (${ano}), gere material complementar curto e útil com as 4 seções abaixo. Máximo de 400 palavras no total.
+Com base APENAS nesta pagina do livro de ${componente} (${ano}), gere material de aprofundamento com as 3 secoes abaixo. Maximo de 400 palavras.${notaEF1}
 
-APROFUNDAMENTO RÁPIDO
-Em 4 a 5 linhas: explique o conceito da página de forma mais ampla, com 1 exemplo do cotidiano de Vacaria-RS.
+APROFUNDAMENTO RAPIDO
+Em 4 a 6 linhas: expanda o conteudo da pagina com uma explicacao mais detalhada, incluindo 1 exemplo pratico do cotidiano de Vacaria-RS.
 
 CURIOSIDADE OU CONTEXTO
-1 fato interessante, dado atual ou conexão com o mundo real relacionado ao tema desta página.
+1 fato interessante ou contexto historico/cientifico relacionado ao tema, em 3 linhas.
 
-CONEXÃO COM TECNOLOGIA
-Em 2 a 3 linhas: como o tema da página se conecta com Pensamento Computacional, Mundo Digital ou Cultura Digital.
+CONEXAO COM TECNOLOGIA
+Como este tema se conecta com Pensamento Computacional ou Cultura Digital. Sugira 1 atividade desplugada${isEF1 ? ' ludica para criancas' : ''}.
 
 PARA PESQUISAR
-Sugira 3 termos de busca que o professor pode usar para encontrar recursos de qualidade — use o formato:
-YouTube: "titulo de video para buscar"
+YouTube: "titulo exato do video para buscar"
 Google Imagens: "termo para encontrar imagem ou infografico"
-Khan Academy: "topico para buscar em pt.khanacademy.org"
-Escolha apenas plataformas conhecidas (YouTube, Khan Academy, Google, Wordwall, National Geographic, Britannica) e termos específicos que realmente existam sobre o tema desta página.`;
+Khan Academy: "topico para buscar em pt.khanacademy.org"`;
   }
+
+  // fallback generico
+  return `${contexto}
+
+Gere um material pedagogico objetivo para ${componente}, ${ano}, com base na pagina informada. Maximo de 350 palavras.${notaEF1}`;
 }
 
 /* ── API call ── */
@@ -996,6 +1043,51 @@ function exportPDF() {
   doc.save('AprendeMais_' + sanitize(currentRef).replace(/[^a-zA-Z0-9]/g,'_') + '.pdf');
   showToast('PDF exportado com sucesso!');
 }
+
+/* ── Filtro EF1 / EF2 por ano selecionado ── */
+(function() {
+  const EF1_ANOS = ['1º ano','2º ano','3º ano','4º ano','5º ano'];
+  const EF2_ANOS = ['6º ano','7º ano','8º ano','9º ano'];
+
+  function filtrarComponentes(ano) {
+    const sel = document.getElementById('componente');
+    const grpEF1 = document.getElementById('grp-ef1');
+    const grpEF2 = document.getElementById('grp-ef2');
+    const valorAtual = sel.value;
+
+    if (EF1_ANOS.includes(ano)) {
+      grpEF1.style.display = '';
+      grpEF2.style.display = 'none';
+      // se componente selecionado era EF2, limpa
+      const opts = grpEF1.querySelectorAll('option');
+      const validos = Array.from(opts).map(o => o.value || o.text);
+      if (!validos.includes(valorAtual)) sel.value = '';
+    } else if (EF2_ANOS.includes(ano)) {
+      grpEF1.style.display = 'none';
+      grpEF2.style.display = '';
+      const opts = grpEF2.querySelectorAll('option');
+      const validos = Array.from(opts).map(o => o.value || o.text);
+      if (!validos.includes(valorAtual)) sel.value = '';
+    } else {
+      // nenhum ano selecionado — mostra tudo
+      grpEF1.style.display = '';
+      grpEF2.style.display = '';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Esconde EF2 por padrão até selecionar ano
+    const grpEF1 = document.getElementById('grp-ef1');
+    const grpEF2 = document.getElementById('grp-ef2');
+    if (grpEF1) grpEF1.style.display = 'none';
+    if (grpEF2) grpEF2.style.display = 'none';
+
+    const anoSel = document.getElementById('ano');
+    if (anoSel) {
+      anoSel.addEventListener('change', () => filtrarComponentes(anoSel.value));
+    }
+  });
+})();
 
 /* ── Histórico ── */
 const HISTORY_KEY = 'aprende_mais_history';
