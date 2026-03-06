@@ -462,6 +462,11 @@ document.getElementById('componente').addEventListener('change', function() {
   const checkTraducao = document.getElementById('checkTraducao');
   if (isIngles) {
     checkTraducao.style.display = 'flex';
+    // garante que aparece já marcado e com visual idêntico aos demais
+    const cb = checkTraducao.querySelector('input');
+    cb.checked = true;
+    checkTraducao.classList.add('checked');
+    checkTraducao.querySelector('.check-icon').textContent = '✓';
   } else {
     checkTraducao.style.display = 'none';
     // desmarca se estava marcado
