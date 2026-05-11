@@ -492,7 +492,7 @@ function switchTab(mode) {
 function handleFile(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 10*1024*1024) { alert('Arquivo muito grande. Máximo: 10 MB.'); return; }
+  if (file.size > 10*1024*1024) { alert('Arquivo muito grande. Máximo: 4 MB.'); return; }
   const reader = new FileReader();
   reader.onload = ev => {
     uploadedB64 = ev.target.result.split(',')[1];
