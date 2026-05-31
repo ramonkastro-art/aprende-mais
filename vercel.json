@@ -1,22 +1,6 @@
 {
   "rewrites": [
     {
-      "source": "/api/generate",
-      "destination": "/api/generate"
-    },
-    {
-      "source": "/api/painel",
-      "destination": "/api/painel"
-    },
-    {
-      "source": "/api/avaliacao-salvar",
-      "destination": "/api/avaliacao-salvar"
-    },
-    {
-      "source": "/api/avaliacao-buscar",
-      "destination": "/api/avaliacao-buscar"
-    },
-    {
       "source": "/painel",
       "destination": "/api/painel-view"
     },
@@ -47,6 +31,10 @@
     {
       "source": "/icon-512.png",
       "destination": "/public/icon-512.png"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/public/favicon.ico"
     },
     {
       "source": "/",
