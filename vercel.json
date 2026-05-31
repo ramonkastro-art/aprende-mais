@@ -1,8 +1,20 @@
 {
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/api/generate",
+      "destination": "/api/generate"
+    },
+    {
+      "source": "/api/painel",
+      "destination": "/api/painel"
+    },
+    {
+      "source": "/api/avaliacao-salvar",
+      "destination": "/api/avaliacao-salvar"
+    },
+    {
+      "source": "/api/avaliacao-buscar",
+      "destination": "/api/avaliacao-buscar"
     },
     {
       "source": "/painel",

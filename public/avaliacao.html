@@ -547,14 +547,6 @@ function renderizarGrade() {
 function _renderizarGradeInterno(grade) {
   const qtd = avaliacaoAtual.questoes.length;
 
-  // Gabarito visível para o professor
-  const gabHTML = `
-    <div style="background:var(--surface2);border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--muted);">
-      <strong style="color:var(--text);">Gabarito:</strong>
-      ${avaliacaoAtual.questoes.map((q,i)=>`<span style="margin:0 4px;"><b>${i+1}.</b>${q.gabarito}</span>`).join('')}
-    </div>`;
-  grade.insertAdjacentHTML('beforeend', gabHTML);
-
   avaliacaoAtual.questoes.forEach((q, qi) => {
     // letras = LETRAS (global)
     const resp = respostasAluno[qi];
@@ -745,35 +737,6 @@ async function exportarPDF() {
     });
     y += 5;
   }
-
-  // ── GABARITO (nova página) ──
-  doc.addPage();
-  pageNum++;
-  y = drawPageHeader(doc, false);
-  drawFooter(doc, pageNum);
-
-  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
-  doc.text('GABARITO', M, y+4);
-  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,110,130);
-  doc.text(`${c.comp} · ${c.ano} · ${c.qtd} questões · ${c.geradaEm}`, M, y+10);
-  y += 18;
-
-  // Grade do gabarito
-  const cols = 5;
-  const cellW = cW / cols;
-  const cellH = 10;
-  questoes.forEach((q, qi) => {
-    const col = qi % cols;
-    const row = Math.floor(qi / cols);
-    const cx = M + col * cellW;
-    const cy = y + row * cellH;
-    doc.setFillColor(qi%2===0?245:250,248,255);
-    doc.rect(cx, cy, cellW, cellH-1, 'F');
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
-    doc.text(`${qi+1}.`, cx+2, cy+6.5);
-    doc.setFont('helvetica','normal'); doc.setTextColor(30,36,51);
-    doc.text(q.gabarito, cx+cellW/2, cy+6.5, {align:'center'});
-  });
 
   // ── Gera QR Code como imagem base64 ──
   let qrDataUrl = null;
