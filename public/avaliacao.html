@@ -858,15 +858,10 @@ async function exportarPDF() {
     const qrX = W - M - qrSize;
     const qrY = y;
     doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
-    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
-    doc.text('Correção pelo celular:', M, qrY + 6);
-    doc.setFont('helvetica','normal'); doc.setTextColor(80,90,110);
-    doc.text('1. Abra a câmera ou leitor de QR Code', M, qrY + 12);
-    doc.text('2. Aponte para o código ao lado', M, qrY + 18);
-    doc.text('3. Marque as respostas e calcule a nota', M, qrY + 24);
-    doc.setFontSize(7); doc.setTextColor(150,160,180);
-    const idLabel = qrIdParaUsar.startsWith('LOCAL-') ? 'Gabarito embutido no QR' : 'Código: ' + qrIdParaUsar;
-    doc.text(idLabel, M, qrY + 30);
+    doc.setFontSize(7.5); doc.setFont('helvetica','italic'); doc.setTextColor(100,110,130);
+    doc.text('QR Code de uso', M, qrY + 8);
+    doc.text('exclusivo do(a)', M, qrY + 13);
+    doc.text('Professor(a)', M, qrY + 18);
   }
 
   doc.save(`Avaliacao_${c.comp.replace(/\s/g,'_')}_${c.ano}_${c.geradaEm.replace(/\//g,'-')}.pdf`);
