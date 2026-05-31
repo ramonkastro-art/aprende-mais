@@ -616,21 +616,31 @@ function novaCorrecao() {
 // SALVAR NO SUPABASE
 // ══════════════════════════════════════════════
 async function salvarAvaliacao(questoes, config) {
+  // Gabarito codificado localmente — garante QR funcional mesmo sem Supabase
+  const gabStr = questoes.map(q => q.gabarito).join('');
+  avaliacaoId = 'LOCAL-' + gabStr; // fallback imediato
+
+  const badge = document.getElementById('avIdBadge');
+  if (badge) { badge.textContent = '🔑 Gabarito pronto'; badge.style.display = 'inline-flex'; }
+
+  // Tenta salvar no Supabase em background para persistência real
   try {
     const res = await fetch('/api/avaliacao-salvar', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({ questoes, config })
     });
-    const data = await res.json();
-    if (data.id) {
-      avaliacaoId = data.id;
-      // Atualiza badge com o ID
-      const badge = document.getElementById('avIdBadge');
-      if (badge) { badge.textContent = '🔑 ' + avaliacaoId; badge.style.display = 'inline-flex'; }
-      console.log('Avaliação salva:', avaliacaoId);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.id) {
+        avaliacaoId = data.id;
+        if (badge) badge.textContent = '🔑 ' + avaliacaoId;
+        console.log('Avaliação salva no Supabase:', avaliacaoId);
+      }
+    } else {
+      console.warn('Supabase indisponível, usando modo local');
     }
-  } catch(e) { console.warn('Erro ao salvar avaliação:', e); }
+  } catch(e) { console.warn('Supabase offline, modo local ativo:', e.message); }
 }
 
 // ══════════════════════════════════════════════
@@ -743,9 +753,11 @@ async function exportarPDF() {
 
   // ── Gera QR Code como imagem base64 ──
   let qrDataUrl = null;
-  if (avaliacaoId) {
+  // avaliacaoId sempre disponível (LOCAL- ou Supabase)
+  const qrIdParaUsar = avaliacaoId || ('LOCAL-' + questoes.map(q=>q.gabarito).join(''));
+  {
     try {
-      const qrUrl = 'https://aprendemaisvac.vercel.app/corrigir/' + avaliacaoId;
+      const qrUrl = 'https://aprendemaisvac.vercel.app/corrigir/' + qrIdParaUsar;
       const qrDiv = document.createElement('div');
       qrDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
       document.body.appendChild(qrDiv);
@@ -853,7 +865,8 @@ async function exportarPDF() {
     doc.text('2. Aponte para o código ao lado', M, qrY + 18);
     doc.text('3. Marque as respostas e calcule a nota', M, qrY + 24);
     doc.setFontSize(7); doc.setTextColor(150,160,180);
-    doc.text('Código: ' + avaliacaoId, M, qrY + 30);
+    const idLabel = qrIdParaUsar.startsWith('LOCAL-') ? 'Gabarito embutido no QR' : 'Código: ' + qrIdParaUsar;
+    doc.text(idLabel, M, qrY + 30);
   }
 
   doc.save(`Avaliacao_${c.comp.replace(/\s/g,'_')}_${c.ano}_${c.geradaEm.replace(/\//g,'-')}.pdf`);

@@ -96,6 +96,30 @@ const AV_ID = '${id || ''}';
 
 async function carregar() {
   if (!AV_ID) { mostrarErro(); return; }
+
+  // Modo LOCAL: gabarito embutido na URL (LOCAL-ABCDEABCDE...)
+  if (AV_ID.startsWith('LOCAL-')) {
+    const gabStr = AV_ID.replace('LOCAL-', '');
+    const letras = ['A','B','C','D','E'];
+    const questoes = gabStr.split('').map((g, i) => ({
+      enunciado: 'Questão ' + (i+1),
+      alternativas: {A:'A',B:'B',C:'C',D:'D',E:'E'},
+      gabarito: g
+    }));
+    avaliacao = {
+      id: AV_ID,
+      config: { comp: '', ano: '', turma: '', conteudo: 'Gabarito local', qtd: questoes.length, geradaEm: '' },
+      questoes
+    };
+    respostas = new Array(questoes.length).fill('');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('conteudo').style.display = 'block';
+    renderInfo();
+    renderGrade();
+    return;
+  }
+
+  // Modo Supabase: busca pelo ID
   try {
     const r = await fetch('/api/avaliacao-buscar?id=' + encodeURIComponent(AV_ID));
     if (!r.ok) throw new Error();
