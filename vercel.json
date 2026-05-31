@@ -14,7 +14,11 @@
     },
     {
       "source": "/avaliacao.html",
-      "destination": "/public/avaliacao.html"
+      "destination": "/api/avaliacao-view"
+    },
+    {
+      "source": "/corrigir/:id",
+      "destination": "/api/corrigir-view?id=:id"
     },
     {
       "source": "/manifest.json",

@@ -261,7 +261,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
     <div class="questoes-container" id="questoesContainer">
       <div class="card" style="margin-top:16px;">
         <div class="card-title">✏️ Revise e edite antes de imprimir</div>
-        <p style="font-size:13px;color:var(--muted);margin-bottom:4px;">Clique no enunciado ou nas alternativas para editar. Clique na bolinha da letra para marcar/desmarcar o gabarito.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px;">Clique no enunciado ou nas alternativas para editar. Clique na bolinha da letra para marcar/desmarcar o gabarito.</p>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <span id="avIdBadge" style="display:none;background:rgba(37,99,235,.1);color:var(--accent);border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700;"></span>
+          <span style="font-size:12px;color:var(--muted);">O QR Code para correção será impresso na folha de respostas.</span>
+        </div>
       </div>
 
       <div id="questoesList"></div>
@@ -323,6 +327,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 // ══════════════════════════════════════════════
 const LETRAS = ['A','B','C','D','E'];
 let avaliacaoAtual = null; // { questoes, gabarito, config }
+let avaliacaoId = null;    // ID salvo no Supabase ex: AV-2505-X3K2
 let respostasAluno = [];   // ['A','','C',...]
 
 // ══════════════════════════════════════════════
@@ -445,6 +450,8 @@ Gere exatamente \${qtd} questões seguindo as regras. Responda APENAS com o JSON
     };
 
     renderizarQuestoes();
+    // Salva no Supabase em background e armazena o ID
+    salvarAvaliacao(parsed.questoes, avaliacaoAtual.config);
 
   } catch(err) {
     showToast('Erro: ' + err.message);
@@ -616,10 +623,36 @@ function novaCorrecao() {
 }
 
 // ══════════════════════════════════════════════
+// SALVAR NO SUPABASE
+// ══════════════════════════════════════════════
+async function salvarAvaliacao(questoes, config) {
+  try {
+    const res = await fetch('/api/avaliacao-salvar', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ questoes, config })
+    });
+    const data = await res.json();
+    if (data.id) {
+      avaliacaoId = data.id;
+      // Atualiza badge com o ID
+      const badge = document.getElementById('avIdBadge');
+      if (badge) { badge.textContent = '🔑 ' + avaliacaoId; badge.style.display = 'inline-flex'; }
+      console.log('Avaliação salva:', avaliacaoId);
+    }
+  } catch(e) { console.warn('Erro ao salvar avaliação:', e); }
+}
+
+// ══════════════════════════════════════════════
 // EXPORT PDF
 // ══════════════════════════════════════════════
 async function exportarPDF() {
   if (!avaliacaoAtual) return;
+  if (!avaliacaoId) {
+    showToast('Aguarde... salvando avaliação');
+    await new Promise(r => setTimeout(r, 1500));
+    if (!avaliacaoId) { showToast('Erro ao salvar. Tente novamente.'); return; }
+  }
   showToast('Gerando PDF...');
 
   const { jsPDF } = window.jspdf;
@@ -744,6 +777,24 @@ async function exportarPDF() {
     doc.text(q.gabarito, cx+cellW/2, cy+6.5, {align:'center'});
   });
 
+  // ── Gera QR Code como imagem base64 ──
+  let qrDataUrl = null;
+  try {
+    const qrUrl = 'https://aprendemaisvac.vercel.app/corrigir/' + avaliacaoId;
+    const qrCanvas = document.createElement('canvas');
+    await new Promise((resolve, reject) => {
+      new QRCode(qrCanvas, {
+        text: qrUrl, width: 128, height: 128,
+        colorDark:'#1e2433', colorLight:'#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      setTimeout(() => {
+        try { qrDataUrl = qrCanvas.toDataURL('image/png'); resolve(); }
+        catch(e) { reject(e); }
+      }, 300);
+    });
+  } catch(e) { console.warn('QR Code error:', e); }
+
   // ── FOLHA DE RESPOSTAS (nova página) ──
   doc.addPage();
   pageNum++;
@@ -814,6 +865,23 @@ async function exportarPDF() {
   // Legenda
   doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(150,160,180);
   doc.text('● Preencha completamente    ○ Não rasure    ✗ Marque apenas UMA alternativa por questão', M, y);
+  y += 10;
+
+  // QR Code + instruções de correção
+  if (qrDataUrl) {
+    const qrSize = 28;
+    const qrX = W - M - qrSize;
+    const qrY = y;
+    doc.addImage(qrDataUrl, 'PNG', qrX, qrY, qrSize, qrSize);
+    doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
+    doc.text('Correção pelo celular:', M, qrY + 6);
+    doc.setFont('helvetica','normal'); doc.setTextColor(80,90,110);
+    doc.text('1. Abra a câmera ou leitor de QR Code', M, qrY + 12);
+    doc.text('2. Aponte para o código ao lado', M, qrY + 18);
+    doc.text('3. Marque as respostas e calcule a nota', M, qrY + 24);
+    doc.setFontSize(7); doc.setTextColor(150,160,180);
+    doc.text('Código: ' + avaliacaoId, M, qrY + 30);
+  }
 
   doc.save(\`Avaliacao_\${c.comp.replace(/\\s/g,'_')}_\${c.ano}_\${c.geradaEm.replace(/\\//g,'-')}.pdf\`);
   showToast('PDF gerado com sucesso!');
