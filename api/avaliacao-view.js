@@ -358,42 +358,36 @@ async function gerarAvaliacao() {
   }, 2500);
 
   try {
-    const systemPrompt = \`Você é um professor especialista em elaborar avaliações pedagógicas de alta qualidade para o Ensino Fundamental.
-Gere uma avaliação de múltipla escolha com exatamente \${qtd} questões para \${comp} - \${ano}.
-Nível: \${nivel}.
+    const systemPrompt = \`Você é um professor experiente do Ensino Fundamental brasileiro, especialista em elaborar avaliações pedagógicas alinhadas à BNCC.
 
-REGRAS OBRIGATÓRIAS:
-1. Cada questão tem exatamente 5 alternativas: A, B, C, D, E
-2. Apenas UMA alternativa é correta por questão
-3. As alternativas incorretas devem ser plausíveis (não obviamente erradas)
-4. Varie a posição do gabarito (não concentre no A ou B)
-5. Linguagem adequada para \${ano} do Ensino Fundamental
-6. Baseie as questões no conteúdo informado pelo professor
+TAREFA: Gere exatamente \${qtd} questões de múltipla escolha para \${comp} - \${ano} - nível \${nivel}.
 
-FORMATO DE SAÍDA — responda APENAS com JSON válido, sem texto extra, sem markdown:
-{
-  "questoes": [
-    {
-      "enunciado": "Texto da questão aqui",
-      "alternativas": {
-        "A": "Texto da alternativa A",
-        "B": "Texto da alternativa B",
-        "C": "Texto da alternativa C",
-        "D": "Texto da alternativa D",
-        "E": "Texto da alternativa E"
-      },
-      "gabarito": "C"
-    }
-  ]
-}\`;
+REGRAS PEDAGÓGICAS:
+- Questões claras, objetivas e adequadas à faixa etária do \${ano}
+- Cada questão avalia UMA habilidade específica do conteúdo
+- Alternativas incorretas devem ser plausíveis (erros comuns dos alunos)
+- Distribua o gabarito: no máximo 25% em cada letra (A/B/C/D/E)
+- Nunca repita o gabarito mais de 2 vezes seguidas
+- Linguagem simples para anos iniciais (1º-5º), mais técnica para finais (6º-9º)
 
-    const userContent = \`Componente: \${comp}
-Ano: \${ano}
-Número de questões: \${qtd}
-Nível de dificuldade: \${nivel}
-Conteúdo / tópicos a avaliar: \${conteudo}
+REGRAS DE FORMATO — CRÍTICO:
+- Responda SOMENTE com o JSON abaixo, sem nenhum texto antes ou depois
+- Não use markdown, não use blocos de código, não use \\\`\\\`\\\`
+- Todas as strings devem usar aspas duplas
+- Não deixe vírgula após o último elemento de arrays/objetos
+- O campo "gabarito" deve conter APENAS uma letra maiúscula: A, B, C, D ou E
 
-Gere a avaliação completa com gabarito seguindo exatamente o formato JSON solicitado.\`;
+JSON ESPERADO (siga exatamente esta estrutura):
+{"questoes":[{"enunciado":"texto da questao","alternativas":{"A":"texto A","B":"texto B","C":"texto C","D":"texto D","E":"texto E"},"gabarito":"C"}]}\`;
+
+    const userContent = \`DADOS DA AVALIAÇÃO:
+- Componente: \${comp}
+- Ano/Série: \${ano}
+- Quantidade de questões: \${qtd}
+- Nível de dificuldade: \${nivel}
+- Conteúdo/tópicos: \${conteudo}
+
+Gere exatamente \${qtd} questões seguindo as regras. Responda APENAS com o JSON, nenhum texto adicional.\`;
 
     const res = await fetch('/api/generate', {
       method: 'POST',
@@ -403,13 +397,27 @@ Gere a avaliação completa com gabarito seguindo exatamente o formato JSON soli
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    // Parse JSON da resposta
+    // Parse JSON — robusto para Groq (LLaMA) e Gemini
     let parsed;
     try {
-      const clean = data.text.replace(/\`\`\`json|\`\`\`/g,'').trim();
-      parsed = JSON.parse(clean);
+      let raw = data.text.trim();
+      // Remove markdown code blocks
+      raw = raw.replace(/^\`\`\`json\\s*/i,'').replace(/^\`\`\`\\s*/,'').replace(/\\s*\`\`\`$/,'').trim();
+      // Extrai só o objeto JSON caso venha com texto ao redor
+      const jsonMatch = raw.match(/\\{[\\s\\S]*\\}/);
+      if (jsonMatch) raw = jsonMatch[0];
+      parsed = JSON.parse(raw);
     } catch(e) {
-      throw new Error('Erro ao interpretar resposta da IA. Tente novamente.');
+      // Segunda tentativa: corrige JSON levemente malformado
+      try {
+        let raw2 = data.text;
+        raw2 = raw2.replace(/,\\s*\\}/g,'}').replace(/,\\s*\\]/g,']');
+        const m = raw2.match(/\\{[\\s\\S]*\\}/);
+        if (!m) throw new Error();
+        parsed = JSON.parse(m[0]);
+      } catch(e2) {
+        throw new Error('A IA não retornou o formato esperado. Tente novamente.');
+      }
     }
 
     if (!parsed.questoes || !Array.isArray(parsed.questoes)) {
@@ -717,6 +725,77 @@ async function exportarPDF() {
     doc.setFont('helvetica','normal'); doc.setTextColor(30,36,51);
     doc.text(q.gabarito, cx+cellW/2, cy+6.5, {align:'center'});
   });
+
+  // ── FOLHA DE RESPOSTAS (nova página) ──
+  doc.addPage();
+  pageNum++;
+  y = drawPageHeader(doc, false);
+  drawFooter(doc, pageNum);
+
+  // Título
+  doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
+  doc.text('FOLHA DE RESPOSTAS', M, y+5);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(80,90,110);
+  doc.text(\`\${c.comp} · \${c.ano} · \${c.qtd} questões\`, M, y+11);
+  y += 18;
+
+  // Campo identificação do aluno
+  doc.setDrawColor(200,210,230); doc.setLineWidth(0.3);
+  doc.rect(M, y, cW, 20, 'S');
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(100,110,130);
+  doc.text('Nome: ___________________________________________________', M+4, y+7);
+  doc.text(\`Turma: _________________   Data: \${c.data || '____/____/______'}\`, M+4, y+15);
+  y += 26;
+
+  // Instrução
+  doc.setFontSize(8); doc.setFont('helvetica','italic'); doc.setTextColor(120,130,150);
+  doc.text('Instrução: Preencha completamente a bolinha correspondente à sua resposta. Use caneta ou lápis.', M, y);
+  y += 8;
+
+  // Grade de bolinhas — layout compacto em 2 colunas
+  const letras = ['A','B','C','D','E'];
+  const colW = cW / 2 - 4;
+  const rowH = 10;
+  const bSize = 5.5; // diâmetro da bolinha
+  const bSpacing = 10;
+
+  questoes.forEach((q, qi) => {
+    const col = qi % 2;
+    const row = Math.floor(qi / 2);
+    const bx = M + col * (colW + 8);
+    const by = y + row * rowH;
+
+    // Fundo alternado
+    doc.setFillColor(col===0 ? 248:252, 249, 254);
+    doc.rect(bx, by, colW, rowH-1, 'F');
+
+    // Número da questão
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
+    doc.text(\`\${qi+1}\`, bx+2, by+6.8);
+
+    // Bolinhas A-E
+    letras.forEach((l, li) => {
+      const cx = bx + 14 + li * bSpacing;
+      const cy = by + rowH/2;
+
+      // Círculo vazio
+      doc.setDrawColor(100,120,160); doc.setLineWidth(0.5);
+      doc.setFillColor(255,255,255);
+      doc.circle(cx, cy, bSize/2, 'FD');
+
+      // Letra dentro
+      doc.setFontSize(6); doc.setFont('helvetica','bold'); doc.setTextColor(80,100,140);
+      doc.text(l, cx, cy+2, {align:'center'});
+    });
+  });
+
+  // Calcula altura total da grade
+  const totalRows = Math.ceil(questoes.length / 2);
+  y += totalRows * rowH + 10;
+
+  // Legenda
+  doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(150,160,180);
+  doc.text('● Preencha completamente    ○ Não rasure    ✗ Marque apenas UMA alternativa por questão', M, y);
 
   doc.save(\`Avaliacao_\${c.comp.replace(/\\s/g,'_')}_\${c.ano}_\${c.geradaEm.replace(/\\//g,'-')}.pdf\`);
   showToast('PDF gerado com sucesso!');
