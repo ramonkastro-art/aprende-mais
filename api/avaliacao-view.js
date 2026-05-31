@@ -640,10 +640,13 @@ async function salvarAvaliacao(questoes, config) {
 // ══════════════════════════════════════════════
 async function exportarPDF() {
   if (!avaliacaoAtual) return;
+  // Tenta aguardar o ID por até 3s, mas não bloqueia o PDF
   if (!avaliacaoId) {
-    showToast('Aguarde... salvando avaliação');
-    await new Promise(r => setTimeout(r, 1500));
-    if (!avaliacaoId) { showToast('Erro ao salvar. Tente novamente.'); return; }
+    showToast('Aguardando salvamento...');
+    for (let i = 0; i < 6; i++) {
+      await new Promise(r => setTimeout(r, 500));
+      if (avaliacaoId) break;
+    }
   }
   showToast('Gerando PDF...');
 
@@ -742,21 +745,30 @@ async function exportarPDF() {
 
   // ── Gera QR Code como imagem base64 ──
   let qrDataUrl = null;
-  try {
-    const qrUrl = 'https://aprendemaisvac.vercel.app/corrigir/' + avaliacaoId;
-    const qrCanvas = document.createElement('canvas');
-    await new Promise((resolve, reject) => {
-      new QRCode(qrCanvas, {
-        text: qrUrl, width: 128, height: 128,
-        colorDark:'#1e2433', colorLight:'#ffffff',
-        correctLevel: QRCode.CorrectLevel.M
+  if (avaliacaoId) {
+    try {
+      const qrUrl = 'https://aprendemaisvac.vercel.app/corrigir/' + avaliacaoId;
+      const qrDiv = document.createElement('div');
+      qrDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
+      document.body.appendChild(qrDiv);
+      await new Promise((resolve) => {
+        new QRCode(qrDiv, {
+          text: qrUrl, width: 128, height: 128,
+          colorDark:'#1e2433', colorLight:'#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+        setTimeout(() => {
+          try {
+            const img = qrDiv.querySelector('img') || qrDiv.querySelector('canvas');
+            if (img && img.tagName === 'CANVAS') qrDataUrl = img.toDataURL('image/png');
+            else if (img && img.tagName === 'IMG') qrDataUrl = img.src;
+          } catch(e) { console.warn('QR extract error:', e); }
+          document.body.removeChild(qrDiv);
+          resolve();
+        }, 500);
       });
-      setTimeout(() => {
-        try { qrDataUrl = qrCanvas.toDataURL('image/png'); resolve(); }
-        catch(e) { reject(e); }
-      }, 300);
-    });
-  } catch(e) { console.warn('QR Code error:', e); }
+    } catch(e) { console.warn('QR Code error:', e); }
+  }
 
   // ── FOLHA DE RESPOSTAS (nova página) ──
   doc.addPage();
