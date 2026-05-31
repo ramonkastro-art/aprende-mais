@@ -95,7 +95,13 @@ let respostas = [];
 const AV_ID = '__AV_ID__';
 
 async function carregar() {
-  if (!AV_ID) { mostrarErro(); return; }
+  console.log('AV_ID recebido:', AV_ID);
+  if (!AV_ID || AV_ID === 'undefined' || AV_ID === '') {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('erro').innerHTML = '<div class="icon">🔗</div><p>ID da avaliação não encontrado na URL.<br><small>' + window.location.href + '</small></p>';
+    document.getElementById('erro').style.display = 'block';
+    return;
+  }
 
   // Modo LOCAL: gabarito embutido na URL (LOCAL-ABCDEABCDE...)
   if (AV_ID.startsWith('LOCAL-')) {
@@ -122,14 +128,21 @@ async function carregar() {
   // Modo Supabase: busca pelo ID
   try {
     const r = await fetch('/api/avaliacao-buscar?id=' + encodeURIComponent(AV_ID));
-    if (!r.ok) throw new Error();
+    console.log('Buscar status:', r.status);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
     avaliacao = await r.json();
+    console.log('Avaliação carregada:', avaliacao.id);
     respostas = new Array(avaliacao.questoes.length).fill('');
     document.getElementById('loading').style.display = 'none';
     document.getElementById('conteudo').style.display = 'block';
     renderInfo();
     renderGrade();
-  } catch(e) { mostrarErro(); }
+  } catch(e) {
+    console.error('Erro ao carregar:', e.message);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('erro').innerHTML = '<div class="icon">❌</div><p>Erro ao carregar avaliação.<br><small>ID: ' + AV_ID + '<br>' + e.message + '</small></p>';
+    document.getElementById('erro').style.display = 'block';
+  }
 }
 
 function mostrarErro() {
