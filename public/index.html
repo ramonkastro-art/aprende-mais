@@ -257,8 +257,8 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
 
   <div id="formSection">
     <div class="input-tabs">
-      <button class="tab-btn active" id="tabManualBtn" onclick="switchTab('manual')">✏️ &nbsp;Descrever o conteúdo</button>
-      <button class="tab-btn" id="tabUploadBtn" onclick="switchTab('upload')">📷 &nbsp;Foto / PDF da página</button>
+      <button class="tab-btn active" id="tabManualBtn" onclick="switchTab('manual')">✏️ &nbsp;Configurar manualmente</button>
+      <button class="tab-btn" id="tabUploadBtn" onclick="switchTab('upload')">📷 &nbsp;Usar foto ou PDF de referência</button>
     </div>
 
     <!-- Banner Avaliações -->
@@ -272,22 +272,31 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
     </a>
 
     <div class="form-card">
-      <div class="section-label"><span>1</span>Identificação do Conteúdo</div>
+      <div class="section-label"><span>1</span>Configure o Plano de Aula</div>
 
       <div class="form-grid-2">
         <div class="field">
-          <label>Ano</label>
+          <label>Ano / Série</label>
           <select id="ano">
             <option value="">Selecione...</option>
-            <option>1º ano</option>
-            <option>2º ano</option>
-            <option>3º ano</option>
-            <option>4º ano</option>
-            <option>5º ano</option>
-            <option>6º ano</option>
-            <option>7º ano</option>
-            <option>8º ano</option>
-            <option>9º ano</option>
+            <optgroup label="Ensino Fundamental I">
+              <option>1º ano</option>
+              <option>2º ano</option>
+              <option>3º ano</option>
+              <option>4º ano</option>
+              <option>5º ano</option>
+            </optgroup>
+            <optgroup label="Ensino Fundamental II">
+              <option>6º ano</option>
+              <option>7º ano</option>
+              <option>8º ano</option>
+              <option>9º ano</option>
+            </optgroup>
+            <optgroup label="Ensino Médio">
+              <option>1ª série EM</option>
+              <option>2ª série EM</option>
+              <option>3ª série EM</option>
+            </optgroup>
           </select>
         </div>
         <div class="field">
@@ -303,37 +312,51 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
             <option>Educação Física</option>
             <option>Ensino Religioso</option>
             <option>Língua Inglesa</option>
-            <option id="opt-filosofia">Filosofia</option>
+            <option>Filosofia</option>
+            <option>Sociologia</option>
+            <option>Química</option>
+            <option>Física</option>
+            <option>Biologia</option>
           </select>
         </div>
+      </div>
+
+      <div class="field">
+        <label>Tema / Conteúdo da Aula</label>
+        <input type="text" id="pagina" placeholder="Ex: Frações equivalentes, Revolução Francesa, Interpretação de texto...">
       </div>
 
       <div class="form-grid-2">
         <div class="field">
-          <label>Volume</label>
+          <label>Duração</label>
           <select id="volume">
             <option value="">Selecione...</option>
-            <option>Volume 1</option>
-            <option>Volume 2</option>
-            <option>Volume 3</option>
-            <option>Volume 4</option>
+            <option value="1 período (50 min)">1 período (50 min)</option>
+            <option value="2 períodos (100 min)">2 períodos (100 min)</option>
+            <option value="3 períodos (150 min)">3 períodos (150 min)</option>
+            <option value="4 períodos (200 min)">4 períodos (200 min)</option>
           </select>
         </div>
         <div class="field">
-          <label>Página(s)</label>
-          <input type="text" id="pagina" placeholder="Ex: 42 ou 42-44">
+          <label>Recursos Disponíveis</label>
+          <select id="recursos-disp">
+            <option value="quadro negro/branco">Somente quadro</option>
+            <option value="quadro e multimídia">Quadro + Multimídia</option>
+            <option value="quadro, multimídia e internet">Quadro + Multimídia + Internet</option>
+            <option value="laboratório de informática">Laboratório de informática</option>
+          </select>
         </div>
       </div>
 
-      <!-- MANUAL -->
-      <div id="tab-manual" class="tab-panel active" style="margin-top:20px">
-        <div class="section-label"><span>2</span>Descreva o Conteúdo da Página</div>
-        <textarea id="descricao" style="min-height:110px" placeholder="Descreva o que aparece na página: tema, exercícios, textos, conceitos, atividades... Ex: 'A página apresenta o conceito de frações equivalentes com exemplos visuais e 5 exercícios de simplificação...'"></textarea>
+      <!-- TAB MANUAL -->
+      <div id="tab-manual" class="tab-panel active" style="margin-top:16px">
+        <div class="section-label"><span>2</span>Contexto adicional (opcional)</div>
+        <textarea id="descricao" style="min-height:80px" placeholder="Descreva algo específico que queira incluir no plano: turma com necessidades especiais, projeto da escola, tema transversal, abordagem preferida..."></textarea>
       </div>
 
-      <!-- UPLOAD -->
-      <div id="tab-upload" class="tab-panel" style="margin-top:20px">
-        <div class="section-label"><span>2</span>Foto ou PDF da Página</div>
+      <!-- TAB UPLOAD -->
+      <div id="tab-upload" class="tab-panel" style="margin-top:16px">
+        <div class="section-label"><span>2</span>Foto ou PDF de referência (opcional)</div>
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(event)">
           <span class="upload-icon">🖼️</span>
@@ -342,59 +365,41 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
         </div>
         <button type="button" class="camera-btn" onclick="openCamera()">📷 &nbsp;Tirar foto agora</button>
         <div class="photo-tips">
-          <div class="photo-tips-title">📸 Dicas para uma boa foto</div>
-          <div class="photo-tips-grid">
-            <div class="tip-item tip-ok">✅ Página plana e aberta</div>
-            <div class="tip-item tip-ok">✅ Boa iluminação, sem sombras</div>
-            <div class="tip-item tip-ok">✅ Texto totalmente legível</div>
-            <div class="tip-item tip-ok">✅ Foto centralizada na página</div>
-            <div class="tip-item tip-no">❌ Foto torta ou inclinada</div>
-            <div class="tip-item tip-no">❌ Dedo ou objeto cobrindo texto</div>
-            <div class="tip-item tip-no">❌ Imagem desfocada ou escura</div>
-            <div class="tip-item tip-no">❌ Página parcialmente cortada</div>
-          </div>
+          <strong>💡 Dica:</strong> Envie uma foto do livro, apostila ou qualquer material de referência para que a IA adapte o plano ao conteúdo específico.
         </div>
-        <img id="previewImg" class="preview-img" alt="Prévia">
-        <div id="pdfName" class="pdf-name"></div>
-        <button class="remove-img" id="removeImg" onclick="removeFile()">✕ &nbsp;Remover arquivo</button>
-        <div class="field" style="margin-top:14px">
-          <label>Observações adicionais (opcional)</label>
-          <textarea id="descExtra" placeholder="Algum foco específico? Ex: 'Concentre nas questões de interpretação de texto'"></textarea>
-        </div>
+        <div id="previewArea" style="display:none;margin-top:14px;"></div>
       </div>
 
-      <!-- RESOURCES -->
-      <div style="margin-top:24px">
-        <div class="section-label"><span>3</span>O que deseja gerar</div>
-        <div class="checkbox-grid" id="checkboxes">
-          <label class="checkbox-item checked" onclick="toggleCheck(this)">
-            <input type="checkbox" value="atividades" checked>
-            <div class="check-icon">✓</div>
-            <span class="check-label">✏️ Atividades pedagógicas</span>
-          </label>
-          <label class="checkbox-item checked" onclick="toggleCheck(this)">
-            <input type="checkbox" value="complementar" checked>
-            <div class="check-icon">✓</div>
-            <span class="check-label">📎 Material complementar</span>
-          </label>
-          <label class="checkbox-item" id="checkTraducao" onclick="toggleCheck(this)" style="display:none">
-            <input type="checkbox" value="traducao">
-            <div class="check-icon"></div>
-            <span class="check-label">🌐 Traduzir conteúdo</span>
-          </label>
-        </div>
+      <div class="section-label" style="margin-top:20px"><span>3</span>O que deseja gerar</div>
+      <div class="checkbox-grid" id="checkboxes">
+        <label class="checkbox-item checked" id="checkAtividades" onclick="toggleCheck(this)">
+          <input type="checkbox" value="atividades" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">📋 Plano de Aula</span>
+        </label>
+        <label class="checkbox-item checked" id="checkComplementar" onclick="toggleCheck(this)">
+          <input type="checkbox" value="material" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">📚 Material Complementar</span>
+        </label>
+        <label class="checkbox-item checked" id="checkTraducao" onclick="toggleCheck(this)" style="display:none">
+          <input type="checkbox" value="traducao" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">🌐 Traduzir conteúdo</span>
+        </label>
       </div>
 
-      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar Materiais</button>
+      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar Plano de Aula</button>
     </div>
   </div>
+
 
   <div class="error-box" id="errorBox"></div>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p class="loading-main" id="loadingMain">Preparando...</p>
-    <p class="loading-sub">Analisando o conteúdo e gerando materiais específicos para esta página ✨</p>
+    <p class="loading-sub">Elaborando o plano de audo e gerando materiais específicos para esta página ✨</p>
     <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
   </div>
 
@@ -460,12 +465,597 @@ let uploadedB64 = null, uploadedMime = null;
 let generatedContent = {}, currentRef = '', currentComponente = '';
 
 const CFG = {
-  atividades:  {icon:'✏️', title:'Atividades Pedagógicas', cls:'mod-atividades',   badge:'Atividades'},
-  complementar:{icon:'📎', title:'Material Complementar',   cls:'mod-complementar', badge:'Complementar'},
+  atividades:  {icon:'📋', title:'Plano de Aula',           cls:'mod-atividades',   badge:'Plano de Aula'},
+  material:    {icon:'📚', title:'Material Complementar',   cls:'mod-complementar', badge:'Material'},
   traducao:    {icon:'🌐', title:'Tradução do Conteúdo',    cls:'mod-traducao',     badge:'Tradução'},
 };
 
-const KEYS = ['atividades','complementar','traducao'];
+const KEYS = ['atividades','material','traducao'];
+
+/* ── Mostrar/ocultar tradução se Inglês ── */
+document.getElementById('componente').addEventListener('change', function() {
+  const isIngles = this.value === 'Língua Inglesa';
+  const checkTraducao = document.getElementById('checkTraducao');
+  if (isIngles) {
+    checkTraducao.style.display = 'flex';
+    // garante que aparece já marcado e com visual idêntico aos demais
+    const cb = checkTraducao.querySelector('input');
+    cb.checked = true;
+    checkTraducao.classList.add('checked');
+    checkTraducao.querySelector('.check-icon').textContent = '✓';
+  } else {
+    checkTraducao.style.display = 'none';
+    // desmarca se estava marcado
+    const cb = checkTraducao.querySelector('input');
+    if (cb.checked) {
+      cb.checked = false;
+      checkTraducao.classList.remove('checked');
+      checkTraducao.querySelector('.check-icon').textContent = '';
+    }
+  }
+});
+
+/* ── Tabs ── */
+function switchTab(mode) {
+  currentMode = mode;
+  document.getElementById('tabManualBtn').classList.toggle('active', mode==='manual');
+  document.getElementById('tabUploadBtn').classList.toggle('active', mode==='upload');
+  document.getElementById('tab-manual').classList.toggle('active', mode==='manual');
+  document.getElementById('tab-upload').classList.toggle('active', mode==='upload');
+}
+
+/* ── File Upload ── */
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (file.size > 10*1024*1024) { alert('Arquivo muito grande. Máximo: 10 MB.'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    uploadedB64 = ev.target.result.split(',')[1];
+    uploadedMime = file.type;
+    const img = document.getElementById('previewImg');
+    const pn = document.getElementById('pdfName');
+    if (file.type.startsWith('image/')) {
+      img.src = ev.target.result; img.classList.add('visible');
+      pn.style.display = 'none';
+    } else {
+      img.classList.remove('visible');
+      pn.textContent = '📄 ' + file.name; pn.style.display = 'block';
+    }
+    document.getElementById('removeImg').classList.add('visible');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeFile() {
+  uploadedB64 = null; uploadedMime = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('previewImg').classList.remove('visible');
+  document.getElementById('removeImg').classList.remove('visible');
+  document.getElementById('pdfName').style.display = 'none';
+}
+
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('dragover');
+  if (e.dataTransfer.files[0]) {
+    document.getElementById('fileInput').files = e.dataTransfer.files;
+    handleFile({target: {files: e.dataTransfer.files}});
+  }
+});
+
+/* ── Checkbox ── */
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+  el.querySelector('.check-icon').textContent = cb.checked ? '✓' : '';
+}
+function getChecked() {
+  return [...document.querySelectorAll('#checkboxes input')].filter(c => c.checked).map(c => c.value);
+}
+
+/* ── System prompt dinâmico por componente ── */
+function buildSystemPrompt(componente, ano) {
+  const isEM = ano.includes('EM');
+  const isEF1 = ['1º ano','2º ano','3º ano','4º ano','5º ano'].includes(ano);
+  const segmento = isEM ? 'Ensino Médio' : isEF1 ? 'Ensino Fundamental I (Anos Iniciais)' : 'Ensino Fundamental II (Anos Finais)';
+  const faixaIdade = isEM ? 'jovens de 15 a 18 anos' : isEF1 ? 'crianças de 6 a 10 anos' : 'adolescentes de 11 a 15 anos';
+  const linguagem = isEF1 ? 'simples, lúdica e acolhedora' : isEM ? 'clara, contextualizada e crítica' : 'objetiva e contextualizada';
+
+  return `Você é um professor especialista em elaborar planos de aula completos e materiais pedagógicos de alta qualidade para a Educação Básica brasileira, alinhados à BNCC.
+
+CONTEXTO:
+- Segmento: ${segmento}
+- Componente: ${componente}
+- Público: ${faixaIdade}
+- Linguagem: ${linguagem}
+
+PRINCÍPIOS:
+- Seja prático e direto — professores precisam de material utilizável imediatamente
+- Adapte exemplos à realidade brasileira e ao cotidiano dos alunos
+- Inclua sempre estratégias para inclusão (AEE/NEE)
+- Conecte o conteúdo com competências da BNCC em linguagem descritiva (sem citar códigos alfanuméricos)
+- Nunca invente conteúdo fora do que foi solicitado
+
+FORMATO: Texto puro, organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Títulos em LETRAS MAIÚSCULAS.`;
+}
+
+DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aprende+ | Apoio Pedagógico</title>
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#2563eb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Aprende+">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,600;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f5f3ee;--surface:#ffffff;--surface2:#f0ede8;--border:#e0d9d0;
+  --accent:#2563eb;--accent2:#7c3aed;--accent3:#dc2626;
+  --text:#1a1814;--muted:#78716c;--card-bg:#ffffff;
+  --shadow:0 2px 12px rgba(0,0,0,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(37,99,235,.06) 0%,transparent 70%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(124,58,237,.05) 0%,transparent 70%);pointer-events:none;z-index:0;}
+header{padding:20px 40px;display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;background:rgba(245,243,238,.95);backdrop-filter:blur(12px);box-shadow:0 1px 0 var(--border);}
+.logo-icon{width:40px;height:40px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.logo-text{font-family:'Fraunces',serif;font-size:26px;font-weight:900;letter-spacing:-1px;}
+.logo-text span{color:var(--accent);}
+.logo-sub{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:2px;}
+.main{max-width:840px;margin:0 auto;padding:48px 24px 80px;position:relative;z-index:1;}
+.hero{text-align:center;margin-bottom:44px;}
+.hero h1{font-family:'Fraunces',serif;font-size:clamp(28px,5vw,48px);font-weight:900;line-height:1.1;letter-spacing:-2px;margin-bottom:12px;}
+.hero h1 em{font-style:italic;color:var(--accent);}
+.hero p{color:var(--muted);font-size:15px;font-weight:300;max-width:520px;margin:0 auto;line-height:1.6;}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.15);border-radius:20px;font-size:12px;color:var(--accent);margin-bottom:18px;font-weight:500;}
+
+/* TABS */
+.input-tabs{display:flex;border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.tab-btn{flex:1;padding:14px;background:var(--surface2);border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.tab-btn:first-child{border-right:1px solid var(--border);}
+.tab-btn.active{background:var(--surface);color:var(--accent);font-weight:600;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* FORM */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:36px;margin-bottom:28px;box-shadow:var(--shadow);}
+.section-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-label span{background:var(--accent);color:#fff;width:22px;height:22px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+.field{display:flex;flex-direction:column;gap:7px;}
+label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);font-weight:500;}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 16px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;transition:border-color .2s,box-shadow .2s;outline:none;width:100%;}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+select option{background:#fff;}
+textarea{resize:vertical;min-height:90px;line-height:1.6;}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border);border-radius:16px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .25s;position:relative;background:var(--surface2);}
+.upload-zone:hover,.upload-zone.dragover{border-color:var(--accent);background:rgba(37,99,235,.04);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:44px;margin-bottom:14px;display:block;}
+.upload-title{font-family:'Fraunces',serif;font-size:18px;font-weight:600;margin-bottom:6px;}
+.upload-sub{font-size:13px;color:var(--muted);}
+.preview-img{width:100%;max-height:300px;object-fit:contain;border-radius:12px;border:1px solid var(--border);margin-top:16px;display:none;}
+.preview-img.visible{display:block;}
+.pdf-name{margin-top:12px;font-size:13px;color:var(--accent2);display:none;}
+.camera-btn{margin-top:12px;width:100%;padding:11px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);border-radius:10px;color:var(--accent);font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.camera-btn:hover{background:rgba(37,99,235,.12);}
+.remove-img{margin-top:10px;padding:7px 16px;background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:8px;color:var(--accent3);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;display:none;align-items:center;gap:6px;}
+.remove-img.visible{display:inline-flex;}
+/* ── Camera Modal ── */
+.camera-modal{position:fixed;inset:0;z-index:400;display:none;flex-direction:column;background:#000;}
+.camera-modal.open{display:flex;}
+.camera-header{padding:14px 20px;display:flex;align-items:center;justify-content:space-between;background:rgba(0,0,0,.7);}
+.camera-header span{color:#fff;font-size:15px;font-weight:500;}
+.camera-close{background:none;border:none;color:#fff;font-size:22px;cursor:pointer;padding:4px 10px;}
+.camera-preview{flex:1;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;}
+.camera-preview video{width:100%;height:100%;object-fit:contain;background:#000;}
+.camera-preview canvas{display:none;width:100%;height:100%;object-fit:contain;background:#000;}
+.camera-footer{padding:24px 20px;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;gap:24px;}
+.camera-capture{width:68px;height:68px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,.4);cursor:pointer;transition:transform .15s;}
+.camera-capture:active{transform:scale(.92);}
+.camera-flip{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:46px;height:46px;color:#fff;font-size:20px;cursor:pointer;}
+.camera-retake{background:rgba(255,255,255,.15);border:none;border-radius:50%;width:46px;height:46px;color:#fff;font-size:20px;cursor:pointer;display:none;}
+.camera-use{background:var(--accent);border:none;border-radius:24px;padding:12px 28px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;display:none;font-family:'DM Sans',sans-serif;}
+.photo-tips{margin-top:16px;background:rgba(37,99,235,.04);border:1px solid rgba(37,99,235,.15);border-radius:12px;padding:16px 18px;}
+.photo-tips-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:12px;}
+.photo-tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.tip-item{font-size:12px;padding:5px 8px;border-radius:7px;line-height:1.4;}
+.tip-ok{background:rgba(16,185,129,.07);color:#065f46;}
+.tip-no{background:rgba(220,38,38,.06);color:#991b1b;}
+@media(max-width:480px){.photo-tips-grid{grid-template-columns:1fr;}}
+
+/* CHECKBOXES */
+.checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-top:12px;}
+.checkbox-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s,background .2s;user-select:none;}
+.checkbox-item:hover{border-color:var(--accent2);}
+.checkbox-item.checked{border-color:var(--accent);background:rgba(37,99,235,.06);}
+.checkbox-item input[type=checkbox]{display:none;}
+.check-icon{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .2s;}
+.checkbox-item.checked .check-icon{background:var(--accent);border-color:var(--accent);color:#fff;}
+.check-label{font-size:13px;line-height:1.3;}
+
+.btn-generate{width:100%;margin-top:28px;padding:16px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font-family:'Fraunces',serif;font-size:18px;font-weight:600;border:none;border-radius:12px;cursor:pointer;transition:transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:-.5px;}
+.btn-generate:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(37,99,235,.25);}
+.btn-generate:active{transform:translateY(0);}
+
+/* LOADING */
+.loading{display:none;text-align:center;padding:50px 20px;}
+.loading.visible{display:block;}
+.spinner{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-main{color:var(--text);font-size:15px;margin-bottom:6px;}
+.loading-sub{font-size:13px;color:var(--muted);font-style:italic;}
+.progress-bar-wrap{width:220px;height:4px;background:var(--border);border-radius:4px;margin:16px auto 0;}
+.progress-bar{height:4px;background:var(--accent);border-radius:4px;transition:width .4s ease;}
+
+/* RESULTS */
+#results{display:none;}
+#results.visible{display:block;}
+.result-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.result-header h2{font-family:'Fraunces',serif;font-size:26px;font-weight:900;letter-spacing:-1px;}
+.result-header h2 span{color:var(--accent);}
+.result-actions{display:flex;flex-direction:column;gap:10px;align-items:stretch;width:100%;max-width:340px;margin:0 auto 8px;}
+.btn-action{padding:9px 18px;border:1px solid var(--border);border-radius:10px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:7px;}
+.btn-pdf{background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff!important;border:none;padding:14px 32px;font-size:16px;font-weight:700;border-radius:14px;justify-content:center;box-shadow:0 4px 16px rgba(37,99,235,.35);letter-spacing:.2px;}
+.btn-pdf:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(37,99,235,.45);background:linear-gradient(135deg,#1d4ed8,#1e40af);}
+.btn-pdf:active{transform:translateY(0);}
+.btn-word:hover{border-color:var(--accent2);color:var(--accent2);}
+.btn-new:hover{border-color:var(--muted);}
+.tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;}
+.ref-tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(37,99,235,.07);border:1px solid rgba(37,99,235,.2);border-radius:20px;font-size:12px;color:var(--accent);}
+
+/* MODULES */
+.modules{display:flex;flex-direction:column;gap:18px;}
+.module{background:var(--card-bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;animation:fadeUp .4s ease forwards;opacity:0;box-shadow:var(--shadow);}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.module-header{display:flex;align-items:center;gap:14px;padding:18px 22px;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;transition:background .2s;}
+.module-header:hover{background:var(--surface2);}
+.module-icon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.module-title{font-family:'Fraunces',serif;font-size:16px;font-weight:600;flex:1;}
+.module-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;}
+.chevron{color:var(--muted);transition:transform .3s;font-size:12px;}
+.module.open .chevron{transform:rotate(180deg);}
+.module-body{max-height:0;overflow:hidden;transition:max-height .5s ease;}
+.module.open .module-body{max-height:4000px;}
+.module-content{padding:22px;font-size:14px;line-height:1.9;color:#44403c;white-space:pre-wrap;}
+.module-content strong{color:var(--text);font-weight:600;}
+.copy-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;margin:0 22px 16px;transition:all .2s;}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(37,99,235,.05);}
+.skeleton{padding:22px;display:flex;flex-direction:column;gap:10px;}
+.sk-line{height:12px;background:linear-gradient(90deg,#f0ede8 25%,#e5e1db 50%,#f0ede8 75%);background-size:200% 100%;animation:shimmer 1.2s infinite;border-radius:6px;}
+.sk-line.short{width:60%;}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+.mod-atividades .module-icon{background:rgba(37,99,235,.08);}
+.mod-traducao .module-icon{background:rgba(5,150,105,.08);}
+.mod-traducao .module-badge{background:rgba(5,150,105,.08);color:#059669;}
+.mod-atividades .module-badge{background:rgba(37,99,235,.08);color:var(--accent);}
+.mod-complementar .module-icon{background:rgba(217,119,6,.08);}
+.mod-complementar .module-badge{background:rgba(217,119,6,.08);color:#d97706;}
+
+.error-box{background:rgba(220,38,38,.06);border:1px solid rgba(220,38,38,.2);border-radius:12px;padding:20px;color:#dc2626;font-size:14px;line-height:1.6;display:none;margin-bottom:20px;}
+.error-box.visible{display:block;}
+.toast{position:fixed;bottom:28px;right:28px;background:#fff;border:1px solid rgba(37,99,235,.3);border-radius:12px;padding:12px 20px;font-size:14px;color:var(--accent);z-index:999;display:none;box-shadow:0 8px 30px rgba(0,0,0,.12);}
+.toast.visible{display:flex;align-items:center;gap:10px;animation:fadeUp .3s ease;}
+
+/* ── Tablet ── */
+@media(max-width:768px){
+  .main{padding:36px 20px 80px;}
+  .result-actions{gap:8px;}
+  .btn-action{padding:8px 14px;font-size:12px;}
+}
+
+/* ── Mobile ── */
+@media(max-width:600px){
+  header{padding:14px 16px;}
+  .logo-text{font-size:22px;}
+  .logo-sub{display:none;}
+  .main{padding:24px 14px 80px;}
+  .hero{margin-bottom:28px;}
+  .hero p{font-size:14px;}
+  .form-card{padding:20px 16px;border-radius:16px;}
+  .form-grid,.form-grid-2{grid-template-columns:1fr;}
+  .tab-btn{font-size:13px;padding:12px 8px;gap:5px;}
+  .upload-zone{padding:28px 16px;}
+  .upload-icon{font-size:36px;margin-bottom:10px;}
+  .upload-title{font-size:16px;}
+  .checkbox-grid{grid-template-columns:1fr;}
+  .checkbox-item{padding:12px 14px;}
+  .btn-generate{font-size:16px;padding:14px;}
+  .result-header{flex-direction:column;align-items:flex-start;gap:14px;}
+  .result-header h2{font-size:22px;}
+  .result-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .btn-action{justify-content:center;font-size:12px;padding:10px 8px;}
+  .btn-new{grid-column:1/-1;}
+  .module-header{padding:14px 16px;gap:10px;}
+  .module-title{font-size:14px;}
+  .module-badge{display:none;}
+  .module-content{padding:16px;font-size:13px;}
+  .copy-btn{margin:0 16px 14px;}
+  .ref-tag{font-size:11px;padding:5px 10px;}
+  .toast{left:16px;right:16px;bottom:20px;justify-content:center;text-align:center;}
+  .loading-main{font-size:14px;}
+}
+
+.history-btn{position:fixed;bottom:24px;left:24px;background:#fff;border:1px solid var(--border);border-radius:50px;padding:10px 18px;font-size:13px;color:var(--muted);cursor:pointer;font-family:'DM Sans',sans-serif;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;transition:all .2s;z-index:200;}
+.history-btn:hover{border-color:var(--accent);color:var(--accent);}
+.history-panel{position:fixed;inset:0;z-index:300;display:none;}
+.history-panel.open{display:flex;}
+.history-overlay{position:absolute;inset:0;background:rgba(0,0,0,.3);}
+.history-drawer{position:absolute;left:0;top:0;bottom:0;width:380px;max-width:95vw;background:#fff;box-shadow:4px 0 24px rgba(0,0,0,.1);display:flex;flex-direction:column;animation:slideIn .25s ease;}
+@keyframes slideIn{from{transform:translateX(-100%)}to{transform:translateX(0)}}
+.history-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.history-head h3{font-family:'Fraunces',serif;font-size:18px;font-weight:700;}
+.history-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);padding:4px;}
+.history-list{flex:1;overflow-y:auto;padding:12px;}
+.history-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:14px;}
+.history-item{padding:14px 16px;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;cursor:pointer;transition:all .2s;background:#fff;}
+.history-item:hover{border-color:var(--accent);background:rgba(37,99,235,.03);}
+.history-item-ref{font-size:13px;font-weight:600;color:var(--text);margin-bottom:4px;}
+.history-item-date{font-size:11px;color:var(--muted);}
+.history-item-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.history-tag{font-size:11px;padding:2px 8px;background:rgba(37,99,235,.07);color:var(--accent);border-radius:20px;}
+.history-foot{padding:16px 24px;border-top:1px solid var(--border);}
+.history-clear{width:100%;padding:10px;background:none;border:1px solid rgba(220,38,38,.2);border-radius:10px;color:var(--accent3);font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;transition:all .2s;}
+.history-clear:hover{background:rgba(220,38,38,.05);}
+@media(max-width:600px){.history-btn{bottom:16px;left:16px;padding:9px 14px;font-size:12px;}}
+footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-spacing:.5px;}
+@media(hover:none){
+  input,select,textarea{font-size:16px;}
+  .tab-btn,.checkbox-item,.btn-generate,.btn-action{-webkit-tap-highlight-color:transparent;}
+}
+</style>
+<link rel="icon" href="/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+<header>
+  <div class="logo-icon" style="background:none;border-radius:0;width:48px;height:48px;overflow:hidden;">
+    <img src="data:image/png;base64,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" style="width:56px;height:56px;object-fit:contain;" alt="Aprende+">
+  </div>
+  <div>
+    <div class="logo-text">Aprende<span>+</span></div>
+    <div class="logo-sub">Apoio Pedagógico — Vacaria RS</div>
+  </div>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <div class="hero-badge">🏫 Rede Municipal de Vacaria · 6º ao 9º ano</div>
+    <h1>Material complementar<br><em>para o Aprende Brasil</em></h1>
+    <p>Informe o componente curricular, o ano, o volume e a página do livro — a IA gera atividades pedagógicas e material complementar específicos para aquele conteúdo.</p>
+  </div>
+
+  <div id="formSection">
+    <div class="input-tabs">
+      <button class="tab-btn active" id="tabManualBtn" onclick="switchTab('manual')">✏️ &nbsp;Configurar manualmente</button>
+      <button class="tab-btn" id="tabUploadBtn" onclick="switchTab('upload')">📷 &nbsp;Usar foto ou PDF de referência</button>
+    </div>
+
+    <!-- Banner Avaliações -->
+    <a href="/avaliacao" style="display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#059669,#047857);color:#fff;border-radius:14px;padding:14px 18px;margin-bottom:14px;text-decoration:none;box-shadow:0 4px 16px rgba(5,150,105,.25);transition:transform .2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+      <span style="font-size:28px;">📝</span>
+      <div>
+        <div style="font-weight:700;font-size:15px;">Gerador de Avaliações</div>
+        <div style="font-size:12px;opacity:.85;">Crie provas com IA + corrija pelo celular</div>
+      </div>
+      <span style="margin-left:auto;font-size:20px;">→</span>
+    </a>
+
+    <div class="form-card">
+      <div class="section-label"><span>1</span>Configure o Plano de Aula</div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Ano / Série</label>
+          <select id="ano">
+            <option value="">Selecione...</option>
+            <optgroup label="Ensino Fundamental I">
+              <option>1º ano</option>
+              <option>2º ano</option>
+              <option>3º ano</option>
+              <option>4º ano</option>
+              <option>5º ano</option>
+            </optgroup>
+            <optgroup label="Ensino Fundamental II">
+              <option>6º ano</option>
+              <option>7º ano</option>
+              <option>8º ano</option>
+              <option>9º ano</option>
+            </optgroup>
+            <optgroup label="Ensino Médio">
+              <option>1ª série EM</option>
+              <option>2ª série EM</option>
+              <option>3ª série EM</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="field">
+          <label>Componente Curricular</label>
+          <select id="componente">
+            <option value="">Selecione...</option>
+            <option>Língua Portuguesa</option>
+            <option>Matemática</option>
+            <option>Ciências</option>
+            <option>História</option>
+            <option>Geografia</option>
+            <option>Arte</option>
+            <option>Educação Física</option>
+            <option>Ensino Religioso</option>
+            <option>Língua Inglesa</option>
+            <option>Filosofia</option>
+            <option>Sociologia</option>
+            <option>Química</option>
+            <option>Física</option>
+            <option>Biologia</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Tema / Conteúdo da Aula</label>
+        <input type="text" id="pagina" placeholder="Ex: Frações equivalentes, Revolução Francesa, Interpretação de texto...">
+      </div>
+
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Duração</label>
+          <select id="volume">
+            <option value="">Selecione...</option>
+            <option value="1 período (50 min)">1 período (50 min)</option>
+            <option value="2 períodos (100 min)">2 períodos (100 min)</option>
+            <option value="3 períodos (150 min)">3 períodos (150 min)</option>
+            <option value="4 períodos (200 min)">4 períodos (200 min)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Recursos Disponíveis</label>
+          <select id="recursos-disp">
+            <option value="quadro negro/branco">Somente quadro</option>
+            <option value="quadro e multimídia">Quadro + Multimídia</option>
+            <option value="quadro, multimídia e internet">Quadro + Multimídia + Internet</option>
+            <option value="laboratório de informática">Laboratório de informática</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- TAB MANUAL -->
+      <div id="tab-manual" class="tab-panel active" style="margin-top:16px">
+        <div class="section-label"><span>2</span>Contexto adicional (opcional)</div>
+        <textarea id="descricao" style="min-height:80px" placeholder="Descreva algo específico que queira incluir no plano: turma com necessidades especiais, projeto da escola, tema transversal, abordagem preferida..."></textarea>
+      </div>
+
+      <!-- TAB UPLOAD -->
+      <div id="tab-upload" class="tab-panel" style="margin-top:16px">
+        <div class="section-label"><span>2</span>Foto ou PDF de referência (opcional)</div>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(event)">
+          <span class="upload-icon">🖼️</span>
+          <div class="upload-title">Arraste aqui ou clique para selecionar</div>
+          <div class="upload-sub">JPG, PNG, WEBP ou PDF &nbsp;·&nbsp; máx. 10 MB</div>
+        </div>
+        <button type="button" class="camera-btn" onclick="openCamera()">📷 &nbsp;Tirar foto agora</button>
+        <div class="photo-tips">
+          <strong>💡 Dica:</strong> Envie uma foto do livro, apostila ou qualquer material de referência para que a IA adapte o plano ao conteúdo específico.
+        </div>
+        <div id="previewArea" style="display:none;margin-top:14px;"></div>
+      </div>
+
+      <div class="section-label" style="margin-top:20px"><span>3</span>O que deseja gerar</div>
+      <div class="checkbox-grid" id="checkboxes">
+        <label class="checkbox-item checked" id="checkAtividades" onclick="toggleCheck(this)">
+          <input type="checkbox" value="atividades" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">📋 Plano de Aula</span>
+        </label>
+        <label class="checkbox-item checked" id="checkComplementar" onclick="toggleCheck(this)">
+          <input type="checkbox" value="material" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">📚 Material Complementar</span>
+        </label>
+        <label class="checkbox-item checked" id="checkTraducao" onclick="toggleCheck(this)" style="display:none">
+          <input type="checkbox" value="traducao" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">🌐 Traduzir conteúdo</span>
+        </label>
+      </div>
+
+      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar Plano de Aula</button>
+    </div>
+  </div>
+
+
+  <div class="error-box" id="errorBox"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p class="loading-main" id="loadingMain">Preparando...</p>
+    <p class="loading-sub">Elaborando o plano de audo e gerando materiais específicos para esta página ✨</p>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
+  </div>
+
+  <div id="results">
+    <div class="result-header">
+      <h2>Materiais <span>Gerados</span></h2>
+      <div class="result-actions">
+        <button class="btn-action btn-pdf" onclick="exportPDF()">📄 Exportar PDF</button>
+        <button class="btn-action btn-new" onclick="resetForm()">← Nova consulta</button>
+      </div>
+    </div>
+    <div class="tags-row">
+      <div class="ref-tag" id="refTag"></div>
+      <div class="ref-tag" id="aiBadge">✦ Usando Gemini</div>
+    </div>
+    <div class="modules" id="modules"></div>
+  </div>
+</div>
+
+<button class="history-btn" onclick="openHistory()">🕘 &nbsp;Histórico</button>
+
+<div class="history-panel" id="historyPanel">
+  <div class="history-overlay" onclick="closeHistory()"></div>
+  <div class="history-drawer">
+    <div class="history-head">
+      <h3>Histórico de Consultas</h3>
+      <button class="history-close" onclick="closeHistory()">✕</button>
+    </div>
+    <div class="history-list" id="historyList"></div>
+    <div class="history-foot">
+      <button class="history-clear" onclick="clearHistory()">🗑️ Limpar histórico</button>
+    </div>
+  </div>
+</div>
+
+<div class="camera-modal" id="cameraModal">
+  <div class="camera-header">
+    <span>📷 Tirar foto da página</span>
+    <button class="camera-close" onclick="closeCamera()">✕</button>
+  </div>
+  <div class="camera-preview">
+    <video id="cameraVideo" autoplay playsinline></video>
+    <canvas id="cameraCanvas"></canvas>
+  </div>
+  <div class="camera-footer">
+    <button class="camera-flip" id="cameraFlip" onclick="flipCamera()" title="Virar câmera">🔄</button>
+    <button class="camera-capture" id="cameraCaptureBtn" onclick="capturePhoto()" title="Tirar foto"></button>
+    <button class="camera-retake" id="cameraRetake" onclick="retakePhoto()">🔁</button>
+    <button class="camera-use" id="cameraUse" onclick="usePhoto()">Usar foto ✓</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  <p>Desenvolvido por Ramon Castro</p>
+</footer>
+
+<script>
+/* ── State ── */
+let currentMode = 'manual';
+let uploadedB64 = null, uploadedMime = null;
+let generatedContent = {}, currentRef = '', currentComponente = '';
+
+const CFG = {
+  atividades:  {icon:'📋', title:'Plano de Aula',           cls:'mod-atividades',   badge:'Plano de Aula'},
+  material:    {icon:'📚', title:'Material Complementar',   cls:'mod-complementar', badge:'Material'},
+  traducao:    {icon:'🌐', title:'Tradução do Conteúdo',    cls:'mod-traducao',     badge:'Tradução'},
+};
+
+const KEYS = ['atividades','material','traducao'];
 
 /* ── Mostrar/ocultar tradução se Inglês ── */
 document.getElementById('componente').addEventListener('change', function() {
@@ -583,85 +1173,145 @@ Texto puro, organizado, em portugues brasileiro. Sem JSON, sem markdown, sem ast
 
 /* ── Prompts por recurso ── */
 function buildResourcePrompt(key, componente, ano, contexto) {
-  const EF1_ANOS = ['1º ano','2º ano','3º ano','4º ano','5º ano'];
-  const isEF1 = EF1_ANOS.includes(ano);
-  const notaEF1 = isEF1 ? ' Use linguagem simples, exemplos ludicos e concretos adequados para criancas de 6 a 10 anos.' : '';
-  const dinamica = isEF1
-    ? '1 dinamica ludica e concreta (max. 20 min) com uso de objetos, desenho ou movimento'
-    : '1 dinamica rapida (max. 20 min) baseada diretamente no conteudo da pagina';
-  const atividadeExtra = isEF1
-    ? '1 atividade criativa: nome, objetivo, materiais simples, passo a passo em ate 4 etapas, tempo estimado'
-    : '1 atividade pratica e objetiva: nome, objetivo, passo a passo em ate 4 etapas, tempo estimado';
+  const isEM = ano.includes('EM');
+  const isEF1 = ['1º ano','2º ano','3º ano','4º ano','5º ano'].includes(ano);
+  const nivel = isEM ? 'Ensino Médio' : isEF1 ? 'Ensino Fundamental I' : 'Ensino Fundamental II';
+  const recursos = document.getElementById('recursos-disp')?.value || 'quadro e multimídia';
+  const duracao = document.getElementById('volume')?.value || '2 períodos (100 min)';
+  const contextoExtra = document.getElementById('descricao')?.value?.trim() || '';
+
+  const base = `${contexto}
+Recursos disponíveis: ${recursos}
+Duração da aula: ${duracao}${contextoExtra ? '
+Contexto adicional: ' + contextoExtra : ''}`;
 
   if (key === 'atividades') {
-    return `${contexto}
+    return `${base}
 
-Com base APENAS nesta pagina do livro de ${componente} (${ano}), gere uma resposta curta e pratica com as 4 secoes abaixo. Maximo de 400 palavras no total.${notaEF1}
+Gere um PLANO DE AULA COMPLETO e prático. Máximo 500 palavras. Estruture exatamente assim:
 
-SOBRE ESTA PAGINA
-Em 3 a 4 linhas: o que a pagina ensina e qual a habilidade da BNCC que ela desenvolve.
+IDENTIFICAÇÃO
+Componente: ${componente} | Ano/Série: ${ano} | Duração: ${duracao}
+Tema: [tema da aula]
+Competência BNCC: [descreva em 1 frase a competência trabalhada, sem citar códigos alfanuméricos]
 
-COMO TRABALHAR EM SALA
-2 perguntas disparadoras + ${dinamica}.
+OBJETIVOS DE APRENDIZAGEM
+Liste 3 objetivos claros e mensuráveis, iniciando com verbos de ação.
 
-CONEXAO COM TECNOLOGIA
-Em 2 a 3 linhas: como relacionar o tema com Pensamento Computacional, Mundo Digital ou Cultura Digital. Sugira 1 ferramenta ou atividade desplugada${isEF1 ? ' adequada para criancas' : ''}.
+DESENVOLVIMENTO DA AULA
+Divida em etapas com tempo estimado:
+INÍCIO ([X] min): Problematização/sensibilização — como engajar os alunos no tema
+DESENVOLVIMENTO ([X] min): Estratégia principal com ${recursos}
+FECHAMENTO ([X] min): Síntese, socialização e verificação da aprendizagem
 
-ATIVIDADE COMPLEMENTAR
-${atividadeExtra}.
+AVALIAÇÃO
+Como o professor vai verificar se os objetivos foram atingidos.
 
-PARA PESQUISAR
-Sugira 2 termos de busca prontos para o professor pesquisar no YouTube ou Google — use o formato:
-YouTube: "titulo exato do video para buscar"
-Google: "termo de busca para encontrar atividade ou imagem"
-Escolha termos especificos que realmente existam sobre o tema desta pagina.`;
-  }
+INCLUSÃO E AEE
+Adaptações concretas para alunos com necessidades educacionais especiais (dislexia, TDAH, autismo, deficiência intelectual). Seja específico e prático.
 
-  if (key === 'traducao') {
-    return `${contexto}
-
-Com base APENAS nesta pagina do livro de Lingua Inglesa (${ano}), gere uma resposta objetiva com as 3 secoes abaixo. Maximo de 350 palavras no total.${notaEF1}
-
-TRADUCAO
-Traduza os textos e dialogos da pagina de forma natural e fiel.
-
-VOCABULARIO-CHAVE
-Liste ate 8 palavras ou expressoes importantes da pagina com traducao e 1 exemplo curto de uso.
-
-GRAMATICA EM FOCO
-Em 3 a 5 linhas: explique a estrutura gramatical principal da pagina com 1 exemplo pratico.
-
-PARA PRATICAR
-Sugira 2 termos de busca:
-YouTube: "titulo exato do video para buscar"
-Google: "termo de busca para encontrar exercicio ou jogo"`;
+DICAS DO PROFESSOR
+2 sugestões práticas para enriquecer esta aula.`;
   }
 
   if (key === 'material') {
-    return `${contexto}
+    const materialTipo = getMaterialTipo(componente);
+    return `${base}
 
-Com base APENAS nesta pagina do livro de ${componente} (${ano}), gere material de aprofundamento com as 3 secoes abaixo. Maximo de 400 palavras.${notaEF1}
+Gere um MATERIAL DE APOIO COMPLETO para uso direto em sala. Máximo 500 palavras.
 
-APROFUNDAMENTO RAPIDO
-Em 4 a 6 linhas: expanda o conteudo da pagina com uma explicacao mais detalhada, incluindo 1 exemplo pratico do cotidiano de Vacaria-RS.
+${materialTipo}
 
-CURIOSIDADE OU CONTEXTO
-1 fato interessante ou contexto historico/cientifico relacionado ao tema, em 3 linhas.
+Ao final, inclua:
 
-CONEXAO COM TECNOLOGIA
-Como este tema se conecta com Pensamento Computacional ou Cultura Digital. Sugira 1 atividade desplugada${isEF1 ? ' ludica para criancas' : ''}.
+ROTEIRO DE ESTUDO PARA O ALUNO
+3 a 4 orientações de como o aluno deve estudar este conteúdo em casa.
 
-PARA PESQUISAR
-YouTube: "titulo exato do video para buscar"
-Google Imagens: "termo para encontrar imagem ou infografico"
-Khan Academy: "topico para buscar em pt.khanacademy.org"`;
+MATERIAL ADAPTADO PARA AEE
+Versão simplificada ou adaptada do mesmo material para alunos com necessidades especiais. Use linguagem mais simples, frases curtas, apoio visual descrito.`;
   }
 
-  // fallback generico
-  return `${contexto}
+  if (key === 'traducao') {
+    return `${base}
 
-Gere um material pedagogico objetivo para ${componente}, ${ano}, com base na pagina informada. Maximo de 350 palavras.${notaEF1}`;
+Gere um MATERIAL COMPLETO DE LÍNGUA INGLESA para uso em sala. Máximo 500 palavras.
+
+TEXTO EM INGLÊS
+Escreva um texto curto em inglês adequado ao nível ${ano}, sobre o tema solicitado.
+
+TRADUÇÃO COMENTADA
+Traduza o texto com notas explicativas sobre vocabulário e estruturas gramaticais importantes.
+
+VOCABULÁRIO-CHAVE
+Liste 8 palavras/expressões do texto com: palavra | tradução | exemplo de uso.
+
+ATIVIDADE PRÁTICA
+2 exercícios simples baseados no texto (verdadeiro/falso ou perguntas curtas).
+
+ADAPTAÇÃO AEE
+Versão simplificada do texto com vocabulário básico para alunos com dificuldades.`;
+  }
+
+  return `${base}
+
+Gere material pedagógico prático para ${componente}, ${ano}. Máximo 400 palavras.`;
 }
+
+function getMaterialTipo(componente) {
+  const tipos = {
+    'Língua Portuguesa': `TEXTO PARA TRABALHO EM SALA
+Escreva um texto adequado ao ano/tema solicitado (pode ser conto, crônica, notícia, poema, charge descrita ou texto informativo). O texto deve ter entre 150 e 250 palavras.
+
+ATIVIDADES DE INTERPRETAÇÃO
+Elabore 4 questões sobre o texto: 2 de interpretação literal, 1 de inferência e 1 de linguagem/vocabulário.`,
+
+    'Matemática': `SITUAÇÕES-PROBLEMA
+Elabore 4 problemas contextualizados com a realidade dos alunos, do mais simples ao mais complexo. Inclua o gabarito ao final.
+
+CONCEITO EM FOCO
+Explique o conceito principal em linguagem acessível com 1 exemplo resolvido passo a passo.`,
+
+    'Ciências': `TEXTO DE DIVULGAÇÃO CIENTÍFICA
+Escreva um texto informativo (150-200 palavras) sobre o tema, com linguagem adequada ao ano.
+
+EXPERIMENTO OU OBSERVAÇÃO
+Descreva 1 atividade prática (com ou sem laboratório) relacionada ao tema, com materiais simples.`,
+
+    'História': `DOCUMENTO OU FONTE HISTÓRICA ADAPTADA
+Apresente um trecho adaptado de fonte histórica, imagem descrita ou relato sobre o tema.
+
+QUESTÕES DE ANÁLISE
+3 questões para explorar o documento: contextualização, análise e conexão com o presente.`,
+
+    'Geografia': `LEITURA DE PAISAGEM OU MAPA
+Descreva uma situação geográfica ou dado concreto sobre o tema (pode incluir dados estatísticos reais aproximados).
+
+ATIVIDADE DE ANÁLISE ESPACIAL
+2 questões que levem o aluno a relacionar o tema com seu cotidiano ou com Vacaria-RS.`,
+
+    'Língua Inglesa': `TEXTO EM INGLÊS
+Escreva texto adequado ao nível com vocabulário e estruturas do tema.
+
+ATIVIDADES
+3 exercícios práticos baseados no texto.`,
+
+    'Arte': `APRECIAÇÃO ARTÍSTICA
+Descreva uma obra, movimento artístico ou manifestação cultural relacionada ao tema, com linguagem acessível.
+
+PROPOSTA DE CRIAÇÃO
+Roteiro de uma atividade prática de criação artística usando os recursos disponíveis.`,
+
+    'Educação Física': `SEQUÊNCIA DE ATIVIDADES
+Descreva 3 atividades práticas progressivas para a aula, com regras simples e variações inclusivas.
+
+REFLEXÃO TEÓRICA
+Texto curto conectando a prática corporal com saúde, cultura ou cidadania.`,
+  };
+
+  return tipos[componente] || `MATERIAL DE APOIO
+Elabore um texto explicativo (150-200 palavras) sobre o tema e 3 atividades práticas adequadas ao ${componente}.`;
+}
+
 
 /* ── API call ── */
 let activeAI = 'gemini';
@@ -715,13 +1365,8 @@ async function generate() {
 
   if (!componente) { alert('Por favor, selecione o componente curricular.'); return; }
   if (!ano)        { alert('Por favor, selecione o ano/série.'); return; }
-  if (currentMode === 'manual' && !document.getElementById('descricao').value.trim()) {
-    alert('Por favor, descreva o conteúdo da página.'); return;
-  }
-  if (currentMode === 'upload' && !uploadedB64) {
-    alert('Por favor, faça upload de uma foto ou PDF da página.'); return;
-  }
-  if (recursos.length === 0) { alert('Selecione pelo menos um recurso.'); return; }
+  if (!pagina.trim()) { alert('Por favor, informe o tema ou conteúdo da aula.'); return; }
+  if (recursos.length === 0) { alert('Selecione pelo menos um tipo de material.'); return; }
 
   // Reset UI
   document.getElementById('formSection').style.display = 'none';
@@ -741,7 +1386,9 @@ async function generate() {
     ? document.getElementById('descricao').value
     : (document.getElementById('descExtra').value || '');
 
-  const contexto = `Livro Aprende Brasil — ${componente}, ${ano}, ${volume || '?'}, página ${pagina || '?'}.${descricao ? ' Descrição do professor: ' + descricao : ' Analise o conteúdo visual da imagem/PDF fornecido.'}`;
+  const duracao = volume || '2 períodos (100 min)';
+  const recursosDisp = document.getElementById('recursos-disp')?.value || 'quadro e multimídia';
+  const contexto = `Plano de Aula — ${componente}, ${ano}. Tema: ${pagina}. Duração: ${duracao}. Recursos: ${recursosDisp}.${descricao ? ' Orientação do professor: ' + descricao : ''}${currentMode === 'upload' && uploadedB64 ? ' Material de referência enviado como imagem/PDF.' : ''}`; 
 
   const systemPrompt = buildSystemPrompt(componente, ano);
 
@@ -898,7 +1545,7 @@ function exportPDF() {
       doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
       doc.text('APRENDE+', M, 10);
       doc.setFontSize(9); doc.setFont('helvetica','normal');
-      doc.text('Apoio Pedagogico - Rede Municipal de Ensino de Vacaria-RS', M, 17);
+      doc.text('Planos de Aula e Materiais Pedagógicos com IA', M, 17);
     } else {
       doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
       doc.text('APRENDE+ · Apoio Pedagogico - Rede Municipal de Vacaria-RS', M, 7);
@@ -951,8 +1598,9 @@ function exportPDF() {
   // === PÁGINA 1 — Cabeçalho ===
   drawHeader(true);
 
-  writeLine('Materiais Pedagogicos Complementares', 14, true, [20,40,100]);
-  writeLine(sanitize(currentRef), 11, false, [70,85,130]);
+  writeLine('Plano de Aula', 14, true, [20,40,100]);
+  const refLine = currentRef || (document.getElementById('componente').value + ' · ' + document.getElementById('ano').value + ' · ' + document.getElementById('pagina').value);
+  writeLine(sanitize(refLine), 11, false, [70,85,130]);
   writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165]);
   y += 3;
 
