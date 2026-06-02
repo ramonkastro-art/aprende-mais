@@ -606,6 +606,11 @@ function updateAIBadge(ai) {
     badge.style.background = 'rgba(66,133,244,.08)';
     badge.style.borderColor = 'rgba(66,133,244,.25)';
     badge.style.color = '#4285f4';
+  } else if (ai === 'cerebras') {
+    badge.textContent = uploadedB64 ? '✦ Cerebras (sem leitura de imagem)' : '✦ Usando Cerebras';
+    badge.style.background = 'rgba(124,58,237,.08)';
+    badge.style.borderColor = 'rgba(124,58,237,.25)';
+    badge.style.color = '#7c3aed';
   } else if (ai === 'openai') {
     badge.textContent = '✦ Usando OpenAI (backup)';
     badge.style.background = 'rgba(16,163,127,.08)';

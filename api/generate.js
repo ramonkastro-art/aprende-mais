@@ -41,7 +41,7 @@ module.exports = async function handler(req, res) {
     }
   } else {
     // Sem imagem: Groq primeiro (rápido e gratuito) → Gemini → OpenAI
-    console.log('Modo texto: Groq → Gemini → OpenAI');
+    console.log('Modo texto: Groq → Gemini → Cerebras → OpenAI');
     try {
       const text = await callGroq(userContent, systemPrompt);
       return res.status(200).json({ text, provider: 'groq' });
@@ -51,14 +51,20 @@ module.exports = async function handler(req, res) {
         const text = await callGemini(userContent, systemPrompt);
         return res.status(200).json({ text, provider: 'gemini' });
       } catch (geminiErr) {
-        console.warn('Gemini falhou, tentando OpenAI...', geminiErr.message);
+        console.warn('Gemini falhou, tentando Cerebras...', geminiErr.message);
         try {
-          const text = await callOpenAI(userContent, systemPrompt);
-          return res.status(200).json({ text, provider: 'openai' });
-        } catch (openaiErr) {
-          return res.status(500).json({
-            error: `Groq: ${groqErr.message} | Gemini: ${geminiErr.message} | OpenAI: ${openaiErr.message}`,
-          });
+          const text = await callCerebras(userContent, systemPrompt);
+          return res.status(200).json({ text, provider: 'cerebras' });
+        } catch (cerebrasErr) {
+          console.warn('Cerebras falhou, tentando OpenAI...', cerebrasErr.message);
+          try {
+            const text = await callOpenAI(userContent, systemPrompt);
+            return res.status(200).json({ text, provider: 'openai' });
+          } catch (openaiErr) {
+            return res.status(500).json({
+              error: `Groq: ${groqErr.message} | Gemini: ${geminiErr.message} | Cerebras: ${cerebrasErr.message} | OpenAI: ${openaiErr.message}`,
+            });
+          }
         }
       }
     }
@@ -161,7 +167,7 @@ async function callGroq(userContent, systemPrompt) {
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
-      max_tokens: 8192,
+      max_tokens: 4096,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: textPrompt },
@@ -179,7 +185,47 @@ async function callGroq(userContent, systemPrompt) {
   return data.choices[0].message.content.trim();
 }
 
-/* ── OpenAI — terceiro fallback ── */
+/* ── Cerebras (terceiro fallback) ── */
+async function callCerebras(userContent, systemPrompt) {
+  let textPrompt = '';
+  if (typeof userContent === 'string') {
+    textPrompt = userContent;
+  } else {
+    for (const part of userContent) {
+      if (part.type === 'text') textPrompt += part.text;
+      if (part.type === 'image' || part.type === 'document') {
+        textPrompt += '\n[Imagem enviada — gere o material com base no contexto textual fornecido]';
+      }
+    }
+  }
+
+  const response = await fetch('https://api.cerebras.ai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.CEREBRAS_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b',
+      max_tokens: 4096,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: textPrompt },
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    const data = await response.json();
+    throw new Error(data.error?.message || `Cerebras HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  if (!data.choices?.[0]?.message?.content) throw new Error('Cerebras retornou resposta vazia');
+  return data.choices[0].message.content.trim();
+}
+
+/* ── OpenAI — quarto fallback ── */
 async function callOpenAI(userContent, systemPrompt) {
   let userMessage;
 
