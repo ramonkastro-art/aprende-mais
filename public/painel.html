@@ -121,10 +121,15 @@ tr:hover td{background:rgba(37,99,235,.02);}
     </div>
 
     <div class="table-card">
-      <h3>Últimas consultas</h3>
+      <h3>Últimos Planos de Aula</h3>
       <table>
-        <thead><tr><th>Data</th><th>Componente</th><th>Ano</th><th>Volume</th><th>Página</th></tr></thead>
+        <thead><tr><th>Data</th><th>Tipo</th><th>Componente</th><th>Ano</th><th>Tema/Conteúdo</th></tr></thead>
         <tbody id="tabelaConsultas"></tbody>
+      </table>
+      <h3 style="margin:24px 0 12px;font-size:15px;">Avaliações Geradas <span style="font-size:12px;color:#7c8499;font-weight:400;">· disponíveis 90 dias para correção via QR Code</span></h3>
+      <table>
+        <thead><tr><th>Data</th><th>Componente</th><th>Ano/Turma</th><th>Questões</th><th>Conteúdo</th><th>Expira em</th></tr></thead>
+        <tbody id="tabelaAvaliacoes"></tbody>
       </table>
     </div>
   </div>
@@ -132,6 +137,7 @@ tr:hover td{background:rgba(37,99,235,.02);}
 
 <script>
 let allData = [];
+let allAvaliacoes = [];
 let charts = {};
 let periodoAtivo = 7;
 
@@ -145,7 +151,15 @@ async function entrar() {
     return;
   }
 
-  allData = await res.json();
+  const json = await res.json();
+  // Compatível com novo formato {consultas, avaliacoes} e antigo formato array
+  if (Array.isArray(json)) {
+    allData = json;
+    allAvaliacoes = [];
+  } else {
+    allData = json.consultas || [];
+    allAvaliacoes = json.avaliacoes || [];
+  }
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('painelScreen').style.display = 'block';
   renderPainel(periodoAtivo);
@@ -171,17 +185,23 @@ function renderPainel(dias) {
   document.getElementById('painelContent').style.display = 'block';
 
   const label = dias ? `Últimos ${dias} dias` : 'Todo o período';
-  document.getElementById('painelSub').textContent = `${label} · ${data.length} consultas registradas`;
+  const avFiltradas = dias ? allAvaliacoes.filter(a => {
+    const d = new Date(a.criado_em);
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - dias);
+    return d >= cutoff;
+  }) : allAvaliacoes;
+  document.getElementById('painelSub').textContent = `${label} · ${data.length} planos · ${avFiltradas.length} avaliações`;
 
   // Stats
   const componentes = [...new Set(data.map(d => d.componente))];
   const hoje = data.filter(d => new Date(d.created_at).toDateString() === new Date().toDateString());
   const semana = filtrarPorPeriodo(allData, 7);
 
+  const avHoje = allAvaliacoes.filter(a => new Date(a.criado_em).toDateString() === new Date().toDateString());
   document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-value">${data.length}</div><div class="stat-label">Total de consultas</div></div>
-    <div class="stat-card"><div class="stat-value">${hoje.length}</div><div class="stat-label">Consultas hoje</div></div>
-    <div class="stat-card"><div class="stat-value">${semana.length}</div><div class="stat-label">Últimos 7 dias</div></div>
+    <div class="stat-card"><div class="stat-value">${data.length}</div><div class="stat-label">Planos de Aula</div></div>
+    <div class="stat-card"><div class="stat-value">${allAvaliacoes.length}</div><div class="stat-label">Avaliações Geradas</div></div>
+    <div class="stat-card"><div class="stat-value">${hoje.length + avHoje.length}</div><div class="stat-label">Gerações hoje</div></div>
     <div class="stat-card"><div class="stat-value">${componentes.length}</div><div class="stat-label">Componentes usados</div></div>
   `;
 
@@ -218,12 +238,32 @@ function renderPainel(dias) {
   tbody.innerHTML = data.slice(0,50).map(d => `
     <tr>
       <td>${new Date(d.created_at).toLocaleString('pt-BR')}</td>
+      <td><span style="background:rgba(37,99,235,.1);color:#2563eb;padding:2px 8px;border-radius:6px;font-size:11px;">Plano de Aula</span></td>
       <td>${d.componente || '-'}</td>
       <td>${d.ano || '-'}</td>
-      <td>${d.volume || '-'}</td>
-      <td>${d.pagina || '-'}</td>
+      <td>${d.pagina || d.volume || '-'}</td>
     </tr>
   `).join('');
+
+  // Avaliações
+  const tbodyAv = document.getElementById('tabelaAvaliacoes');
+  if (tbodyAv) {
+    tbodyAv.innerHTML = avFiltradas.slice(0,50).map(a => {
+      const expira = a.expira_em ? new Date(a.expira_em).toLocaleDateString('pt-BR') : '-';
+      const diasRestantes = a.expira_em ? Math.ceil((new Date(a.expira_em) - new Date()) / (1000*60*60*24)) : null;
+      const expiryColor = diasRestantes && diasRestantes < 15 ? '#dc2626' : '#059669';
+      return `
+        <tr>
+          <td>${new Date(a.criado_em).toLocaleString('pt-BR')}</td>
+          <td>${a.componente || '-'}</td>
+          <td>${a.ano || '-'}${a.turma ? ' · ' + a.turma : ''}</td>
+          <td>${a.qtd || '-'} questões</td>
+          <td>${a.conteudo || '-'}</td>
+          <td style="color:${expiryColor};font-size:11px;">${expira}${diasRestantes ? ' (' + diasRestantes + 'd)' : ''}</td>
+        </tr>
+      `;
+    }).join('') || '<tr><td colspan="6" style="text-align:center;color:#999;padding:20px;">Nenhuma avaliação registrada</td></tr>';
+  }
 }
 
 function renderChart(id, type, labels, values, colors) {

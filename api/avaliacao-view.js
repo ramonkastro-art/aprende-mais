@@ -674,21 +674,21 @@ async function exportarPDF() {
 
   function drawPageHeader(doc, isFirst) {
     const third = W / 3;
-    doc.setFillColor(31,119,150);  doc.rect(0,0,third,isFirst?28:14,'F');
-    doc.setFillColor(230,185,55);  doc.rect(third,0,third,isFirst?28:14,'F');
-    doc.setFillColor(214,120,40);  doc.rect(third*2,0,third+1,isFirst?28:14,'F');
+    doc.setFillColor(31,119,150);  doc.rect(0,0,third,isFirst?20:10,'F');
+    doc.setFillColor(230,185,55);  doc.rect(third,0,third,isFirst?20:10,'F');
+    doc.setFillColor(214,120,40);  doc.rect(third*2,0,third+1,isFirst?20:10,'F');
     if (isFirst) {
-      doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
-      doc.text('APRENDE+ · AVALIAÇÃO', M, 11);
-      doc.setFontSize(9); doc.setFont('helvetica','normal');
+      doc.setFontSize(12); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+      doc.text('APRENDE+ · AVALIAÇÃO', M, 8);
+      doc.setFontSize(8); doc.setFont('helvetica','normal');
       doc.text(\`\${c.comp} · \${c.ano}\${c.turma?' · '+c.turma:''} · \${c.qtd} questões · Nível: \${c.nivel}\`, M, 18);
       doc.setFontSize(8);
       doc.text(\`Conteúdo: \${c.conteudo.substring(0,80)}\${c.conteudo.length>80?'...':''}\`, M, 24);
-      return 32;
+      return 24;
     } else {
-      doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
-      doc.text(\`APRENDE+ · \${c.comp} · \${c.ano}\`, M, 9);
-      return 18;
+      doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
+      doc.text(\`APRENDE+ · \${c.comp} · \${c.ano}\`, M, 7);
+      return 14;
     }
   }
 
@@ -698,7 +698,7 @@ async function exportarPDF() {
     doc.setDrawColor(220,225,235); doc.setLineWidth(0.3);
     doc.line(M, PAGE_H-FOOTER_H, W-M, PAGE_H-FOOTER_H);
     doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(140,148,170);
-    doc.text(\`Aprende+ · Rede Municipal de Vacaria-RS · \${c.geradaEm}\`, M, PAGE_H-FOOTER_H+6);
+    doc.text(\`Aprende+ · Educação Básica · \${c.geradaEm}\`, M, PAGE_H-FOOTER_H+6);
     doc.text(\`Página \${pg}\`, W-M, PAGE_H-FOOTER_H+6, {align:'right'});
   }
 
@@ -747,6 +747,8 @@ async function exportarPDF() {
         doc.addPage(); pageNum++;
         y = drawPageHeader(doc, false);
         drawFooter(doc, pageNum);
+        // Restaura fonte após quebra de página
+        doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(50,60,80);
       }
       doc.text(altText, M+6, y);
       y += altText.length * 5 + 1;
