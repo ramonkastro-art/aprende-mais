@@ -811,46 +811,41 @@ async function exportarPDF() {
   doc.text('Instrução: Preencha completamente a bolinha correspondente à sua resposta. Use caneta ou lápis.', M, y);
   y += 8;
 
-  // Grade de bolinhas — layout compacto em 2 colunas
-  // letras = LETRAS (global)
+  // Grade de bolinhas — layout em 2 colunas sequenciais
+  const totalQuest = questoes.length;
+  const rowsQuest = Math.ceil(totalQuest / 2);
   const colW = cW / 2 - 4;
   const rowH = 10;
-  const bSize = 5.5; // diâmetro da bolinha
+  const bSize = 5.5; 
   const bSpacing = 10;
 
-  questoes.forEach((q, qi) => {
-    const col = qi % 2;
-    const row = Math.floor(qi / 2);
-    const bx = M + col * (colW + 8);
-    const by = y + row * rowH;
+  for (let rQ = 0; rQ < rowsQuest; rQ++) {
+    for (let cQ = 0; cQ < 2; cQ++) {
+      const idxQ = cQ * rowsQuest + rQ; 
+      if (idxQ >= totalQuest) continue;
 
-    // Fundo alternado
-    doc.setFillColor(col===0 ? 248:252, 249, 254);
-    doc.rect(bx, by, colW, rowH-1, 'F');
+      const bx = M + cQ * (colW + 8);
+      const by = y + rQ * rowH;
 
-    // Número da questão
-    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(25,55,140);
-    doc.text(\`\${qi+1}\`, bx+2, by+6.8);
+      doc.setFillColor(cQ === 0 ? 248 : 252, 249, 254);
+      doc.rect(bx, by, colW, rowH - 1, 'F');
 
-    // Bolinhas A-E
-    LETRAS.forEach((l, li) => {
-      const cx = bx + 14 + li * bSpacing;
-      const cy = by + rowH/2;
+      doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(25, 55, 140);
+      doc.text((idxQ + 1).toString(), bx + 2, by + 6.8);
 
-      // Círculo vazio
-      doc.setDrawColor(100,120,160); doc.setLineWidth(0.5);
-      doc.setFillColor(255,255,255);
-      doc.circle(cx, cy, bSize/2, 'FD');
+      LETRAS.forEach((l, li) => {
+        const cx = bx + 14 + li * bSpacing;
+        const cy = by + rowH / 2;
+        doc.setDrawColor(100, 120, 160); doc.setLineWidth(0.5);
+        doc.setFillColor(255, 255, 255);
+        doc.circle(cx, cy, bSize / 2, 'FD');
+        doc.setFontSize(6); doc.setFont('helvetica', 'bold'); doc.setTextColor(80, 100, 140);
+        doc.text(l, cx, cy + 2, { align: 'center' });
+      });
+    }
+  }
 
-      // Letra dentro
-      doc.setFontSize(6); doc.setFont('helvetica','bold'); doc.setTextColor(80,100,140);
-      doc.text(l, cx, cy+2, {align:'center'});
-    });
-  });
-
-  // Calcula altura total da grade
-  const totalRows = Math.ceil(questoes.length / 2);
-  y += totalRows * rowH + 10;
+  y += rowsQuest * rowH + 10;
 
   // Legenda
   doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor(150,160,180);
