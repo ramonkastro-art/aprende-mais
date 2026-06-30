@@ -340,7 +340,11 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
         </div>
         <button type="button" class="camera-btn" onclick="openCamera()">📷 &nbsp;Tirar foto agora</button>
         <div class="photo-tips"><strong>💡 Dica:</strong> Envie foto de livro ou apostila para a IA adaptar o plano ao material específico.</div>
-        <div id="previewArea" style="display:none;margin-top:14px;"></div>
+        <div id="previewArea">
+          <img id="previewImg" class="preview-img" alt="Pré-visualização da foto">
+          <div id="pdfName" class="pdf-name"></div>
+          <button type="button" id="removeImg" class="remove-img" onclick="removeFile()">🗑️ &nbsp;Remover arquivo</button>
+        </div>
       </div>
       <div class="section-label" style="margin-top:20px"><span>3</span>O que deseja gerar</div>
       <div class="checkbox-grid" id="checkboxes">
