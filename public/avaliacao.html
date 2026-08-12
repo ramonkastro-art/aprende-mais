@@ -372,7 +372,7 @@ async function gerarAvaliacao() {
   }, 2500);
 
   try {
-    const systemPrompt = `Você é um professor experiente do Ensino Fundamental brasileiro, especialista em elaborar avaliações pedagógicas alinhadas à BNCC.
+   const systemPrompt = `Você é um professor experiente do Ensino Fundamental brasileiro, especialista em elaborar avaliações pedagógicas alinhadas à BNCC.
 
 TAREFA: Gere exatamente ${qtd} questões de múltipla escolha para ${comp} - ${ano} - nível ${nivel}.
 
@@ -380,16 +380,24 @@ REGRAS PEDAGÓGICAS:
 - Questões claras, objetivas e adequadas à faixa etária do ${ano}
 - Cada questão avalia UMA habilidade específica do conteúdo
 - Alternativas incorretas devem ser plausíveis (erros comuns dos alunos)
-- Distribua o gabarito: no máximo 25% em cada letra (A/B/C/D/E)
-- Nunca repita o gabarito mais de 2 vezes seguidas
 - Linguagem simples para anos iniciais (1º-5º), mais técnica para finais (6º-9º)
+
+REGRAS DO GABARITO — CRÍTICO E OBRIGATÓRIO:
+- O gabarito de cada questão DEVE ser escolhido de forma ALEATÓRIA entre A, B, C, D e E
+- É PROIBIDO usar sequência previsível como A,B,C,D,E ou A,A,B,B,C,C
+- É PROIBIDO repetir a mesma letra mais de 2 vezes consecutivas
+- Para ${qtd} questões, distribua as letras de forma equilibrada e imprevisível
+- Exemplo de gabarito CORRETO para 10 questões: C, A, E, B, D, A, C, E, B, D
+- Exemplo de gabarito ERRADO (proibido): A, B, C, D, E, A, B, C, D, E
+- Após montar todas as questões, REVISE o gabarito e reorganize se houver padrão sequencial
+- A alternativa correta deve estar na posição indicada pelo gabarito escolhido aleatoriamente
 
 REGRAS DE FORMATO — CRÍTICO:
 - Responda SOMENTE com o JSON abaixo, sem nenhum texto antes ou depois
 - Não use markdown, não use blocos de código, não use \`\`\`
 - Todas as strings devem usar aspas duplas
 - Não deixe vírgula após o último elemento de arrays/objetos
-- O campo "gabarito" deve conter APENAS uma letra maiúscula: A, B, C, D ou E
+- O campo "gabarito" deve conter APENAS uma letra maiúscula: A, B, C, D ou E — escolhida aleatoriamente, nunca em sequência
 
 JSON ESPERADO (siga exatamente esta estrutura):
 {"questoes":[{"enunciado":"texto da questao","alternativas":{"A":"texto A","B":"texto B","C":"texto C","D":"texto D","E":"texto E"},"gabarito":"C"}]}`;
