@@ -601,8 +601,24 @@ async function callAPI(userContent, systemPrompt) {
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({ userContent, systemPrompt })
   });
-  const data = await res.json();
-  if (data.error) throw new Error(data.error);
+  let data;
+  try {
+    data = await res.json();
+  } catch (e) {
+    const error = new Error('Resposta inválida do serviço de IA.');
+    error.code = 'AI_UNAVAILABLE';
+    throw error;
+  }
+  if (data.error || !res.ok) {
+    const error = new Error(data.error || 'As IAs estão temporariamente indisponíveis.');
+    error.code = data.code || (res.status === 429 ? 'AI_LIMIT' : 'AI_UNAVAILABLE');
+    throw error;
+  }
+  if (!data.text) {
+    const error = new Error('A IA não retornou um material.');
+    error.code = 'AI_UNAVAILABLE';
+    throw error;
+  }
   if (data.provider && data.provider !== activeAI) {
     activeAI = data.provider;
     updateAIBadge(data.provider);
@@ -713,8 +729,15 @@ async function generate() {
       document.getElementById('results').classList.remove('visible');
     }
     const eb = document.getElementById('errorBox');
+    const aiLimit = err.code === 'AI_LIMIT' || /429|quota|rate.?limit|token|indisponível|indisponivel|excedido/i.test(String(err.message || ''));
+    const message = aiLimit
+      ? '⚠️ O uso de IA foi excedido ou está temporariamente indisponível. Tente novamente mais tarde.'
+      : '⚠️ Não foi possível gerar os materiais agora. Tente novamente mais tarde.';
+    const detail = Object.keys(generatedContent).length
+      ? 'Os materiais já gerados foram mantidos.'
+      : 'Nenhum material foi gerado nesta tentativa.';
     eb.classList.add('visible');
-    eb.innerHTML = '⚠️ Erro: ' + escHtml(err.message) + '<br><small>Os materiais já gerados foram mantidos. Corrija os dados ou tente novamente.</small>';
+    eb.innerHTML = message + '<br><small>' + detail + '</small>';
   }
 }
 
@@ -827,7 +850,7 @@ function exportPDF() {
       doc.text('Estratégias de aula com IA', M, 17);
     } else {
       doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
-      doc.text('APRENDE+ · Estratégias de aula · Rede Municipal de Vacaria-RS', M, 7);
+      doc.text('EnsinAprende+ · Estratégias de aula', M, 7);
       try { doc.addImage(SMED_LOGO, 'PNG', W-14, 0, 11, 11); } catch(e) {}
     }
   }
@@ -840,7 +863,7 @@ function exportPDF() {
     doc.setLineWidth(0.3);
     doc.line(0,PAGE_H-FOOTER_H,W,PAGE_H-FOOTER_H);
     doc.setFontSize(10); doc.setFont('helvetica','normal'); doc.setTextColor(140,148,170);
-    doc.text('Aprende+ · Rede Municipal de Vacaria-RS · ' + new Date().toLocaleDateString('pt-BR'), M, PAGE_H-FOOTER_H+5);
+    doc.text('EnsinAprende+ · ' + new Date().toLocaleDateString('pt-BR'), M, PAGE_H-FOOTER_H+5);
     // Paginação será escrita depois que soubermos o total
     doc.setFontSize(9); doc.setFont('helvetica','italic'); doc.setTextColor(130,120,150);
     doc.text('Execute com autenticidade. Protagonize em sala.', W/2, PAGE_H-FOOTER_H+10, {align:'center'});
@@ -889,8 +912,8 @@ function exportPDF() {
   y += 7;
 
   // === SEÇÕES ===
-  HISTORY_KEYS.forEach(key => {
-    if (!generatedContent[key]) return;
+  const sections = HISTORY_KEYS.filter(key => generatedContent[key]);
+  sections.forEach((key, sectionIndex) => {
     const c = CFG[key];
 
     // Cabeçalho da seção — garante espaço mínimo para título + pelo menos 2 linhas de conteúdo
@@ -930,21 +953,26 @@ function exportPDF() {
         doc.setTextColor(45,50,65);
       }
       const linhas = doc.splitTextToSize(trimmed, cW);
-      for (const l of linhas) {
+      linhas.forEach((l, lineIndex) => {
         checkSpace(lh + 2);
-        doc.text(l, M, y);
+        const isLastLine = lineIndex === linhas.length - 1;
+        const textOptions = !isSubtitle && !isLastLine ? {align:'justify', maxWidth:cW} : undefined;
+        if (textOptions) doc.text(l, M, y, textOptions);
+        else doc.text(l, M, y);
         y += lh;
-      }
+      });
       if (isSubtitle) y += 1;
     }
     y += 8;
 
-    // Separador
-    checkSpace(6);
-    doc.setDrawColor(230,233,242);
-    doc.setLineWidth(0.3);
-    doc.line(M, y-2, W-M, y-2);
-    y += 4;
+    // Separador somente entre seções; nunca após a última, evitando página vazia.
+    if (sectionIndex < sections.length - 1) {
+      checkSpace(6);
+      doc.setDrawColor(230,233,242);
+      doc.setLineWidth(0.3);
+      doc.line(M, y-2, W-M, y-2);
+      y += 4;
+    }
   });
 
   // Rodapé da última página

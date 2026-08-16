@@ -33,9 +33,7 @@ module.exports = async function handler(req, res) {
           const text = await callOpenAI(userContent, systemPrompt);
           return res.status(200).json({ text, provider: 'openai' });
         } catch (openaiErr) {
-          return res.status(500).json({
-            error: `Gemini: ${geminiErr.message} | Groq: ${groqErr.message} | OpenAI: ${openaiErr.message}`,
-          });
+          return respondWithAIError(res, [geminiErr, groqErr, openaiErr]);
         }
       }
     }
@@ -60,16 +58,30 @@ module.exports = async function handler(req, res) {
           try {
             const text = await callOpenAI(userContent, systemPrompt);
             return res.status(200).json({ text, provider: 'openai' });
-          } catch (openaiErr) {
-            return res.status(500).json({
-              error: `Groq: ${groqErr.message} | Gemini: ${geminiErr.message} | Cerebras: ${cerebrasErr.message} | OpenAI: ${openaiErr.message}`,
-            });
+            } catch (openaiErr) {
+            return respondWithAIError(res, [groqErr, geminiErr, cerebrasErr, openaiErr]);
           }
         }
       }
     }
   }
 };
+
+const AI_LIMIT_MESSAGE = 'O uso de IA foi excedido ou está temporariamente indisponível. Tente novamente mais tarde.';
+const AI_UNAVAILABLE_MESSAGE = 'As IAs estão temporariamente indisponíveis. Tente novamente mais tarde.';
+
+function isLimitError(error) {
+  const message = String(error?.message || error || '').toLowerCase();
+  return /429|quota|rate.?limit|too many requests|resource exhausted|token|context length|max.?tokens|insufficient_quota|billing|exceed/.test(message);
+}
+
+function respondWithAIError(res, errors) {
+  const limited = errors.some(isLimitError);
+  return res.status(limited ? 429 : 503).json({
+    error: limited ? AI_LIMIT_MESSAGE : AI_UNAVAILABLE_MESSAGE,
+    code: limited ? 'AI_LIMIT' : 'AI_UNAVAILABLE',
+  });
+}
 
 /* ── Gemini 3.6 Flash (Google) — primário multimodal ── */
 async function callGemini(userContent, systemPrompt) {
@@ -128,7 +140,10 @@ async function callGemini(userContent, systemPrompt) {
 
   // finishReason diferente de STOP indica problema
   const finishReason = data.candidates[0].finishReason;
-  if (finishReason && finishReason !== 'STOP' && finishReason !== 'MAX_TOKENS') {
+  if (finishReason === 'MAX_TOKENS') {
+    throw new Error('Limite de tokens excedido');
+  }
+  if (finishReason && finishReason !== 'STOP') {
     throw new Error(`Gemini encerrou com motivo: ${finishReason}`);
   }
 
@@ -181,8 +196,10 @@ async function callGroq(userContent, systemPrompt) {
   }
 
   const data = await response.json();
-  if (!data.choices?.[0]?.message?.content) throw new Error('Groq retornou resposta vazia');
-  return data.choices[0].message.content.trim();
+  const choice = data.choices?.[0];
+  if (choice?.finish_reason === 'length') throw new Error('Limite de tokens excedido');
+  if (!choice?.message?.content) throw new Error('Groq retornou resposta vazia');
+  return choice.message.content.trim();
 }
 
 /* ── Cerebras (terceiro fallback) ── */
@@ -221,8 +238,10 @@ async function callCerebras(userContent, systemPrompt) {
   }
 
   const data = await response.json();
-  if (!data.choices?.[0]?.message?.content) throw new Error('Cerebras retornou resposta vazia');
-  return data.choices[0].message.content.trim();
+  const choice = data.choices?.[0];
+  if (choice?.finish_reason === 'length') throw new Error('Limite de tokens excedido');
+  if (!choice?.message?.content) throw new Error('Cerebras retornou resposta vazia');
+  return choice.message.content.trim();
 }
 
 /* ── OpenAI — quarto fallback ── */
@@ -273,5 +292,8 @@ async function callOpenAI(userContent, systemPrompt) {
 
   const data = await response.json();
   if (data.error) throw new Error(data.error.message);
-  return data.choices[0].message.content.trim();
+  const choice = data.choices?.[0];
+  if (choice?.finish_reason === 'length') throw new Error('Limite de tokens excedido');
+  if (!choice?.message?.content) throw new Error('OpenAI retornou resposta vazia');
+  return choice.message.content.trim();
 }
