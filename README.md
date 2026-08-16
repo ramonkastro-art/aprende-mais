@@ -1,18 +1,29 @@
-# Aprende+ — Ações BNCC entre disciplinas
+# Aprende+ — Estratégias de aula para todos aprenderem
 
-O Aprende+ é um assistente pedagógico para transformar habilidades da Base Nacional Comum Curricular (BNCC) em **planos de ação práticos**, estratégias alternativas e materiais aplicáveis em diferentes disciplinas. A disciplina em que a aula acontece pode ser diferente do componente curricular associado ao código BNCC. Assim, um professor de Língua Inglesa pode trabalhar uma habilidade de Matemática, por exemplo, usando problemas matemáticos escritos em inglês.
+O Aprende+ é um assistente pedagógico para criar **estratégias de aula claras, práticas e inclusivas** para professores da Educação Básica. O formulário principal foi pensado para ser rápido: o professor informa a disciplina, a turma/ano, a quantidade de períodos e escolhe quais materiais deseja receber.
 
-O aplicativo não substitui o diagnóstico pedagógico da rede, o planejamento docente ou a consulta à redação oficial da BNCC. Ele organiza propostas para recomposição e aprofundamento das aprendizagens a partir das informações fornecidas pelo professor.
+O conteúdo, objetivo, código BNCC, contexto da turma e foto/PDF são recursos opcionais. Quando forem informados, ajudam a tornar a proposta mais específica; quando não forem, o sistema ainda deve gerar uma sugestão coerente com a disciplina, a turma e o tempo selecionados.
 
 ## Funcionalidades principais
 
-O formulário permite informar o ano/série, a disciplina da aula, o componente curricular do código BNCC, o código, a redação da habilidade, o tema ou evidência do gargalo, a duração, os recursos e o contexto da turma.
+A geração pode produzir seis materiais independentes: Plano de Ação, Estratégias Alternativas, Exercícios para Quadro, Exercícios para Tela, Acessibilidade e Inclusão e Acompanhamento do Avanço. O professor escolhe os módulos desejados e pode gerar somente o que precisa.
 
-A geração pode produzir seis materiais independentes: Plano de Ação BNCC, Estratégias Alternativas, Exercícios para Quadro, Exercícios para Tela, Acessibilidade e Inclusão e Acompanhamento do Avanço. O professor pode desmarcar os materiais de que não precisa.
+O comando interno orienta a IA a usar linguagem simples, instruções em etapas, alternativas de baixo recurso, diferentes formas de participação e apoios pedagógicos para estudantes com diferentes ritmos, formas de comunicação, atenção, leitura, escrita, mobilidade e processamento sensorial. A lógica pedagógica fica no sistema e não é transformada em um questionário para o professor.
 
-A aba `Usar foto ou PDF` continua disponível. A mídia é enviada ao backend multimodal como imagem ou documento; quando o provedor principal não puder interpretar a mídia, os fallbacks preservam a consulta textual e informam a limitação ao professor, sem inventar o conteúdo do arquivo. A captura pela câmera permanece disponível.
+A seção `Adicionar conteúdo ou foto/PDF` fica recolhida e é totalmente opcional. O professor pode escrever um tema, anexar uma imagem/PDF ou tirar uma foto, mas também pode gerar sem nenhum desses dados. A mídia é enviada ao backend multimodal quando existir; se o provedor não puder interpretá-la, o sistema não deve inventar o conteúdo.
 
-O gerador de avaliações e suas rotas (`/avaliacao`, `/corrigir` e `/painel`) foram mantidos separados do novo fluxo de ações BNCC.
+O gerador de avaliações e suas rotas (`/avaliacao`, `/corrigir` e `/painel`) foram mantidos separados do fluxo principal.
+
+## Campos do fluxo principal
+
+| Campo | Obrigatório? | Função |
+|---|---:|---|
+| Disciplina | Sim | Define a área e a linguagem da proposta. |
+| Turma/ano | Sim | Ajusta a complexidade dos exemplos. |
+| Quantidade de períodos | Sim | Dimensiona o tempo da aula. |
+| Materiais desejados | Sim | Define quais módulos serão gerados. |
+| Conteúdo ou objetivo | Não | Personaliza a aula quando o professor quiser. |
+| Foto/PDF | Não | Fornece referência visual ou documental opcional. |
 
 ## Estrutura do projeto
 
@@ -37,20 +48,20 @@ aprende-mais/
 
 ## Como rodar localmente
 
-O projeto usa funções serverless compatíveis com Vercel. Instale a CLI e execute:
+O projeto usa funções serverless compatíveis com Vercel. Na raiz do projeto, execute:
 
 ```bash
+npm install
 npm install -g vercel
+vercel login
 vercel dev
 ```
 
-Depois, acesse `http://localhost:3000`.
-
-Para testar as funções com IA localmente, configure as variáveis de ambiente em um arquivo `.env.local` ou na configuração local da Vercel. Nunca versione esse arquivo.
+Depois, acesse `http://localhost:3000`. Configure as variáveis de ambiente em `.env.local` ou na configuração local da Vercel. Nunca versione esse arquivo.
 
 ## Variáveis de ambiente
 
-Configure no Vercel, em **Settings → Environment Variables**, somente as chaves que serão utilizadas pela sua operação. O fluxo de geração usa esta ordem de fallback:
+Configure no Vercel, em **Settings → Environment Variables**, somente as chaves utilizadas pela sua operação. O fluxo de geração usa esta ordem de fallback:
 
 | Variável | Uso |
 |---|---|
@@ -62,7 +73,7 @@ Configure no Vercel, em **Settings → Environment Variables**, somente as chave
 | `SUPABASE_KEY` | Chave do Supabase para o registro administrativo |
 | `PAINEL_SENHA` | Proteção do painel administrativo, quando habilitada |
 
-Para o caminho de foto/PDF, recomenda-se manter `GEMINI_API_KEY` configurada, pois é o provedor priorizado para interpretar a mídia. Sem essa chave, o sistema pode recorrer aos fallbacks textuais, mas o resultado pode ser baseado apenas nos dados escritos pelo professor.
+Para o caminho de foto/PDF, recomenda-se manter `GEMINI_API_KEY` configurada, pois é o provedor priorizado para interpretar a mídia. Sem essa chave, o sistema pode recorrer aos fallbacks textuais, mas o resultado poderá se basear apenas nos dados escritos pelo professor.
 
 ## Como publicar no GitHub
 
@@ -71,7 +82,7 @@ Dentro da pasta do projeto final:
 ```bash
 git init
 git add .
-git commit -m "Reestruturar gerador para ações BNCC interdisciplinares"
+git commit -m "Simplificar gerador de estratégias de aula"
 git branch -M main
 git remote add origin https://github.com/SEU_USUARIO/aprende-mais.git
 git push -u origin main
@@ -92,9 +103,9 @@ vercel --prod
 
 ## Referência pedagógica
 
-A redação oficial da habilidade deve ser conferida pelo professor na [Base Nacional Comum Curricular do MEC](https://basenacionalcomum.mec.gov.br/abase/). O aplicativo permite colar essa redação no campo correspondente para reduzir ambiguidades e orientar a geração com maior precisão.
+A redação oficial de códigos e habilidades deve ser conferida na [Base Nacional Comum Curricular do MEC](https://basenacionalcomum.mec.gov.br/abase/). O fluxo principal não exige que o professor informe código ou habilidade para gerar uma boa proposta de aula; esses dados podem ser acrescentados futuramente em uma versão avançada, sem fazer parte do questionário inicial.
 
-O comando completo usado pelo backend está versionado em [`PROMPT_IA_BNCC.md`](./PROMPT_IA_BNCC.md). Ele estabelece que o código BNCC é o alvo de aprendizagem, enquanto a disciplina da aula é o meio de acesso, e exige evidências observáveis, alternativa de baixo recurso e apoios pedagógicos inclusivos sem diagnóstico ou prescrição.
+O comando completo usado pelo sistema está em [`PROMPT_IA_BNCC.md`](./PROMPT_IA_BNCC.md). Ele exige linguagem acessível, atividades observáveis, alternativas de baixo recurso e apoios pedagógicos inclusivos sem diagnóstico ou prescrição.
 
 ## Segurança
 
