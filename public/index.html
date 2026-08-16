@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Aprende+ | Apoio Pedagógico</title>
+<title>Aprende+ | Ação BNCC</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -233,6 +233,20 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
   input,select,textarea{font-size:16px;}
   .tab-btn,.checkbox-item,.btn-generate,.btn-action{-webkit-tap-highlight-color:transparent;}
 }
+
+/* ── BNCC action modules and form helpers ── */
+.optional-label{font-size:10px;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:500;}
+.field-hint{font-size:12px;line-height:1.5;color:var(--muted);margin-top:-2px;}
+#codigo-bncc{text-transform:uppercase;font-weight:600;letter-spacing:.4px;}
+#habilidade-bncc{min-height:78px;}
+.mod-quadro .module-icon{background:rgba(217,119,6,.08);}
+.mod-quadro .module-badge{background:rgba(217,119,6,.08);color:#b45309;}
+.mod-tela .module-icon{background:rgba(124,58,237,.08);}
+.mod-tela .module-badge{background:rgba(124,58,237,.08);color:#7c3aed;}
+.mod-inclusao .module-icon{background:rgba(5,150,105,.08);}
+.mod-inclusao .module-badge{background:rgba(5,150,105,.08);color:#047857;}
+.mod-acompanhamento .module-icon{background:rgba(14,116,144,.08);}
+.mod-acompanhamento .module-badge{background:rgba(14,116,144,.08);color:#0e7490;}
 </style>
 </head>
 <body>
@@ -250,8 +264,8 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
 <div class="main">
   <div class="hero">
     <div class="hero-badge">🏫 Rede de Educação Básica</div>
-    <h1>Planos de Aula<br><em>com Inteligência Artificial</em></h1>
-    <p>Selecione a disciplina, o ano e o tema — a IA elabora o plano de aula completo, material de apoio e adaptações para alunos com necessidades especiais.</p>
+    <h1>Ações BNCC<br><em>que atravessam disciplinas</em></h1>
+    <p>Escolha uma habilidade que precisa avançar. O Aprende+ cria estratégias práticas para qualquer componente curricular, com alternativas para quadro, telas, baixo recurso e diferentes formas de aprender.</p>
   </div>
 
   <div id="formSection">
@@ -271,7 +285,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
     </div>
 
     <div class="form-card">
-      <div class="section-label"><span>1</span>Configure o Plano de Aula</div>
+      <div class="section-label"><span>1</span>Defina o alvo da ação</div>
       <div class="form-grid-2">
         <div class="field">
           <label>Ano / Série</label>
@@ -290,7 +304,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
           </select>
         </div>
         <div class="field">
-          <label>Componente Curricular</label>
+          <label>Disciplina em que a aula acontecerá</label>
           <select id="componente">
             <option value="">Selecione...</option>
             <option>Língua Portuguesa</option><option>Matemática</option><option>Ciências</option>
@@ -301,9 +315,31 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
           </select>
         </div>
       </div>
+      <div class="form-grid-2">
+        <div class="field">
+          <label>Componente curricular do código BNCC</label>
+          <select id="componente-bncc">
+            <option value="">Selecione ou deixe para a IA inferir...</option>
+            <option>Língua Portuguesa</option><option>Matemática</option><option>Ciências</option>
+            <option>História</option><option>Geografia</option><option>Arte</option>
+            <option>Educação Física</option><option>Ensino Religioso</option>
+            <option>Língua Inglesa</option><option>Filosofia</option><option>Sociologia</option>
+            <option>Química</option><option>Física</option><option>Biologia</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Código da habilidade BNCC</label>
+          <input type="text" id="codigo-bncc" placeholder="Ex.: EF06MA03 ou EM13MAT..." autocomplete="off">
+        </div>
+      </div>
       <div class="field">
-        <label>Tema / Conteúdo da Aula</label>
-        <input type="text" id="pagina" placeholder="Ex: Frações equivalentes, Revolução Francesa, Interpretação de texto...">
+        <label>Descrição da habilidade BNCC <span class="optional-label">(recomendado)</span></label>
+        <textarea id="habilidade-bncc" style="min-height:78px" placeholder="Cole a redação da habilidade ou descreva o que os estudantes precisam conseguir fazer."></textarea>
+        <div class="field-hint">Se o código pertencer a outra área, a disciplina da aula será o caminho para desenvolver o mesmo alvo.</div>
+      </div>
+      <div class="field">
+        <label>Tema, conteúdo ou evidência do gargalo</label>
+        <input type="text" id="pagina" placeholder="Ex.: problemas com números naturais, leitura de gráficos, compreensão de enunciados...">
       </div>
       <div class="form-grid-2">
         <div class="field">
@@ -317,21 +353,21 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
           </select>
         </div>
         <div class="field">
-          <label>Recursos Disponíveis</label>
+          <label>Recursos disponíveis</label>
           <select id="recursos-disp">
             <option value="somente quadro">Somente quadro</option>
-            <option value="quadro e multimídia">Quadro + Multimídia</option>
-            <option value="quadro, multimídia e internet" selected>Quadro + Multimídia + Internet</option>
+            <option value="quadro e multimídia">Quadro + multimídia</option>
+            <option value="quadro, multimídia e internet" selected>Quadro + multimídia + internet</option>
             <option value="laboratório de informática">Laboratório de informática</option>
           </select>
         </div>
       </div>
       <div id="tab-manual" class="tab-panel active" style="margin-top:16px">
-        <div class="section-label"><span>2</span>Contexto adicional (opcional)</div>
-        <textarea id="descricao" style="min-height:80px" placeholder="Turma com necessidades especiais, projeto da escola, tema transversal, abordagem preferida..."></textarea>
+        <div class="section-label"><span>4</span>Contexto da turma (opcional)</div>
+        <textarea id="descricao" style="min-height:80px" placeholder="Descreva o gargalo observado, o perfil da turma, conhecimentos prévios, tempo disponível ou apoios já tentados."></textarea>
       </div>
       <div id="tab-upload" class="tab-panel" style="margin-top:16px">
-        <div class="section-label"><span>2</span>Foto ou PDF de referência (opcional)</div>
+        <div class="section-label"><span>4</span>Foto ou PDF do conteúdo (opcional)</div>
         <div class="upload-zone" id="uploadZone">
           <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(event)">
           <span class="upload-icon">🖼️</span>
@@ -339,32 +375,51 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
           <div class="upload-sub">JPG, PNG, WEBP ou PDF · máx. 10 MB</div>
         </div>
         <button type="button" class="camera-btn" onclick="openCamera()">📷 &nbsp;Tirar foto agora</button>
-        <div class="photo-tips"><strong>💡 Dica:</strong> Envie foto de livro ou apostila para a IA adaptar o plano ao material específico.</div>
+        <div class="photo-tips"><strong>Como usar:</strong> envie uma página, atividade, gráfico ou imagem do conteúdo para a IA criar exercícios e estratégias relacionados ao alvo BNCC. A descrição da habilidade e do contexto continua sendo a referência principal.</div>
+        <div class="field" style="margin-top:14px">
+          <label>O que a foto/PDF mostra? <span class="optional-label">(recomendado)</span></label>
+          <textarea id="descExtra" style="min-height:72px" placeholder="Informe página, unidade, instrução importante ou o que você quer reforçar a partir do arquivo."></textarea>
+        </div>
         <div id="previewArea">
           <img id="previewImg" class="preview-img" alt="Pré-visualização da foto">
           <div id="pdfName" class="pdf-name"></div>
           <button type="button" id="removeImg" class="remove-img" onclick="removeFile()">🗑️ &nbsp;Remover arquivo</button>
         </div>
       </div>
-      <div class="section-label" style="margin-top:20px"><span>3</span>O que deseja gerar</div>
+      <div class="section-label" style="margin-top:20px"><span>5</span>Escolha os materiais de intervenção</div>
       <div class="checkbox-grid" id="checkboxes">
-        <label class="checkbox-item checked" id="checkAtividades" onclick="toggleCheck(this)">
-          <input type="checkbox" value="atividades" checked>
+        <label class="checkbox-item checked" onclick="toggleCheck(this)">
+          <input type="checkbox" value="plano" checked>
           <div class="check-icon">✓</div>
-          <span class="check-label">📋 Plano de Aula</span>
+          <span class="check-label">🎯 Plano de ação</span>
         </label>
-        <label class="checkbox-item checked" id="checkComplementar" onclick="toggleCheck(this)">
-          <input type="checkbox" value="material" checked>
+        <label class="checkbox-item checked" onclick="toggleCheck(this)">
+          <input type="checkbox" value="estrategias" checked>
           <div class="check-icon">✓</div>
-          <span class="check-label">📚 Material Complementar</span>
+          <span class="check-label">🔁 Estratégias alternativas</span>
         </label>
-        <label class="checkbox-item checked" id="checkTraducao" onclick="toggleCheck(this)" style="display:none">
-          <input type="checkbox" value="traducao" checked>
+        <label class="checkbox-item checked" onclick="toggleCheck(this)">
+          <input type="checkbox" value="quadro" checked>
           <div class="check-icon">✓</div>
-          <span class="check-label">🌐 Traduzir conteúdo</span>
+          <span class="check-label">🧑‍🏫 Exercícios para quadro</span>
+        </label>
+        <label class="checkbox-item checked" onclick="toggleCheck(this)">
+          <input type="checkbox" value="tela" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">🖥️ Exercícios para telas</span>
+        </label>
+        <label class="checkbox-item checked" onclick="toggleCheck(this)">
+          <input type="checkbox" value="inclusao" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">♿ Acessibilidade e inclusão</span>
+        </label>
+        <label class="checkbox-item checked" onclick="toggleCheck(this)">
+          <input type="checkbox" value="acompanhamento" checked>
+          <div class="check-icon">✓</div>
+          <span class="check-label">📈 Acompanhamento do avanço</span>
         </label>
       </div>
-      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar Plano de Aula</button>
+      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar plano de ação BNCC</button>
     </div>
   </div>
 
@@ -439,33 +494,30 @@ let uploadedB64 = null, uploadedMime = null;
 let generatedContent = {}, currentRef = '', currentComponente = '';
 
 const CFG = {
-  atividades:  {icon:'📋', title:'Plano de Aula',         cls:'mod-atividades',   badge:'Plano de Aula'},
-  material:    {icon:'📚', title:'Material Complementar', cls:'mod-complementar', badge:'Material'},
-  traducao:    {icon:'🌐', title:'Tradução do Conteúdo',  cls:'mod-traducao',     badge:'Tradução'},
+  plano:          {icon:'🎯', title:'Plano de Ação BNCC',            cls:'mod-atividades',   badge:'Ação BNCC'},
+  estrategias:    {icon:'🔁', title:'Estratégias Alternativas',       cls:'mod-complementar', badge:'Estratégias'},
+  quadro:         {icon:'🧑‍🏫', title:'Exercícios para Quadro',        cls:'mod-quadro',        badge:'Quadro'},
+  tela:           {icon:'🖥️', title:'Exercícios para Tela',          cls:'mod-tela',         badge:'Tela'},
+  inclusao:       {icon:'♿', title:'Acessibilidade e Inclusão',      cls:'mod-inclusao',      badge:'Inclusão'},
+  acompanhamento: {icon:'📈', title:'Acompanhamento do Avanço',      cls:'mod-acompanhamento', badge:'Acompanhamento'},
+  // Chaves antigas mantidas para abrir históricos já salvos antes da atualização.
+  atividades:     {icon:'📋', title:'Plano de Aula legado',          cls:'mod-atividades',   badge:'Legado'},
+  material:       {icon:'📚', title:'Material Complementar legado',  cls:'mod-complementar', badge:'Legado'},
+  traducao:       {icon:'🌐', title:'Tradução legada',               cls:'mod-traducao',     badge:'Legado'},
 };
 
-const KEYS = ['atividades','material','traducao'];
+const KEYS = ['plano','estrategias','quadro','tela','inclusao','acompanhamento','atividades','material','traducao'];
 
-/* ── Mostrar/ocultar tradução se Inglês ── */
-document.getElementById('componente').addEventListener('change', function() {
-  const isIngles = this.value === 'Língua Inglesa';
-  const checkTraducao = document.getElementById('checkTraducao');
-  if (isIngles) {
-    checkTraducao.style.display = 'flex';
-    const cb = checkTraducao.querySelector('input');
-    cb.checked = true;
-    checkTraducao.classList.add('checked');
-    checkTraducao.querySelector('.check-icon').textContent = '✓';
-  } else {
-    checkTraducao.style.display = 'none';
-    // desmarca se estava marcado
-    const cb = checkTraducao.querySelector('input');
-    if (cb.checked) {
-      cb.checked = false;
-      checkTraducao.classList.remove('checked');
-      checkTraducao.querySelector('.check-icon').textContent = '';
-    }
+/* ── Sincronização inicial dos componentes ── */
+const componenteSelect = document.getElementById('componente');
+const componenteBnccSelect = document.getElementById('componente-bncc');
+componenteSelect.addEventListener('change', function() {
+  if (!componenteBnccSelect.dataset.touched || !componenteBnccSelect.value) {
+    componenteBnccSelect.value = this.value;
   }
+});
+componenteBnccSelect.addEventListener('change', function() {
+  this.dataset.touched = 'true';
 });
 
 /* ── Tabs ── */
@@ -530,51 +582,54 @@ function getChecked() {
   return [...document.querySelectorAll('#checkboxes input')].filter(c => c.checked).map(c => c.value);
 }
 
-/* ── System prompt dinâmico por componente ── */
-function buildSystemPrompt(componente, ano) {
-  const isEM = ano.includes('EM');
-  const isEF1 = ['1º ano','2º ano','3º ano','4º ano','5º ano'].includes(ano);
+/* ── Comando BNCC dinâmico ── */
+function buildSystemPrompt(ctx) {
+  const isEM = ctx.ano.includes('EM');
+  const isEF1 = ['1º ano','2º ano','3º ano','4º ano','5º ano'].includes(ctx.ano);
   const segmento = isEM ? 'Ensino Médio' : isEF1 ? 'Ensino Fundamental I (Anos Iniciais)' : 'Ensino Fundamental II (Anos Finais)';
   const faixaIdade = isEM ? 'jovens de 15 a 18 anos' : isEF1 ? 'crianças de 6 a 10 anos' : 'adolescentes de 11 a 15 anos';
-  const linguagem = isEF1 ? 'simples, lúdica e acolhedora' : isEM ? 'clara, contextualizada e crítica' : 'objetiva e contextualizada';
-  return 'Você é um professor especialista em elaborar planos de aula completos e materiais pedagógicos de alta qualidade para a Educação Básica brasileira, alinhados à BNCC.\n\nCONTEXTO:\n- Segmento: ' + segmento + '\n- Componente: ' + componente + '\n- Público: ' + faixaIdade + '\n- Linguagem: ' + linguagem + '\n\nPRINCÍPIOS:\n- Seja prático e direto — professores precisam de material utilizável imediatamente\n- Adapte exemplos à realidade brasileira e ao cotidiano dos alunos\n- Inclua sempre estratégias para inclusão (AEE/NEE)\n- Conecte o conteúdo com competências da BNCC em linguagem descritiva (sem citar códigos alfanuméricos)\n- Nunca invente conteúdo fora do que foi solicitado\n\nFORMATO: Texto puro, organizado, em português brasileiro. Sem JSON, sem markdown, sem asteriscos, sem backticks. Títulos em LETRAS MAIÚsCULAS.';
+  return `Você é um especialista em planejamento pedagógico, recomposição das aprendizagens e desenho universal para aprendizagem na Educação Básica brasileira. Sua tarefa não é criar um plano de aula genérico. Sua tarefa é transformar uma habilidade da BNCC em um PLANO DE AÇÃO PRÁTICO para desenvolver, reforçar ou melhorar essa habilidade, sempre dentro da disciplina em que o professor dará a aula.
+
+CONTEXTO FIXO
+- Segmento/ano: ${segmento} · ${ctx.ano}
+- Disciplina em que a aula acontecerá: ${ctx.componenteAula}
+- Código BNCC informado: ${ctx.codigo || 'não informado'}
+- Componente curricular associado ao código: ${ctx.componenteBncc || 'não informado; inferir com cautela'}
+- Descrição da habilidade: ${ctx.habilidade || 'não informada; não invente a redação oficial'}
+- Tema ou evidência de aprendizagem: ${ctx.tema || 'não informado'}
+- Duração: ${ctx.duracao}
+- Recursos disponíveis: ${ctx.recursos}
+- Contexto adicional da turma: ${ctx.contexto || 'não informado'}
+
+OBJETIVO CENTRAL
+Parta do código e da descrição da habilidade como alvo de aprendizagem. Se a habilidade pertencer a outro componente, mantenha o código e a intenção cognitiva da habilidade, mas traduza a proposta para a disciplina da aula. A disciplina da aula é o meio de acesso; a habilidade da BNCC é o alvo que deve ser observado.
+
+REGRAS PEDAGÓGICAS
+1. Seja objetivo, aplicável e verificável. Cada proposta deve poder ser aplicada pelo professor com os recursos informados.
+2. Não invente uma redação oficial de habilidade. Se a descrição não for fornecida, sinalize essa limitação e trabalhe apenas com uma interpretação prudente do código.
+3. Diferencie habilidade-alvo da BNCC, conteúdo da disciplina da aula e suporte interdisciplinar.
+4. Explique como a disciplina da aula contribui para o desempenho da habilidade-alvo, sem criar duas aulas desconectadas.
+5. Sempre ofereça uma alternativa de baixo recurso, inclusive quando houver internet ou multimídia disponíveis.
+6. Inclua apoios pedagógicos observáveis para dislexia, TDAH, autismo e dificuldades persistentes de aprendizagem, sem diagnosticar, rotular ou prescrever tratamento. Considere instruções em etapas, modelos visuais, tempo ampliado, redução de estímulos, escolha de resposta, leitura compartilhada, pares e diferentes formas de demonstrar a aprendizagem.
+7. Para toda atividade, indique a evidência que o professor observará e como poderá ajustar a intervenção.
+8. Use linguagem brasileira, acolhedora e profissional, específica para o ano e a realidade descrita.
+9. Ao receber foto ou PDF, use-o como referência do conteúdo visível. Se o provedor não puder interpretar a mídia, não invente o conteúdo: use apenas os dados escritos pelo professor e declare a limitação.
+10. Crie situações originais e não copie trechos longos de livros ou apostilas.
+
+FORMATO DE SAÍDA
+Retorne somente texto puro, em português brasileiro, sem JSON, sem markdown, sem asteriscos e sem backticks. Use títulos em LETRAS MAIÚSCULAS. Quando o pedido exigir exercício, inclua enunciado, resposta esperada ou gabarito, habilidade mobilizada, orientação de aplicação e uma variação mais simples e uma mais complexa. Para aulas de língua adicional, escreva o enunciado no idioma da aula e acrescente tradução ou glossário suficiente para o professor conduzir a atividade.`;
 }
 
-
-
-/* ── Prompts por recurso ── */
-function getMaterialTipo(componente) {
-  if (componente === 'Língua Portuguesa') return 'TEXTO PARA TRABALHO EM SALA\nEscreva um texto adequado ao ano (conto, crônica, notícia, poema ou texto informativo) com 150 a 250 palavras sobre o tema.\n\nATIVIDADES DE INTERPRETAÇÃO\nElabore 4 questões: 2 de interpretação literal, 1 de inferência e 1 de linguagem/vocabulário. Inclua gabarito.';
-  if (componente === 'Matemática') return 'SITUAÇÕES-PROBLEMA\nElabore 4 problemas contextualizados do mais simples ao mais complexo. Inclua gabarito com resolução passo a passo do mais difícil.\n\nCONCEITO EM FOCO\nExplique o conceito principal com linguagem acessível e 1 exemplo resolvido.';
-  if (componente === 'Ciências' || componente === 'Biologia' || componente === 'Química' || componente === 'Física') return 'TEXTO DE DIVULGAÇÃO CIENTÍFICA\nEscreva texto informativo (150-200 palavras) sobre o tema com linguagem adequada ao ano.\n\nEXPERIMENTO OU OBSERVAÇÃO\nDescreva 1 atividade prática com materiais simples relacionada ao tema.';
-  if (componente === 'História') return 'FONTE HISTÓRICA ADAPTADA\nApresente trecho adaptado de fonte histórica ou relato sobre o tema.\n\nQUESTÕES DE ANÁLISE\n3 questões: contextualização, análise e conexão com o presente.';
-  if (componente === 'Geografia') return 'LEITURA DE PAISAGEM\nDescreva situação geográfica ou dado concreto sobre o tema.\n\nATIVIDADE DE ANÁLISE ESPACIAL\n2 questões relacionando o tema ao cotidiano dos alunos.';
-  if (componente === 'Arte') return 'APRECIAÇÃO ARTÍSTICA\nDescreva obra, movimento artístico ou manifestação cultural relacionada ao tema.\n\nPROPOSTA DE CRIAÇÃO\nRoteiro de atividade prática de criação artística.';
-  if (componente === 'Educação Física') return 'SEQUÊNCIA DE ATIVIDADES\nDescreva 3 atividades práticas progressivas com regras simples e variações inclusivas.\n\nREFLEXÃO TEÓRICA\nTexto curto conectando a prática corporal com saúde, cultura ou cidadania.';
-  return 'MATERIAL DE APOIO\nElabore texto explicativo (150-200 palavras) sobre o tema e 3 atividades práticas adequadas ao ano.';
+function buildResourcePrompt(key, ctx) {
+  const base = `DADOS DA CONSULTA\nAno/série: ${ctx.ano}\nDisciplina da aula: ${ctx.componenteAula}\nCódigo BNCC: ${ctx.codigo || 'não informado'}\nComponente da habilidade: ${ctx.componenteBncc || 'não informado'}\nDescrição da habilidade: ${ctx.habilidade || 'não informada'}\nTema/conteúdo ou evidência: ${ctx.tema || 'não informado'}\nDuração: ${ctx.duracao}\nRecursos disponíveis: ${ctx.recursos}\nContexto da turma: ${ctx.contexto || 'não informado'}${ctx.arquivo ? '\nReferência enviada: foto ou PDF anexado pelo professor.' : ''}`;
+  if (key === 'plano') return `${base}\n\nGere um PLANO DE AÇÃO BNCC completo, com no máximo 650 palavras. Estruture exatamente assim:\n\nIDENTIFICAÇÃO\nALVO DA AÇÃO\nPONTO DE PARTIDA E HIPÓTESE DE GARGALO\nESTRATÉGIA PRINCIPAL NA DISCIPLINA DA AULA\nDESENVOLVIMENTO EM ETAPAS\nALTERNATIVA PARA BAIXO RECURSO\nEVIDÊNCIAS DE APRENDIZAGEM\nAJUSTES DURANTE A AÇÃO`;
+  if (key === 'estrategias') return `${base}\n\nCrie 3 ESTRATÉGIAS ALTERNATIVAS para o mesmo alvo BNCC, sem repetir o plano principal. Apresente uma opção manipulável ou corporal, uma opção colaborativa e uma opção com linguagem/representação visual. Para cada uma, informe: quando usar, passos, materiais, evidência observável, variação mais simples e variação mais complexa. Mostre como a disciplina da aula atravessa a habilidade-alvo.`;
+  if (key === 'quadro') return `${base}\n\nCrie uma sequência pronta para o QUADRO, com duração aproximada de 15 a 25 minutos. Inclua: título para escrever no quadro, comando do professor, pelo menos 3 exercícios graduados, gabarito ou resposta esperada, perguntas de intervenção, um exemplo de baixo recurso e uma adaptação para participação sem exigir escrita extensa. Se a disciplina da aula for Língua Inglesa, escreva os enunciados dos exercícios em inglês e acrescente a tradução ou glossário em português. Os exercícios precisam mobilizar diretamente a habilidade BNCC, mesmo quando o código pertence a outro componente.`;
+  if (key === 'tela') return `${base}\n\nCrie uma sequência de EXERCÍCIOS PARA TELA OU PROJEÇÃO, pronta para copiar em slides, formulário ou ambiente virtual. Entregue 5 telas numeradas: 1) situação disparadora, 2) exemplo guiado, 3) exercício individual, 4) desafio em dupla ou grupo, 5) saída/checagem. Inclua respostas esperadas, instrução de acessibilidade visual e uma alternativa equivalente em papel. Para Língua Inglesa, mantenha os comandos em inglês com apoio de tradução/glossário. Não dependa de um aplicativo específico.`;
+  if (key === 'inclusao') return `${base}\n\nCrie um PLANO DE ACESSIBILIDADE E INCLUSÃO para a ação. Organize por: antes da atividade, durante a atividade e depois da atividade. Diferencie apoios para dislexia, TDAH, autismo, dificuldades de linguagem e estudantes que precisam de desafio adicional, sem presumir diagnóstico. Inclua ajustes de instrução, tempo, estímulo, agrupamento, resposta e avaliação. Termine com sinais de participação e aprendizagem que o professor deve observar.`;
+  if (key === 'acompanhamento') return `${base}\n\nCrie um roteiro de ACOMPANHAMENTO DO AVANÇO para 2 a 4 semanas. Inclua uma sondagem inicial curta, três indicadores observáveis ligados à habilidade, uma forma simples de registrar resultados, critérios para decidir entre manter, retomar ou ampliar a intervenção e uma devolutiva para estudante e família. Evite notas como único indicador e não trate o resultado como diagnóstico.`;
+  return `${base}\n\nGere um material pedagógico prático, mantendo o foco no alvo BNCC e na disciplina da aula. Informe como aplicar, o que observar e como adaptar.`;
 }
-
-function buildResourcePrompt(key, componente, ano, contexto) {
-  const recursosDisp = document.getElementById('recursos-disp') ? document.getElementById('recursos-disp').value : 'quadro e multimídia';
-  const duracao = document.getElementById('volume') ? (document.getElementById('volume').value || '2 períodos (100 min)') : '2 períodos (100 min)';
-  const contextoExtra = document.getElementById('descricao') ? (document.getElementById('descricao').value || '').trim() : '';
-  const base = contexto + (contextoExtra ? '\nOr ' + contextoExtra : '');
-
-  if (key === 'atividades') {
-    return base + '\n\nGere um PLANO DE AULA COMPLETO e prático. Máximo 500 palavras. Estruture exatamente assim:\n\nIDENTIFICAÇÃO\nComponente: ' + componente + ' | Ano: ' + ano + ' | Duração: ' + duracao + '\nCompetência BNCC: [descreva em 1 frase a competência trabalhada, sem citar códigos]\n\nOBJETIVOS DE APRENDIZAGEM\nListe 3 objetivos claros e mensuráveis, iniciando com verbos de ação.\n\nDESENVOLVIMENTO DA AULA\nINÍCIO ([X] min): Problematização/sensibilização\nDESENVOLVIMENTO ([X] min): Estratégia principal com ' + recursosDisp + '\nFECHAMENTO ([X] min): Síntese e verificação da aprendizagem\n\nAVALIAÇÃO\nComo verificar se os objetivos foram atingidos.\n\nINCLUSÃO E AEE\nAdaptações concretas para alunos com necessidades especiais (dislexia, TDAH, autismo). Seja específico.\n\nDICAS DO PROFESSOR\n2 sugestões práticas para enriquecer esta aula.';
-  }
-
-  if (key === 'material') {
-    return base + '\n\nATENÇÃO: NÃO repita o plano de aula. Gere APENAS o material de apoio abaixo.\n\n' + getMaterialTipo(componente) + '\n\nROTEIRO DE ESTUDO PARA O ALUNO\n3 a 4 orientações práticas de como o aluno deve estudar este conteúdo em casa.\n\nMATERIAL ADAPTADO PARA AEE\nVersão simplificada do mesmo material acima para alunos com necessidades especiais (dislexia, TDAH, autismo). Use linguagem simples e frases curtas. Inclua gabarito simplificado se houver atividades.';
-  }
-
-  if (key === 'traducao') {
-    return base + '\n\nGere MATERIAL COMPLETO DE LÍNGUA INGLESA. Máximo 500 palavras.\n\nTEXTO EM INGLÊS\nEscreva texto curto em inglês adequado ao nível ' + ano + ' sobre o tema.\n\nTRADUÇÃO COMENTADA\nTradução com notas sobre vocabulário e estruturas gramaticais.\n\nVOCABULÁRIO-CHAVE\n8 palavras do texto: palavra | tradução | exemplo.\n\nATIVIDADE PRÁTICA\n2 exercícios baseados no texto.\n\nADAPTAÇÃO AEE\nVersão simplificada para alunos com dificuldades.';
-  }
-
-  return base + '\n\nGere material pedagógico prático para ' + componente + ', ' + ano + '. Máximo 400 palavras.';
-}
-
 
 /* ── API call ── */
 let activeAI = 'gemini';
@@ -625,18 +680,22 @@ function updateAIBadge(ai) {
 
 /* ── Generate ── */
 async function generate() {
-  const componente = document.getElementById('componente').value;
-  const ano        = document.getElementById('ano').value;
-  const volume     = document.getElementById('volume').value;
-  const pagina     = document.getElementById('pagina').value;
-  const recursos   = getChecked();
+  const componenteAula = document.getElementById('componente').value;
+  const componenteBncc = document.getElementById('componente-bncc').value;
+  const ano = document.getElementById('ano').value;
+  const codigo = document.getElementById('codigo-bncc').value.trim().toUpperCase();
+  const habilidade = document.getElementById('habilidade-bncc').value.trim();
+  const tema = document.getElementById('pagina').value.trim();
+  const duracao = document.getElementById('volume').value || '2 períodos (100 min)';
+  const recursosDisp = document.getElementById('recursos-disp').value;
+  const recursos = getChecked();
 
-  if (!componente) { alert('Por favor, selecione o componente curricular.'); return; }
-  if (!ano)        { alert('Por favor, selecione o ano/série.'); return; }
-  if (!pagina.trim()) { alert('Por favor, informe o tema ou conteúdo da aula.'); return; }
-  if (recursos.length === 0) { alert('Selecione pelo menos um material para gerar.'); return; }
+  if (!componenteAula) { alert('Selecione a disciplina em que a aula acontecerá.'); return; }
+  if (!ano) { alert('Selecione o ano/série.'); return; }
+  if (!codigo && !habilidade) { alert('Informe o código BNCC ou a descrição da habilidade que precisa avançar.'); return; }
+  if (!tema && !uploadedB64) { alert('Informe o tema/evidência do gargalo ou envie uma foto/PDF de referência.'); return; }
+  if (recursos.length === 0) { alert('Selecione pelo menos um material de intervenção.'); return; }
 
-  // Reset UI
   document.getElementById('formSection').style.display = 'none';
   document.getElementById('errorBox').classList.remove('visible');
   document.getElementById('modules').innerHTML = '';
@@ -646,22 +705,18 @@ async function generate() {
   activeAI = 'gemini';
   updateAIBadge('gemini');
 
-  currentComponente = componente;
-  currentRef = `${componente} · ${ano} · ${volume || 'Vol. ?'} · Pág. ${pagina || '?'}`;
-  document.getElementById('refTag').textContent = '📖 ' + currentRef;
+  currentComponente = componenteAula;
+  currentRef = `${codigo || 'BNCC'} · ${componenteAula} · ${ano} · ${tema || 'habilidade em foco'}`;
+  document.getElementById('refTag').textContent = 'BNCC · ' + currentRef;
 
-  const descricao = currentMode === 'manual'
-    ? document.getElementById('descricao').value
-    : (document.getElementById('descExtra').value || '');
-
-  const duracao = volume || '2 períodos (100 min)';
-  const recursosDisp = document.getElementById('recursos-disp') ? document.getElementById('recursos-disp').value : 'quadro e multimídia';
-  const contexto = 'Plano de Aula — ' + componente + ', ' + ano + '. Tema: ' + pagina + '. Duração: ' + duracao + '. Recursos: ' + recursosDisp + (descricao ? '. Orientação: ' + descricao : '') + (currentMode === 'upload' && uploadedB64 ? ' [Material de referência enviado como imagem/PDF]' : '');
-
-  const systemPrompt = buildSystemPrompt(componente, ano);
+  const contexto = currentMode === 'manual'
+    ? document.getElementById('descricao').value.trim()
+    : (document.getElementById('descExtra').value || '').trim();
+  const ctx = { componenteAula, componenteBncc, ano, codigo, habilidade, tema, duracao, recursos: recursosDisp, contexto, arquivo: Boolean(uploadedB64) };
+  const systemPrompt = buildSystemPrompt(ctx);
 
   const buildContent = (prompt) => {
-    if (currentMode === 'upload') {
+    if (currentMode === 'upload' && uploadedB64) {
       return [
         { type: uploadedMime === 'application/pdf' ? 'document' : 'image',
           source: {type: 'base64', media_type: uploadedMime, data: uploadedB64} },
@@ -676,26 +731,21 @@ async function generate() {
 
   try {
     document.getElementById('results').classList.add('visible');
-
     for (let i = 0; i < recursos.length; i++) {
       const key = recursos[i];
       const c = CFG[key];
       loadingMain.textContent = `Gerando ${i + 1} de ${recursos.length}: ${c.title}...`;
       progressBar.style.width = ((i / recursos.length) * 100) + '%';
-
       appendSkeleton(key);
-
-      const prompt = buildResourcePrompt(key, componente, ano, contexto);
+      const prompt = buildResourcePrompt(key, ctx);
       const text = await callAPI(buildContent(prompt), systemPrompt);
       generatedContent[key] = text;
       replaceSkeleton(key, text);
     }
-
     progressBar.style.width = '100%';
     saveToHistory();
-    registrarConsulta(document.getElementById('componente').value, document.getElementById('ano').value, document.getElementById('volume').value, document.getElementById('pagina').value, recursos);
+    registrarConsulta(componenteAula, ano, duracao, `${codigo || ''} ${tema}`.trim(), recursos);
     setTimeout(() => document.getElementById('loading').classList.remove('visible'), 400);
-
   } catch (err) {
     document.getElementById('loading').classList.remove('visible');
     if (Object.keys(generatedContent).length === 0) {
@@ -704,7 +754,7 @@ async function generate() {
     }
     const eb = document.getElementById('errorBox');
     eb.classList.add('visible');
-    eb.innerHTML = '⚠️ Erro: ' + err.message + '<br><small>Os recursos já gerados foram mantidos. Tente novamente para continuar.</small>';
+    eb.innerHTML = '⚠️ Erro: ' + escHtml(err.message) + '<br><small>Os materiais já gerados foram mantidos. Corrija os dados ou tente novamente.</small>';
   }
 }
 
@@ -770,6 +820,7 @@ function resetForm() {
   document.getElementById('modules').innerHTML = '';
   document.getElementById('errorBox').classList.remove('visible');
   generatedContent = {};
+  if (typeof removeFile === 'function') removeFile();
 }
 
 /* ── Logo SMED em base64 ── */
@@ -813,10 +864,10 @@ function exportPDF() {
       doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
       doc.text('APRENDE+', M, 10);
       doc.setFontSize(9); doc.setFont('helvetica','normal');
-      doc.text('Planos de Aula e Materiais Pedagógicos com IA', M, 17);
+      doc.text('Planos de Ação BNCC com IA', M, 17);
     } else {
       doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(255,255,255);
-      doc.text('APRENDE+ · Apoio Pedagogico - Rede Municipal de Vacaria-RS', M, 7);
+      doc.text('APRENDE+ · Ação BNCC - Rede Municipal de Vacaria-RS', M, 7);
       try { doc.addImage(SMED_LOGO, 'PNG', W-14, 0, 11, 11); } catch(e) {}
     }
   }
@@ -866,7 +917,7 @@ function exportPDF() {
   // === PÁGINA 1 — Cabeçalho ===
   drawHeader(true);
 
-  writeLine('Plano de Aula', 14, true, [20,40,100]);
+  writeLine('Plano de Ação BNCC', 14, true, [20,40,100]);
   const pdfRef = currentRef || (document.getElementById('componente').value + ' · ' + document.getElementById('ano').value + ' · ' + (document.getElementById('pagina').value || ''));
   writeLine(sanitize(pdfRef), 11, false, [70,85,130]);
   writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165]);
