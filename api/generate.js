@@ -71,7 +71,7 @@ module.exports = async function handler(req, res) {
   }
 };
 
-/* ── Gemini 2.0 Flash (Google) — primário ── */
+/* ── Gemini 3.6 Flash (Google) — primário multimodal ── */
 async function callGemini(userContent, systemPrompt) {
   let textPrompt = '';
   let imagePart = null;
@@ -97,13 +97,13 @@ async function callGemini(userContent, systemPrompt) {
   parts.push({ text: systemPrompt + '\n\n' + textPrompt });
 
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts }],
-        generationConfig: { maxOutputTokens: 8192 },
+        generationConfig: { maxOutputTokens: 2048 },
       }),
     }
   );
@@ -167,7 +167,7 @@ async function callGroq(userContent, systemPrompt) {
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
-      max_tokens: 4096,
+      max_tokens: 2048,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: textPrompt },
@@ -207,7 +207,7 @@ async function callCerebras(userContent, systemPrompt) {
     },
     body: JSON.stringify({
       model: 'llama-3.3-70b',
-      max_tokens: 4096,
+      max_tokens: 2048,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: textPrompt },
@@ -263,7 +263,7 @@ async function callOpenAI(userContent, systemPrompt) {
     },
     body: JSON.stringify({
       model: 'gpt-4o-mini',
-      max_tokens: 8192,
+      max_tokens: 2048,
       messages: [
         { role: 'system', content: systemPrompt },
         userMessage,

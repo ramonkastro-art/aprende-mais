@@ -271,7 +271,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
   <div class="hero">
     <div class="hero-badge">🏫 Rede de Educação Básica</div>
     <h1>Estratégias de aula<br><em>para todos aprenderem</em></h1>
-    <p>Informe o essencial da sua aula. O Aprende+ cria propostas claras, práticas e inclusivas para a sua disciplina, com alternativas para quadro, telas e diferentes formas de aprender.</p>
+    <p>Informe o essencial da sua aula. O Aprende+ cria propostas claras, práticas e inclusivas para a sua disciplina, com alternativas para quadro, papel e diferentes formas de aprender.</p>
   </div>
 
   <div id="formSection">
@@ -352,38 +352,28 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
 
       <div class="section-label" style="margin-top:20px"><span>2</span>Escolha os materiais que deseja receber</div>
       <div class="checkbox-grid" id="checkboxes">
-        <label class="checkbox-item checked" onclick="toggleCheck(this)">
-          <input type="checkbox" value="plano" checked>
-          <div class="check-icon">✓</div>
-          <span class="check-label">🎯 Plano de ação</span>
+        <label class="checkbox-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="plano">
+          <div class="check-icon"></div>
+          <span class="check-label">🎯 Roteiro de aula</span>
         </label>
-        <label class="checkbox-item checked" onclick="toggleCheck(this)">
-          <input type="checkbox" value="estrategias" checked>
-          <div class="check-icon">✓</div>
+        <label class="checkbox-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="estrategias">
+          <div class="check-icon"></div>
           <span class="check-label">🔁 Estratégias alternativas</span>
         </label>
-        <label class="checkbox-item checked" onclick="toggleCheck(this)">
-          <input type="checkbox" value="quadro" checked>
-          <div class="check-icon">✓</div>
+        <label class="checkbox-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="quadro">
+          <div class="check-icon"></div>
           <span class="check-label">🧑‍🏫 Exercícios para quadro</span>
         </label>
-        <label class="checkbox-item checked" onclick="toggleCheck(this)">
-          <input type="checkbox" value="tela" checked>
-          <div class="check-icon">✓</div>
-          <span class="check-label">🖥️ Exercícios para telas</span>
-        </label>
-        <label class="checkbox-item checked" onclick="toggleCheck(this)">
-          <input type="checkbox" value="inclusao" checked>
-          <div class="check-icon">✓</div>
+        <label class="checkbox-item" onclick="toggleCheck(this)">
+          <input type="checkbox" value="inclusao">
+          <div class="check-icon"></div>
           <span class="check-label">♿ Acessibilidade e inclusão</span>
         </label>
-        <label class="checkbox-item checked" onclick="toggleCheck(this)">
-          <input type="checkbox" value="acompanhamento" checked>
-          <div class="check-icon">✓</div>
-          <span class="check-label">📈 Acompanhamento do avanço</span>
-        </label>
       </div>
-      <p class="form-note">Você pode gerar sem adicionar tema, código ou arquivo. Quanto mais contexto opcional você enviar, mais específica será a proposta.</p>
+      <p class="form-note">Escolha apenas os materiais que deseja receber. Conteúdo e foto/PDF são opcionais e podem ser incluídos somente quando ajudarem a personalizar a aula.</p>
       <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar estratégias de aula</button>
     </div>
   </div>
@@ -393,7 +383,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
   <div class="loading" id="loading">
     <div class="spinner"></div>
     <p class="loading-main" id="loadingMain">Preparando...</p>
-    <p class="loading-sub">Elaborando o plano de aula e gerando materiais específicos para esta página ✨</p>
+    <p class="loading-sub">Gerando somente os materiais escolhidos, com respostas objetivas e prontas para usar.</p>
     <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
   </div>
 
@@ -407,7 +397,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
     </div>
     <div class="tags-row">
       <div class="ref-tag" id="refTag"></div>
-      <div class="ref-tag" id="aiBadge">✦ Usando Gemini</div>
+      <div class="ref-tag" id="aiBadge">✦ IA escolhida automaticamente</div>
     </div>
     <div class="modules" id="modules"></div>
   </div>
@@ -470,7 +460,8 @@ const CFG = {
   traducao:       {icon:'🌐', title:'Tradução legada',               cls:'mod-traducao',     badge:'Legado'},
 };
 
-const KEYS = ['plano','estrategias','quadro','tela','inclusao','acompanhamento','atividades','material','traducao'];
+const KEYS = ['plano','estrategias','quadro','inclusao'];
+const HISTORY_KEYS = [...KEYS, 'tela', 'acompanhamento', 'atividades', 'material', 'traducao'];
 
 /* O formulário expõe somente os dados essenciais; contexto e mídia são opcionais. */
 
@@ -547,19 +538,19 @@ OBJETIVO
 Entregar propostas que o professor consiga entender rapidamente, preparar com poucos passos e aplicar em uma turma real. Quando houver conteúdo ou arquivo, adapte a proposta a ele. Quando não houver, crie uma sugestão geral, pertinente à disciplina e à idade, sem inventar uma habilidade, código BNCC ou conteúdo específico que não tenha sido informado.
 
 REGRAS PEDAGÓGICAS
-1. Escreva em português brasileiro, com frases curtas, títulos claros e instruções na ordem em que serão usadas.
-2. Priorize aprendizagem ativa, participação e compreensão; não entregue apenas uma lista de tarefas.
-3. Para cada atividade, informe objetivo, materiais simples, passos do professor, o que os estudantes fazem e como verificar se compreenderam.
-4. Sempre inclua uma alternativa com poucos recursos, mesmo que a proposta principal use tela ou internet.
-5. Pense em estudantes com diferentes ritmos, formas de comunicação, atenção, leitura, escrita, mobilidade e processamento sensorial. Ofereça escolhas de resposta, modelo visual ou exemplo, instruções em pequenas etapas, tempo flexível, leitura compartilhada, pares e redução de estímulos quando fizer sentido.
-6. Não diagnostique, rotule ou prescreva tratamento. Diga apenas quais apoios podem facilitar a participação e quais sinais de aprendizagem o professor pode observar.
-7. Evite infantilizar adolescentes e evite pressupor que todos tenham acesso a tecnologia, materiais ou apoio familiar.
-8. Para atividades de Língua Inglesa ou outro idioma, mantenha o idioma da aula nos exemplos e acrescente tradução/glossário suficiente para o professor conduzir a atividade.
-9. Se receber uma foto ou PDF e não puder interpretá-lo, não invente seu conteúdo. Use somente as informações textuais disponíveis e avise de forma breve.
-10. Crie exemplos originais, sem copiar trechos longos de livros ou apostilas.
+1. Escreva em português brasileiro, com frases curtas, títulos claros e instruções na ordem de aplicação.
+2. Seja conciso: não repita os dados da aula nem explique sua própria metodologia. Cada material deve respeitar o limite de palavras indicado no pedido.
+3. Use aprendizagem ativa, participação e compreensão. Para cada atividade, informe apenas objetivo, materiais, passos essenciais, ação dos estudantes e como verificar a compreensão.
+4. Sempre inclua uma alternativa funcional sem tela, internet ou materiais caros. Quando sugerir tecnologia, ofereça também a versão no quadro ou em papel.
+5. Considere diferentes ritmos, leitura, escrita, comunicação, atenção, mobilidade e processamento sensorial. Prefira instruções em pequenas etapas, modelos visuais, escolhas de resposta, tempo flexível e participação em pares.
+6. Não diagnostique, rotule ou prescreva tratamento. Descreva somente apoios práticos e sinais observáveis de aprendizagem.
+7. Não infantilize adolescentes e não presuma acesso a tecnologia, materiais ou apoio familiar.
+8. Para Língua Inglesa ou outro idioma, use exemplos no idioma da aula e inclua somente o glossário necessário.
+9. Se a foto/PDF não puder ser interpretada, não invente seu conteúdo; avise brevemente e trabalhe apenas com o contexto textual.
+10. Não use notícias, datas comemorativas ou fatos recentes como tema sem dados confiáveis fornecidos pelo professor.
 
 FORMATO DE SAÍDA
-Retorne somente texto em português brasileiro, sem JSON, sem asteriscos e sem backticks. Use títulos em LETRAS MAIÚSCULAS. Seja objetivo: prefira uma proposta bem explicada a muitas opções superficiais. Quando houver exercício, inclua resposta esperada ou gabarito, uma variação mais simples e uma forma de ampliar o desafio.`;
+Retorne somente texto em português brasileiro, sem JSON, sem asteriscos e sem backticks. Use títulos em LETRAS MAIÚSCULAS. Entregue somente o material solicitado, com no máximo o limite indicado. Inclua gabarito apenas quando houver exercício.`;
 }
 
 function buildResourcePrompt(key, ctx) {
@@ -570,27 +561,29 @@ Duração: ${ctx.duracao}
 Conteúdo ou objetivo: ${ctx.contexto || 'não informado'}${ctx.arquivo ? ' (Há uma foto ou PDF anexado como referência opcional.)' : ''}`;
   if (key === 'plano') return `${base}
 
-Crie um ROTEIRO DE AULA PRÁTICO, com no máximo 550 palavras. Estruture exatamente assim:
+Crie um ROTEIRO DE AULA PRÁTICO em no máximo 420 palavras. Estruture exatamente assim:
 
-OBJETIVO DA AULA
+DADOS GERAIS E OBJETIVO
 MATERIAIS
 ABERTURA
 DESENVOLVIMENTO EM ETAPAS
 ALTERNATIVA COM POUCOS RECURSOS
 COMO VERIFICAR A COMPREENSÃO
-ENCERRAMENTO`;
+ENCERRAMENTO E SÍNTESE
+
+Informe passos essenciais, evitando repetir os dados da aula ou criar explicações teóricas longas.`;
   if (key === 'estrategias') return `${base}
 
-Crie 3 ESTRATÉGIAS ALTERNATIVAS para trabalhar o mesmo conteúdo ou objetivo. Apresente uma opção com movimento/manipulação, uma opção colaborativa e uma opção com representação visual ou tecnológica. Para cada uma, informe quando usar, passos, materiais, o que observar, uma adaptação mais simples e uma ampliação do desafio. Evite repetir a mesma dinâmica com nomes diferentes.`;
+Crie ESTRATÉGIAS ALTERNATIVAS em no máximo 320 palavras. Apresente 3 opções breves para o mesmo objetivo: 1) ativa, com movimento ou manipulação; 2) colaborativa, em pares ou grupos; 3) visual, com tecnologia opcional e uma versão equivalente no quadro ou em papel. Para cada opção, informe quando usar, materiais e até 3 passos. Evite repetir explicações, objetivos ou apoios já apresentados no roteiro.`;
   if (key === 'quadro') return `${base}
 
-Crie uma sequência pronta para o QUADRO, para aproximadamente 15 a 25 minutos. Inclua o título para escrever, o comando do professor, pelo menos 3 exercícios graduados, resposta esperada ou gabarito, perguntas de intervenção e uma forma de participação que não dependa de escrita extensa. Se a disciplina for Língua Inglesa ou outro idioma, escreva os comandos no idioma da aula e inclua tradução/glossário.`;
+Crie uma atividade pronta para o QUADRO, em no máximo 260 palavras e para 15 a 25 minutos. Inclua título, comando do professor, 3 exercícios graduados, gabarito ou respostas esperadas, uma pergunta de intervenção e uma forma de participação que não dependa de escrita extensa. Para Língua Inglesa ou outro idioma, use os comandos no idioma da aula e um glossário curto.`;
   if (key === 'tela') return `${base}
 
 Crie uma sequência de EXERCÍCIOS PARA TELA OU PROJEÇÃO, pronta para copiar em slides, formulário ou ambiente virtual. Entregue 5 telas numeradas: situação inicial, exemplo guiado, exercício individual, desafio em dupla/grupo e checagem final. Inclua respostas esperadas, uma orientação de acessibilidade visual e uma alternativa equivalente em papel. Não dependa de aplicativo específico.`;
   if (key === 'inclusao') return `${base}
 
-Crie um PLANO DE ACESSIBILIDADE E INCLUSÃO para esta aula. Organize por antes, durante e depois da atividade. Considere diferentes ritmos, leitura, escrita, linguagem, atenção, comunicação, mobilidade e sensibilidade a estímulos. Inclua ajustes de instrução, tempo, materiais, agrupamento, resposta e verificação da aprendizagem, sem presumir diagnóstico. Termine com sinais de participação que o professor pode observar.`;
+Crie um PLANO DE ACESSIBILIDADE E INCLUSÃO em no máximo 260 palavras. Organize em ANTES, DURANTE e FORMAS DE RESPOSTA. Inclua somente ajustes práticos de instrução, tempo, materiais, agrupamento, comunicação e estímulos para diferentes estudantes, sem presumir diagnóstico. Termine com 3 sinais observáveis de participação ou compreensão.`;
   if (key === 'acompanhamento') return `${base}
 
 Crie um roteiro de ACOMPANHAMENTO simples para esta aula e para os próximos encontros. Inclua uma sondagem inicial curta, três evidências observáveis, uma forma rápida de registrar o que aconteceu, critérios para retomar ou avançar e uma devolutiva compreensível para os estudantes. Não use nota como único indicador.`;
@@ -600,7 +593,7 @@ Gere um material pedagógico prático, claro e inclusivo. Informe como aplicar, 
 }
 
 /* ── API call ── */
-let activeAI = 'gemini';
+let activeAI = null;
 
 async function callAPI(userContent, systemPrompt) {
   const res = await fetch('/api/generate', {
@@ -665,8 +658,9 @@ async function generate() {
   document.getElementById('results').classList.remove('visible');
   document.getElementById('loading').classList.add('visible');
   generatedContent = {};
-  activeAI = 'gemini';
-  updateAIBadge('gemini');
+  activeAI = null;
+  const initialBadge = document.getElementById('aiBadge');
+  if (initialBadge) initialBadge.textContent = '✦ IA escolhida automaticamente';
 
   currentComponente = componenteAula;
   currentRef = `${componenteAula} · ${ano} · ${duracao}`;
@@ -895,7 +889,7 @@ function exportPDF() {
   y += 7;
 
   // === SEÇÕES ===
-  KEYS.forEach(key => {
+  HISTORY_KEYS.forEach(key => {
     if (!generatedContent[key]) return;
     const c = CFG[key];
 
@@ -1060,7 +1054,7 @@ function loadFromHistory(id) {
   document.getElementById('refTag').textContent = '📖 ' + currentRef;
   document.getElementById('modules').innerHTML = '';
 
-  KEYS.forEach(key => {
+  HISTORY_KEYS.forEach(key => {
     if (!generatedContent[key]) return;
     const c = CFG[key];
     const div = document.createElement('div');
