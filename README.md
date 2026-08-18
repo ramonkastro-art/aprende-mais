@@ -61,7 +61,7 @@ Depois, acesse `http://localhost:3000`. Configure as variáveis de ambiente em `
 
 ## Variáveis de ambiente
 
-Configure no Vercel, em **Settings → Environment Variables**, somente as chaves utilizadas pela sua operação. O fluxo de geração usa esta ordem de fallback:
+Configure no Vercel, em **Settings → Environment Variables**, somente as chaves utilizadas pela sua operação. O fluxo de geração consulta os catálogos disponíveis e monta a ordem de fallback dinamicamente:
 
 | Variável | Uso |
 |---|---|
@@ -73,20 +73,20 @@ Configure no Vercel, em **Settings → Environment Variables**, somente as chave
 | `SUPABASE_KEY` | Chave do Supabase para o registro administrativo |
 | `PAINEL_SENHA` | Proteção do painel administrativo, quando habilitada |
 
-Para o caminho de foto/PDF, recomenda-se manter `GEMINI_API_KEY` configurada, pois o Gemini é o provedor priorizado para interpretar a mídia. Sem essa chave, o sistema pode recorrer aos fallbacks textuais, mas o resultado poderá se basear apenas nos dados escritos pelo professor.
+Para o caminho de foto/PDF, é recomendável manter pelo menos uma chave de provedor com visão configurada. O sistema consulta o catálogo disponível antes da geração e escolhe automaticamente um modelo compatível com o tipo de entrada. Se nenhum modelo com visão estiver disponível, os fallbacks textuais não fingem interpretar a mídia e trabalham apenas com o contexto escrito.
 
-## Provedores e modelos de IA
+## Seleção dinâmica de modelos de IA
 
-No modo texto, o backend tenta `Groq → Gemini → Cerebras → OpenAI`. No modo com imagem ou PDF, tenta `Gemini → Groq → OpenAI`. Os modelos configurados são os seguintes:
+O backend não depende de uma versão fixa do Gemini, Groq, Cerebras ou OpenAI. Antes de solicitar cada material, ele consulta os catálogos dos provedores habilitados em paralelo, filtra modelos de conversa/geração e escolhe a combinação com melhor disponibilidade, compatibilidade e custo-benefício operacional. Para texto, prioriza modelos rápidos e econômicos; para imagem, prioriza modelos com visão; para PDF, prioriza o Gemini ou outro modelo que o catálogo indique como compatível.
 
-| Provedor | Modelo configurado | Uso |
+| Provedor | Consulta de catálogo | Critério de uso |
 |---|---|---|
-| Google Gemini | `gemini-3.6-flash` | Primário multimodal e fallback de texto. |
-| Groq | `llama-3.3-70b-versatile` | Primeiro provedor no modo texto, priorizando latência. |
-| Cerebras | `llama-3.3-70b` | Fallback de texto. |
-| OpenAI | `gpt-4o-mini` | Fallback final e tratamento de imagem no formato compatível. |
+| Google Gemini | `GET /v1beta/models` | Filtra `generateContent` e prioriza modelos de geração multimodal. |
+| Groq | `GET /openai/v1/models` | Prioriza velocidade e modelos de produção; usa visão quando disponível. |
+| Cerebras | `GET /v1/models` | Fallback rápido para texto com modelos atualmente disponíveis. |
+| OpenAI | `GET /v1/models` | Fallback final e visão quando o catálogo confirmar compatibilidade. |
 
-O Gemini foi atualizado de `gemini-2.5-flash` para `gemini-3.6-flash`, uma versão estável mais recente indicada na [documentação oficial de modelos do Gemini](https://ai.google.dev/gemini-api/docs/models) [1]. Os limites de saída também foram reduzidos para 2.048 tokens por chamada, pois os materiais agora têm limites de palavras próprios. Isso reduz verbosidade e tempo sem impedir a geração dos quatro materiais. O código não usa modelos de raciocínio pesado nem pesquisa na internet para montar aulas, o que evita latência e invenção de fatos atuais.
+O catálogo fica em cache por apenas um minuto para evitar consultas repetidas durante a geração dos quatro materiais, sem transformar o projeto em dependente de um identificador antigo. Caso uma consulta de catálogo falhe, o backend usa candidatos de emergência e continua tentando os demais provedores. Os limites permanecem em 2.048 tokens por chamada, alinhados aos limites curtos dos materiais. O código não usa modelos de raciocínio pesado nem pesquisa automática na internet para montar aulas.
 
 ## Como publicar no GitHub
 
@@ -120,7 +120,9 @@ A redação oficial de códigos e habilidades deve ser conferida na [Base Nacion
 
 ## Referências
 
-[1]: https://ai.google.dev/gemini-api/docs/models "Gemini API — Models"
+[1]: https://ai.google.dev/api/models "Gemini API — Models"
+[2]: https://console.groq.com/docs/models "GroqDocs — Models"
+[3]: https://inference-docs.cerebras.ai/api-reference/models/list-models "Cerebras Inference — List models"
 
 O comando completo usado pelo sistema está em [`PROMPT_IA_BNCC.md`](./PROMPT_IA_BNCC.md). Ele exige linguagem acessível, atividades observáveis, alternativas de baixo recurso e apoios pedagógicos inclusivos sem diagnóstico ou prescrição.
 

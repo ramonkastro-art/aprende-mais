@@ -21,19 +21,17 @@ A estrutura anterior também possuía um módulo independente de exercícios par
 
 ## 3. Auditoria dos provedores e modelos
 
-Antes da alteração, o backend utilizava Gemini 2.5 Flash como provedor multimodal, Groq com `llama-3.3-70b-versatile`, Cerebras com `llama-3.3-70b` e OpenAI com `gpt-4o-mini`. O Gemini recebia até 8.192 tokens e os fallbacks recebiam entre 4.096 e 8.192 tokens, o que permitia respostas maiores do que o necessário.
+O backend não mantém mais uma lista fixa de modelos para a geração principal. Antes de cada solicitação, consulta em paralelo os catálogos dos provedores habilitados e seleciona um modelo atualmente disponível, filtrando modelos de conversa/geração e priorizando custo-benefício, produção e compatibilidade com texto, imagem ou PDF.
 
-A versão atualizada troca o modelo Gemini para `gemini-3.6-flash`, listado pela documentação oficial como modelo estável da família Gemini 3 e adequado a tarefas gerais e multimodais [1]. O changelog oficial informa que o Gemini 3.6 Flash foi disponibilizado como versão estável e com melhorias de eficiência de tokens [2]. Os fallbacks foram mantidos para preservar compatibilidade com as variáveis de ambiente já usadas pelo projeto.
+| Tipo de solicitação | Critério de seleção | Fallback |
+|---|---|---|
+| Texto | Velocidade, disponibilidade e custo-benefício operacional | Próximo modelo/provedor do ranking dinâmico |
+| Imagem | Modelo que o catálogo confirme como visual | Gemini, Groq com visão ou OpenAI com visão, conforme catálogo |
+| PDF | Modelo multimodal compatível; sem fingir leitura quando não houver | Contexto textual e próximos provedores |
 
-| Ordem | Provedor | Modelo atual | Uso |
-|---:|---|---|---|
-| 1, texto | Groq | `llama-3.3-70b-versatile` | Velocidade para texto sem mídia. |
-| 1, mídia | Google Gemini | `gemini-3.6-flash` | Imagem, PDF e texto multimodal. |
-| 2, texto/mídia compatível | Google Gemini ou Groq | Conforme disponibilidade | Fallback do modo solicitado. |
-| 3, texto | Cerebras | `llama-3.3-70b` | Fallback textual. |
-| 4, texto/mídia compatível | OpenAI | `gpt-4o-mini` | Fallback final. |
+O catálogo fica em cache por um minuto apenas para evitar quatro consultas repetidas durante a geração dos materiais. Depois disso, o projeto consulta novamente os provedores. Se o catálogo estiver temporariamente indisponível, candidatos de emergência são usados; se um modelo selecionado falhar, o próximo é tentado. Assim, uma mudança de versão ou descontinuação não exige editar novamente o nome do modelo no código.
 
-O frontend agora informa “IA escolhida automaticamente” antes da resposta e atualiza o indicador quando o backend informa o provedor efetivamente utilizado. Isso corrige a indicação anterior que mostrava Gemini mesmo quando o modo texto poderia começar pelo Groq.
+O frontend informa “IA escolhida automaticamente” antes da resposta e recebe do backend o provedor utilizado. O backend também devolve o modelo selecionado no campo `model`, facilitando diagnóstico sem exibir detalhes técnicos ao professor.
 
 Não foi adotado um modelo de raciocínio pesado nem pesquisa automática na internet. Para este produto, isso aumentaria tempo, custo e risco de inserir fatos recentes não verificados. Quando nenhum tema é fornecido, o prompt pede uma proposta geral coerente com disciplina, turma e tempo, sem inventar notícias ou acontecimentos.
 
@@ -51,12 +49,11 @@ Os dois últimos testes utilizaram o servidor local simulado, portanto comprovam
 
 ## 5. Arquivos alterados
 
-`public/index.html` contém a interface simplificada, os quatro módulos ativos, os limites dos prompts em tempo de execução e a compatibilidade com históricos antigos. `api/generate.js` contém a atualização do modelo Gemini e dos limites de saída. `PROMPT_IA_BNCC.md` contém o comando pedagógico versionado e revisável. `README.md` documenta os módulos atuais, a ordem de fallback e os modelos configurados.
+`public/index.html` contém a interface simplificada, os quatro módulos ativos, os limites dos prompts em tempo de execução e a compatibilidade com históricos antigos. `api/generate.js` contém a consulta dinâmica de catálogos, o ranking de custo-benefício, os fallbacks e os limites de saída. `PROMPT_IA_BNCC.md` contém o comando pedagógico versionado e revisável. `README.md` documenta a seleção dinâmica e os endpoints de catálogo. `RELATORIO_MODELOS_DINAMICOS.md` detalha a arquitetura e o teste automatizado.
 
 ## Referências
 
-[1]: https://ai.google.dev/gemini-api/docs/models "Google AI for Developers — Gemini API Models"
-
-[2]: https://ai.google.dev/gemini-api/docs/changelog "Google AI for Developers — Gemini API Changelog"
-
-[3]: https://console.groq.com/docs/changelog "Groq Documentation — Changelog"
+[1]: https://ai.google.dev/api/models "Google AI for Developers — Models API"
+[2]: https://console.groq.com/docs/models "GroqDocs — Models"
+[3]: https://console.groq.com/docs/vision "GroqDocs — Images and Vision"
+[4]: https://inference-docs.cerebras.ai/api-reference/models/list-models "Cerebras Inference — List models"
