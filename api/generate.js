@@ -6,7 +6,7 @@ const CATALOG_TTL_MS = 60 * 1000;
 let catalogCache = { expiresAt: 0, models: [] };
 
 const EMERGENCY_MODELS = {
-  gemini: ['gemini-2.5-flash', 'gemini-2.0-flash'],
+  gemini: ['gemini-2.5-flash', 'gemini-2.5-flash-lite'],
   groq: ['qwen/qwen3.6-27b', 'openai/gpt-oss-20b', 'llama-3.3-70b-versatile'],
   cerebras: ['gpt-oss-120b', 'gemma-4-31b', 'llama-3.3-70b'],
   openai: ['gpt-4o-mini', 'gpt-4o', 'gpt-4.1-mini'],
@@ -46,8 +46,9 @@ module.exports = async function handler(req, res) {
           dynamic: true,
         });
       } catch (error) {
-        errors.push(error);
-        console.warn(`${candidate.provider}/${candidate.model} falhou:`, error.message);
+        const failure = normalizeProviderError(error, candidate);
+        errors.push(failure);
+        console.warn(`${candidate.provider}/${candidate.model} falhou:`, failure.message);
       }
     }
   } catch (error) {
@@ -135,7 +136,7 @@ async function listGeminiModels() {
       production: !/preview|experimental|exp/i.test(String(model.name || '')),
       metadata: `${model.displayName || ''} ${model.description || ''}`,
     }))
-    .filter(model => model.model && model.vision && !/embedding|tts|imagen|veo|robotics/i.test(model.model));
+    .filter(model => model.model && model.vision && !/embedding|tts|imagen|veo|robotics|live|image/i.test(model.model));
 }
 
 function listOpenAICompatibleModels(url, key) {
@@ -192,6 +193,11 @@ function scoreModel(candidate, { needsVision, hasPdf }) {
   // tamanho suficiente e modelos econômicos sem congelar tarifas no código.
   if (/flash|mini|small|20b|27b|31b|32b/i.test(id)) score += 22;
   if (/70b|120b|pro|opus|sonnet/i.test(id)) score += 8;
+  // O Gemini 2.5 Flash foi mantido como rota estável de recuperação porque
+  // funcionava no projeto antes da troca dinâmica e continua listado como GA.
+  if (provider === 'gemini' && id === 'gemini-2.5-flash') score += 220;
+  if (provider === 'gemini' && id === 'gemini-2.5-flash-lite') score += 210;
+  if (provider === 'gemini' && /gemini-2\.0|gemini-1\.5/.test(id)) score -= 180;
   if (/preview|experimental|exp|deprecated/i.test(id)) score -= 30;
   if (candidate.vision && needsVision) score += 12;
 
@@ -257,17 +263,22 @@ async function callGemini(model, userContent, systemPrompt) {
   );
 
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || `Gemini HTTP ${response.status}`);
-  if (data.error) throw new Error(data.error.message);
+  if (!response.ok) throw createProviderError(data.error?.message || `Gemini HTTP ${response.status}`, response.status);
+  if (data.error) throw createProviderError(data.error.message, 400);
   if (!data.candidates?.[0]) throw new Error(data.promptFeedback?.blockReason || 'Resposta vazia do Gemini');
 
   const finishReason = data.candidates[0].finishReason;
-  if (finishReason === 'MAX_TOKENS') throw new Error('Limite de tokens excedido');
-  if (finishReason && finishReason !== 'STOP') throw new Error(`Gemini encerrou com motivo: ${finishReason}`);
-
-  const text = data.candidates[0].content?.parts?.[0]?.text;
-  if (!text) throw new Error('Gemini retornou conteúdo vazio');
-  return text.trim();
+  const text = (data.candidates[0].content?.parts || [])
+    .map(part => part.text || '')
+    .join('\n')
+    .trim();
+  if (!text) {
+    if (finishReason === 'MAX_TOKENS') throw createProviderError('Gemini atingiu o limite de saída do material.', 400);
+    if (finishReason && finishReason !== 'STOP') throw createProviderError(`Gemini encerrou com motivo: ${finishReason}`, 400);
+    throw new Error('Gemini retornou conteúdo vazio');
+  }
+  // Uma resposta parcial com texto ainda é útil e não representa quota da conta.
+  return text;
 }
 
 async function callGroq(model, vision, userContent, systemPrompt) {
@@ -325,7 +336,7 @@ async function callGroq(model, vision, userContent, systemPrompt) {
   });
 
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || `Groq HTTP ${response.status}`);
+  if (!response.ok) throw createProviderError(data.error?.message || `Groq HTTP ${response.status}`, response.status);
   const choice = data.choices?.[0];
   if (choice?.finish_reason === 'length') throw new Error('Limite de tokens excedido');
   if (!choice?.message?.content) throw new Error('Groq retornou resposta vazia');
@@ -351,7 +362,7 @@ async function callCerebras(model, userContent, systemPrompt) {
   });
 
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || `Cerebras HTTP ${response.status}`);
+  if (!response.ok) throw createProviderError(data.error?.message || `Cerebras HTTP ${response.status}`, response.status);
   const choice = data.choices?.[0];
   if (choice?.finish_reason === 'length') throw new Error('Limite de tokens excedido');
   if (!choice?.message?.content) throw new Error('Cerebras retornou resposta vazia');
@@ -396,7 +407,7 @@ async function callOpenAI(model, userContent, systemPrompt) {
   });
 
   const data = await response.json();
-  if (!response.ok || data.error) throw new Error(data.error?.message || `OpenAI HTTP ${response.status}`);
+  if (!response.ok || data.error) throw createProviderError(data.error?.message || `OpenAI HTTP ${response.status}`, response.status);
   const choice = data.choices?.[0];
   if (choice?.finish_reason === 'length') throw new Error('Limite de tokens excedido');
   if (!choice?.message?.content) throw new Error('OpenAI retornou resposta vazia');
@@ -423,15 +434,47 @@ async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 3500) {
   }
 }
 
+function createProviderError(message, status) {
+  const error = new Error(String(message || `Provedor HTTP ${status}`));
+  error.status = Number(status) || 0;
+  return error;
+}
+
+function normalizeProviderError(error, candidate) {
+  const normalized = error instanceof Error ? error : new Error(String(error));
+  if (normalized.status == null && error?.status != null) normalized.status = error.status;
+  normalized.provider = candidate.provider;
+  normalized.model = candidate.model;
+  return normalized;
+}
+
 function isLimitError(error) {
+  const status = Number(error?.status);
   const message = String(error?.message || error || '').toLowerCase();
-  return /429|quota|rate.?limit|too many requests|resource exhausted|token|context length|max.?tokens|insufficient_quota|billing|exceed/.test(message);
+  // Somente 429 ou mensagens inequívocas de quota/rate limit entram nesta categoria.
+  // Palavras como token, exceed ou context podem indicar erro de configuração ou
+  // limite de saída, não necessariamente cobrança/quota da conta.
+  return status === 429 || /quota|resource.?exhausted|rate.?limit|too many requests|insufficient_quota/.test(message);
+}
+
+function isConfigurationError(error) {
+  const status = Number(error?.status);
+  const message = String(error?.message || error || '').toLowerCase();
+  return [400, 401, 403, 404].includes(status) || /invalid api key|unauthorized|forbidden|model.+not found|not found|unsupported|invalid argument|bad request/.test(message);
 }
 
 function respondWithAIError(res, errors) {
-  const limited = errors.some(isLimitError);
-  return res.status(limited ? 429 : 503).json({
-    error: limited ? AI_LIMIT_MESSAGE : AI_UNAVAILABLE_MESSAGE,
-    code: limited ? 'AI_LIMIT' : 'AI_UNAVAILABLE',
-  });
+  const limited = errors.length > 0 && errors.every(isLimitError);
+  const configuration = !limited && errors.some(isConfigurationError);
+  const unavailable = !limited && !configuration;
+  if (limited) {
+    return res.status(429).json({ error: AI_LIMIT_MESSAGE, code: 'AI_LIMIT' });
+  }
+  if (configuration) {
+    return res.status(502).json({
+      error: 'A configuração da IA está incompatível com o modelo disponível. Tente novamente mais tarde.',
+      code: 'AI_CONFIGURATION',
+    });
+  }
+  return res.status(503).json({ error: AI_UNAVAILABLE_MESSAGE, code: 'AI_UNAVAILABLE' });
 }

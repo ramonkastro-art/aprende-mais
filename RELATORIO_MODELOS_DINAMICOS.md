@@ -2,15 +2,15 @@
 
 ## Objetivo
 
-A geração deixou de depender de um nome fixo de modelo. Antes de cada solicitação, o backend consulta os catálogos dos provedores habilitados, verifica quais modelos estão disponíveis naquele momento e seleciona a melhor opção funcional para o tipo de conteúdo solicitado.
+A geração consulta os catálogos dos provedores habilitados antes de cada solicitação. Para recuperar a estabilidade do fluxo anterior, o backend prioriza `gemini-2.5-flash` quando o catálogo confirma sua disponibilidade e usa `gemini-2.5-flash-lite` como segunda opção Gemini; os demais provedores permanecem como fallback dinâmico.
 
 ## Funcionamento
 
-As consultas aos catálogos do Gemini, Groq, Cerebras e OpenAI acontecem em paralelo, com timeout curto. O resultado é filtrado por modelos de conversa/geração e pela existência da chave correspondente no ambiente. Para textos, a pontuação prioriza velocidade, disponibilidade e custo-benefício operacional. Para imagem, prioriza modelos que declaram visão. Para PDF, prioriza o Gemini ou outro modelo que o catálogo permita usar com conteúdo multimodal.
+As consultas aos catálogos do Gemini, Groq, Cerebras e OpenAI acontecem em paralelo, com timeout curto. O resultado é filtrado por modelos de conversa/geração e pela existência da chave correspondente no ambiente. Para textos, a pontuação prioriza Gemini 2.5 estável, depois velocidade, disponibilidade e custo-benefício operacional. Para imagem, prioriza modelos que declaram visão. Para PDF, prioriza Gemini 2.5 ou outro modelo que o catálogo permita usar com conteúdo multimodal.
 
 O catálogo fica em cache por um minuto. Esse cache não fixa o modelo: ele apenas evita quatro consultas repetidas durante uma única sequência de materiais. Depois desse período, o projeto consulta novamente os catálogos e pode escolher modelos diferentes sem alteração de código.
 
-Se um catálogo estiver indisponível, entram candidatos de emergência por provedor. Se o primeiro modelo selecionado falhar, o backend tenta o próximo modelo/provedor disponível. Se todos falharem por quota, rate limit ou tokens excedidos, a API retorna `AI_LIMIT`; se todos falharem por indisponibilidade geral, retorna `AI_UNAVAILABLE`. O frontend transforma ambos em uma mensagem simples para o professor.
+Se um catálogo estiver indisponível, entram candidatos de emergência por provedor. Se o primeiro modelo selecionado falhar, o backend tenta o próximo modelo/provedor disponível. Se todos falharem por quota ou rate limit HTTP 429, a API retorna `AI_LIMIT`; se houver modelo inexistente, chave inválida ou parâmetro incompatível, retorna `AI_CONFIGURATION` com HTTP 502; se houver indisponibilidade geral, retorna `AI_UNAVAILABLE` com HTTP 503. O frontend transforma os códigos em mensagens simples para o professor.
 
 ## Modelos multimodais
 
@@ -18,7 +18,7 @@ O fluxo de imagem usa o modelo dinâmico quando o catálogo confirmar capacidade
 
 ## Teste automatizado
 
-O arquivo temporário `test_dynamic_models.js` validou que o catálogo é consultado antes da geração, que o modo texto seleciona `groq/qwen/qwen3.6-27b` no catálogo simulado e que uma falha desse modelo direciona a solicitação para `cerebras/gpt-oss-120b`. O arquivo de teste não faz parte do pacote final.
+O teste `test_dynamic_models.js` valida que o catálogo é consultado antes da geração, que o modo texto prioriza `gemini/gemini-2.5-flash` quando disponível, que falhas de Gemini e Groq direcionam a solicitação para `cerebras/gpt-oss-120b` e que o modo PDF usa Gemini 2.5. Os testes auxiliares de quota e configuração ficam fora do pacote final.
 
 ## Referências oficiais
 

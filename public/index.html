@@ -744,10 +744,14 @@ async function generate() {
       document.getElementById('results').classList.remove('visible');
     }
     const eb = document.getElementById('errorBox');
-    const aiLimit = err.code === 'AI_LIMIT' || /429|quota|rate.?limit|token|indisponível|indisponivel|excedido/i.test(String(err.message || ''));
+    const errorText = String(err.message || '');
+    const aiLimit = err.code === 'AI_LIMIT' || /(^|\D)429(\D|$)|quota|rate.?limit|resource.?exhausted|insufficient_quota/i.test(errorText);
+    const aiConfiguration = err.code === 'AI_CONFIGURATION';
     const message = aiLimit
       ? '⚠️ O uso de IA foi excedido ou está temporariamente indisponível. Tente novamente mais tarde.'
-      : '⚠️ Não foi possível gerar os materiais agora. Tente novamente mais tarde.';
+      : aiConfiguration
+        ? '⚠️ A configuração da IA está temporariamente incompatível. Tente novamente mais tarde.'
+        : '⚠️ Não foi possível gerar os materiais agora. Tente novamente mais tarde.';
     const detail = Object.keys(generatedContent).length
       ? 'Os materiais já gerados foram mantidos.'
       : 'Nenhum material foi gerado nesta tentativa.';

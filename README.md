@@ -77,7 +77,7 @@ Para o caminho de foto/PDF, é recomendável manter pelo menos uma chave de prov
 
 ## Seleção dinâmica de modelos de IA
 
-O backend não depende de uma versão fixa do Gemini, Groq, Cerebras ou OpenAI. Antes de solicitar cada material, ele consulta os catálogos dos provedores habilitados em paralelo, filtra modelos de conversa/geração e escolhe a combinação com melhor disponibilidade, compatibilidade e custo-benefício operacional. Para texto, prioriza modelos rápidos e econômicos; para imagem, prioriza modelos com visão; para PDF, prioriza o Gemini ou outro modelo que o catálogo indique como compatível.
+O backend consulta os catálogos dos provedores habilitados antes de cada material, filtra modelos de conversa/geração e escolhe uma combinação funcional. Para recuperar a estabilidade que existia antes da seleção dinâmica, o `gemini-2.5-flash` é priorizado quando o catálogo confirma que ele está disponível; `gemini-2.5-flash-lite` é a segunda opção Gemini. Os demais provedores continuam como fallback dinâmico. Para imagem/PDF, o sistema prioriza modelos com visão.
 
 | Provedor | Consulta de catálogo | Critério de uso |
 |---|---|---|
@@ -86,7 +86,7 @@ O backend não depende de uma versão fixa do Gemini, Groq, Cerebras ou OpenAI. 
 | Cerebras | `GET /v1/models` | Fallback rápido para texto com modelos atualmente disponíveis. |
 | OpenAI | `GET /v1/models` | Fallback final e visão quando o catálogo confirmar compatibilidade. |
 
-O catálogo fica em cache por apenas um minuto para evitar consultas repetidas durante a geração dos quatro materiais, sem transformar o projeto em dependente de um identificador antigo. Caso uma consulta de catálogo falhe, o backend usa candidatos de emergência e continua tentando os demais provedores. Os limites permanecem em 2.048 tokens por chamada, alinhados aos limites curtos dos materiais. O código não usa modelos de raciocínio pesado nem pesquisa automática na internet para montar aulas.
+O catálogo fica em cache por apenas um minuto para evitar consultas repetidas durante a geração dos quatro materiais. Caso uma consulta de catálogo falhe, o backend usa `gemini-2.5-flash`, `gemini-2.5-flash-lite` e demais candidatos de emergência, conforme as chaves disponíveis. O backend diferencia `429` real de quota/rate limit, `502` de modelo ou configuração incompatível e `503` de indisponibilidade geral; erro de saída ou contexto não é mais classificado automaticamente como limite da conta. Os limites permanecem em 2.048 tokens por chamada.
 
 ## Como publicar no GitHub
 
