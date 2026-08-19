@@ -6,9 +6,9 @@ O conteúdo ou tema que precisa ser reforçado é obrigatório. Código BNCC, co
 
 ## Funcionalidades principais
 
-A geração oferece quatro materiais independentes: Reposição de Aprendizagem, Estratégias Alternativas, Exercícios para Quadro e Acessibilidade e Inclusão. Exercícios para telas foram incorporados como uma possibilidade breve dentro de Estratégias Alternativas, sempre acompanhados de uma versão no quadro ou em papel. O acompanhamento do avanço deixou de ser um módulo separado para reduzir tempo e extensão do PDF.
+A geração oferece quatro materiais independentes: Recomposição de Aprendizagem, Estratégias Alternativas, Exercícios para Quadro e Acessibilidade e Inclusão. Exercícios para telas foram incorporados como uma possibilidade breve dentro de Estratégias Alternativas, sempre acompanhados de uma versão no quadro ou em papel. O acompanhamento do avanço deixou de ser um módulo separado para reduzir tempo e extensão do PDF.
 
-O comando interno orienta a IA a gerar reposição de aprendizagem para o conteúdo informado, com linguagem simples, instruções em etapas, alternativas de baixo recurso, diferentes formas de participação e apoios pedagógicos para estudantes com diferentes ritmos, formas de comunicação, atenção, leitura, escrita, mobilidade e processamento sensorial. Cada material possui limite explícito de palavras para evitar respostas longas e repetitivas. A lógica pedagógica fica no sistema e não é transformada em um questionário para o professor.
+O comando interno orienta a IA a gerar recomposição de aprendizagem para o conteúdo informado, com linguagem simples, instruções em etapas, alternativas de baixo recurso, diferentes formas de participação e apoios pedagógicos para estudantes com diferentes ritmos, formas de comunicação, atenção, leitura, escrita, mobilidade e processamento sensorial. Cada material possui limite explícito de palavras para evitar respostas longas e repetitivas. A lógica pedagógica fica no sistema e não é transformada em um questionário para o professor.
 
 O campo de conteúdo/tema é obrigatório e fica visível no formulário. A seção `Adicionar foto ou PDF` fica recolhida e é totalmente opcional. O professor pode anexar uma imagem/PDF ou tirar uma foto para complementar o tema escrito; se o provedor não puder interpretar a mídia, o sistema não deve inventar o conteúdo. Todos os quatro materiais começam desmarcados e ficam com fundo azul ao serem selecionados.
 
@@ -22,7 +22,7 @@ O gerador de avaliações e suas rotas (`/avaliacao`, `/corrigir` e `/painel`) f
 | Turma/ano | Sim | Ajusta a complexidade dos exemplos. |
 | Quantidade de períodos | Sim | Dimensiona o tempo da aula. |
 | Materiais desejados | Sim | Define quais dos quatro módulos serão gerados; todos começam desmarcados. |
-| Conteúdo ou tema para reposição | **Sim** | Define qual aprendizagem frágil será retomada. |
+| Conteúdo ou tema para recomposição | **Sim** | Define qual aprendizagem frágil será retomada. |
 | Foto/PDF | Não | Fornece referência visual ou documental opcional. |
 
 ## Estrutura do projeto

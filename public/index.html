@@ -331,9 +331,9 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
       </div>
 
       <div class="field required-context" style="margin-top:20px">
-        <label>Qual conteúdo ou tema precisa de reposição? <span class="required-label">(obrigatório)</span></label>
+        <label>Qual conteúdo ou tema precisa de recomposição? <span class="required-label">(obrigatório)</span></label>
         <textarea id="descricao" required style="min-height:92px" placeholder="Ex.: frações equivalentes, interpretação de texto, sistema solar, equações do 1º grau ou outro conteúdo que a turma precisa reforçar."></textarea>
-        <div class="field-hint">Informe o conteúdo que está frágil ou precisa ser retomado. A IA usará isso para criar uma reposição objetiva.</div>
+        <div class="field-hint">Informe o conteúdo que está frágil ou precisa ser retomado. A IA usará isso para criar uma recomposição objetiva.</div>
       </div>
 
       <details class="optional-context" id="optionalContext">
@@ -360,7 +360,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
         <label class="checkbox-item" onclick="toggleCheck(event, this)">
           <input type="checkbox" value="plano">
           <div class="check-icon"></div>
-          <span class="check-label">🎯 Reposição de aprendizagem</span>
+          <span class="check-label">🎯 Recomposição de aprendizagem</span>
         </label>
         <label class="checkbox-item" onclick="toggleCheck(event, this)">
           <input type="checkbox" value="estrategias">
@@ -379,7 +379,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
         </label>
       </div>
       <p class="form-note">O conteúdo ou tema é obrigatório. Foto/PDF é opcional. Escolha apenas os materiais que deseja receber.</p>
-      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar reposição de aprendizagem</button>
+      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar recomposição de aprendizagem</button>
     </div>
   </div>
 
@@ -453,7 +453,7 @@ let uploadedB64 = null, uploadedMime = null;
 let generatedContent = {}, currentRef = '', currentComponente = '';
 
 const CFG = {
-  plano:          {icon:'🎯', title:'Reposição de Aprendizagem', cls:'mod-atividades',   badge:'Reposição'},
+  plano:          {icon:'🎯', title:'Recomposição de Aprendizagem', cls:'mod-atividades',   badge:'Recomposição'},
   estrategias:    {icon:'🔁', title:'Estratégias Alternativas',       cls:'mod-complementar', badge:'Estratégias'},
   quadro:         {icon:'🧑‍🏫', title:'Exercícios para Quadro',        cls:'mod-quadro',        badge:'Quadro'},
   tela:           {icon:'🖥️', title:'Exercícios para Tela',          cls:'mod-tela',         badge:'Tela'},
@@ -540,11 +540,11 @@ CONTEXTO DA AULA
 - Turma/ano: ${ctx.ano}
 - Disciplina: ${ctx.componenteAula}
 - Duração: ${ctx.duracao}
-- Conteúdo ou tema que precisa de reposição: ${ctx.contexto}
+- Conteúdo ou tema que precisa de recomposição: ${ctx.contexto}
 - Arquivo enviado: ${ctx.arquivo ? 'sim; use a foto ou PDF como referência do conteúdo quando conseguir interpretá-lo' : 'não'}
 
 OBJETIVO
-Entregar uma reposição de aprendizagem que o professor consiga entender rapidamente, preparar com poucos passos e aplicar em uma turma real. O foco obrigatório é o conteúdo ou tema informado: identifique o que precisa ser reconstruído, proponha uma forma objetiva de retomada e inclua uma verificação imediata. A foto/PDF é apenas uma referência opcional; se não puder ser interpretada, não invente seu conteúdo.
+Entregar uma recomposição de aprendizagem que o professor consiga entender rapidamente, preparar com poucos passos e aplicar em uma turma real. O foco obrigatório é o conteúdo ou tema informado: identifique o que precisa ser reconstruído, proponha uma forma objetiva de retomada e inclua uma verificação imediata. A foto/PDF é apenas uma referência opcional; se não puder ser interpretada, não invente seu conteúdo.
 
 REGRAS PEDAGÓGICAS
 1. Escreva em português brasileiro, com frases curtas, títulos claros e instruções na ordem de aplicação.
@@ -567,12 +567,12 @@ function buildResourcePrompt(key, ctx) {
 Disciplina: ${ctx.componenteAula}
 Turma/ano: ${ctx.ano}
 Duração: ${ctx.duracao}
-Conteúdo ou tema para reposição: ${ctx.contexto}${ctx.arquivo ? ' (Há uma foto ou PDF anexado como referência opcional.)' : ''}`;
+Conteúdo ou tema para recomposição: ${ctx.contexto}${ctx.arquivo ? ' (Há uma foto ou PDF anexado como referência opcional.)' : ''}`;
   if (key === 'plano') return `${base}
 
-Crie uma REPOSIÇÃO DE APRENDIZAGEM em no máximo 420 palavras para retomar o conteúdo que a turma ainda não domina bem. Não trate a proposta como uma aula comum nem como revisão genérica: identifique o ponto central que precisa ser reconstruído, proponha uma sequência curta de retomada e inclua uma verificação imediata da compreensão. Estruture exatamente assim:
+Crie uma RECOMPOSIÇÃO DE APRENDIZAGEM em no máximo 420 palavras para retomar o conteúdo que a turma ainda não domina bem. Não trate a proposta como uma aula comum nem como revisão genérica: identifique o ponto central que precisa ser reconstruído, proponha uma sequência curta de retomada e inclua uma verificação imediata da compreensão. Estruture exatamente assim:
 
-FOCO DA REPOSIÇÃO
+FOCO DA RECOMPOSIÇÃO
 MATERIAIS
 RETOMADA DO ESSENCIAL
 DESENVOLVIMENTO EM ETAPAS
@@ -583,7 +583,7 @@ ENCERRAMENTO E PRÓXIMO PASSO
 Use linguagem objetiva, passos aplicáveis e exemplos diretamente relacionados ao conteúdo informado. Evite repetir os dados da aula ou criar explicações teóricas longas.`;
   if (key === 'estrategias') return `${base}
 
-Crie ESTRATÉGIAS ALTERNATIVAS em no máximo 320 palavras para fortalecer o conteúdo informado. Apresente 3 opções breves para atacar a dificuldade por caminhos diferentes: 1) ativa, com movimento ou manipulação; 2) colaborativa, em pares ou grupos; 3) visual, com tecnologia opcional e uma versão equivalente no quadro ou em papel. Para cada opção, informe quando usar, materiais e até 3 passos. Evite repetir explicações, objetivos ou apoios já apresentados na reposição.`;
+Crie ESTRATÉGIAS ALTERNATIVAS em no máximo 320 palavras para fortalecer o conteúdo informado. Apresente 3 opções breves para atacar a dificuldade por caminhos diferentes: 1) ativa, com movimento ou manipulação; 2) colaborativa, em pares ou grupos; 3) visual, com tecnologia opcional e uma versão equivalente no quadro ou em papel. Para cada opção, informe quando usar, materiais e até 3 passos. Evite repetir explicações, objetivos ou apoios já apresentados na recomposição.`;
   if (key === 'quadro') return `${base}
 
 Crie uma atividade pronta para o QUADRO, em no máximo 260 palavras e para 15 a 25 minutos. Inclua título, comando do professor, 3 exercícios graduados, gabarito ou respostas esperadas, uma pergunta de intervenção e uma forma de participação que não dependa de escrita extensa. Para Língua Inglesa ou outro idioma, use os comandos no idioma da aula e um glossário curto.`;
@@ -676,7 +676,7 @@ async function generate() {
   if (!ano) { alert('Selecione a turma/ano.'); return; }
   if (!duracao) { alert('Selecione quantos períodos a aula terá.'); return; }
   if (!contexto) {
-    alert('Informe o conteúdo ou tema que precisa de reposição.');
+    alert('Informe o conteúdo ou tema que precisa de recomposição.');
     const campo = document.getElementById('descricao');
     campo.focus();
     return;
@@ -919,7 +919,7 @@ function exportPDF() {
   // === PÁGINA 1 — Cabeçalho ===
   drawHeader(true);
 
-  writeLine('Reposição de Aprendizagem', 14, true, [20,40,100]);
+  writeLine('Recomposição de Aprendizagem', 14, true, [20,40,100]);
   const pdfRef = currentRef || (document.getElementById('componente').value + ' · ' + document.getElementById('ano').value + ' · ' + document.getElementById('volume').value);
   writeLine(sanitize(pdfRef), 11, false, [70,85,130]);
   writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165]);
