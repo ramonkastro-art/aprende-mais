@@ -1,7 +1,9 @@
 const dotenv = require('dotenv');
 dotenv.config();
 
-const OUTPUT_TOKENS = 2048;
+// Os materiais têm até 420 palavras, mas o Gemini 2.5 pode consumir tokens
+// internos de pensamento. 4096 deixa margem para concluir a resposta sem cortar.
+const OUTPUT_TOKENS = 4096;
 const CATALOG_TTL_MS = 60 * 1000;
 let catalogCache = { expiresAt: 0, models: [] };
 
@@ -257,7 +259,12 @@ async function callGemini(model, userContent, systemPrompt) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts }],
-        generationConfig: { maxOutputTokens: OUTPUT_TOKENS },
+        generationConfig: {
+          maxOutputTokens: OUTPUT_TOKENS,
+          // Para esta tarefa objetiva, desativar o pensamento do Gemini 2.5
+          // reserva o orçamento para o texto visível e reduz a chance de corte.
+          ...( /^gemini-2\.5-flash$/i.test(model) ? { thinkingConfig: { thinkingBudget: 0 } } : {} ),
+        },
       }),
     }
   );
