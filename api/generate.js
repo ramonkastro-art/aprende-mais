@@ -69,18 +69,25 @@ async function selectModels({ needsVision, hasPdf }) {
       .filter(model => !needsVision || model.vision || provider === 'gemini')
       .sort((a, b) => scoreModel(b, { needsVision, hasPdf }) - scoreModel(a, { needsVision, hasPdf }));
 
-    if (providerModels[0]) selectedByProvider.set(provider, providerModels[0]);
+    // Mantém os dois melhores candidatos de cada provedor: o primeiro é a
+    // escolha principal e o segundo evita 503 quando a conta não tem acesso
+    // ao primeiro modelo listado ou quando ele está momentaneamente instável.
+    for (const candidate of providerModels.slice(0, 2)) {
+      selectedByProvider.set(`${provider}:${candidate.model}`, candidate);
+    }
   }
 
-  let selected = Array.from(selectedByProvider.values())
+  const selected = Array.from(selectedByProvider.values())
     .sort((a, b) => scoreModel(b, { needsVision, hasPdf }) - scoreModel(a, { needsVision, hasPdf }));
-
-  // Se o catálogo estiver indisponível, mantém um conjunto curto de candidatos de emergência.
-  if (selected.length === 0) {
-    selected = emergencyCandidates({ needsVision, hasPdf });
+  const emergency = emergencyCandidates({ needsVision, hasPdf });
+  const combined = [...selected, ...emergency];
+  const unique = new Map();
+  for (const candidate of combined) {
+    const key = `${candidate.provider}:${candidate.model}`;
+    if (!unique.has(key)) unique.set(key, candidate);
   }
 
-  return selected;
+  return Array.from(unique.values());
 }
 
 async function discoverModels() {
@@ -147,12 +154,16 @@ function listOpenAICompatibleModels(url, key) {
           metadata: String(model.owned_by || ''),
         };
       })
-      .filter(model => isChatModel(model.model));
+      .filter(model => isChatModel(model.model) && !isBlockedModel(model.model));
   };
 }
 
 function isChatModel(model) {
   return /gpt|llama|qwen|gemma|mixtral|mistral|deepseek|command|phi|claude|kimi|moonshot|oss/i.test(model);
+}
+
+function isBlockedModel(model) {
+  return /guard|moderation|prompt.?guard|safeguard|whisper|embedding|rerank|transcription|tts|speech|image|audio/i.test(model);
 }
 
 function scoreModel(candidate, { needsVision, hasPdf }) {
@@ -194,8 +205,13 @@ function emergencyCandidates({ needsVision, hasPdf }) {
 
   return providers.flatMap(provider => {
     if (!process.env[`${provider.toUpperCase()}_API_KEY`]) return [];
-    const model = EMERGENCY_MODELS[provider][0];
-    return [{ provider, model, key: `${provider.toUpperCase()}_API_KEY`, vision: provider === 'gemini' || provider === 'groq' }];
+    return EMERGENCY_MODELS[provider].map(model => ({
+      provider,
+      model,
+      key: `${provider.toUpperCase()}_API_KEY`,
+      vision: provider === 'gemini' || (provider === 'groq' && /qwen|vision|gpt-4o|gpt-4\.1|gpt-5/i.test(model)),
+      production: true,
+    }));
   });
 }
 

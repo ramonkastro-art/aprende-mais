@@ -105,10 +105,12 @@ textarea{resize:vertical;min-height:90px;line-height:1.6;}
 .checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:10px;margin-top:12px;}
 .checkbox-item{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color .2s,background .2s;user-select:none;}
 .checkbox-item:hover{border-color:var(--accent2);}
-.checkbox-item.checked{border-color:var(--accent);background:rgba(37,99,235,.06);}
+.checkbox-item.checked{border-color:#2563eb;background:#2563eb;color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.22);}
+.checkbox-item.checked .check-label{color:#fff;}
+.checkbox-item.checked .check-icon{background:#fff;border-color:#fff;color:#2563eb;}
 .checkbox-item input[type=checkbox]{display:none;}
 .check-icon{width:18px;height:18px;border:2px solid var(--border);border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;transition:all .2s;}
-.checkbox-item.checked .check-icon{background:var(--accent);border-color:var(--accent);color:#fff;}
+.checkbox-item.checked .check-icon{background:#fff;border-color:#fff;color:#2563eb;}
 .check-label{font-size:13px;line-height:1.3;}
 
 .btn-generate{width:100%;margin-top:28px;padding:16px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#fff;font-family:'Fraunces',serif;font-size:18px;font-weight:600;border:none;border-radius:12px;cursor:pointer;transition:transform .15s,box-shadow .2s;display:flex;align-items:center;justify-content:center;gap:10px;letter-spacing:-.5px;}
@@ -244,6 +246,7 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
 
 /* ── BNCC action modules and form helpers ── */
 .optional-label{font-size:10px;text-transform:none;letter-spacing:0;color:var(--accent);font-weight:500;}
+.required-label{font-size:10px;text-transform:none;letter-spacing:0;color:#b91c1c;font-weight:700;}
 .field-hint{font-size:12px;line-height:1.5;color:var(--muted);margin-top:-2px;}
 .mod-quadro .module-icon{background:rgba(217,119,6,.08);}
 .mod-quadro .module-badge{background:rgba(217,119,6,.08);color:#b45309;}
@@ -327,13 +330,15 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
         </select>
       </div>
 
+      <div class="field required-context" style="margin-top:20px">
+        <label>Qual conteúdo ou tema precisa de reposição? <span class="required-label">(obrigatório)</span></label>
+        <textarea id="descricao" required style="min-height:92px" placeholder="Ex.: frações equivalentes, interpretação de texto, sistema solar, equações do 1º grau ou outro conteúdo que a turma precisa reforçar."></textarea>
+        <div class="field-hint">Informe o conteúdo que está frágil ou precisa ser retomado. A IA usará isso para criar uma reposição objetiva.</div>
+      </div>
+
       <details class="optional-context" id="optionalContext">
-        <summary>Adicionar conteúdo ou foto/PDF <span>(opcional)</span></summary>
+        <summary>Adicionar foto ou PDF <span>(opcional)</span></summary>
         <div class="optional-context-body">
-          <div class="field">
-            <label>O que você deseja trabalhar? <span class="optional-label">(opcional)</span></label>
-            <textarea id="descricao" style="min-height:76px" placeholder="Ex.: frações, leitura de gráficos, produção de texto, sistema solar ou uma atividade que precisa ser reforçada."></textarea>
-          </div>
           <div class="upload-zone" id="uploadZone">
             <input type="file" id="fileInput" accept="image/*,application/pdf" onchange="handleFile(event)">
             <span class="upload-icon">🖼️</span>
@@ -352,29 +357,29 @@ footer{text-align:center;padding:24px;font-size:12px;color:var(--border);letter-
 
       <div class="section-label" style="margin-top:20px"><span>2</span>Escolha os materiais que deseja receber</div>
       <div class="checkbox-grid" id="checkboxes">
-        <label class="checkbox-item" onclick="toggleCheck(this)">
+        <label class="checkbox-item" onclick="toggleCheck(event, this)">
           <input type="checkbox" value="plano">
           <div class="check-icon"></div>
-          <span class="check-label">🎯 Roteiro de aula</span>
+          <span class="check-label">🎯 Reposição de aprendizagem</span>
         </label>
-        <label class="checkbox-item" onclick="toggleCheck(this)">
+        <label class="checkbox-item" onclick="toggleCheck(event, this)">
           <input type="checkbox" value="estrategias">
           <div class="check-icon"></div>
           <span class="check-label">🔁 Estratégias alternativas</span>
         </label>
-        <label class="checkbox-item" onclick="toggleCheck(this)">
+        <label class="checkbox-item" onclick="toggleCheck(event, this)">
           <input type="checkbox" value="quadro">
           <div class="check-icon"></div>
           <span class="check-label">🧑‍🏫 Exercícios para quadro</span>
         </label>
-        <label class="checkbox-item" onclick="toggleCheck(this)">
+        <label class="checkbox-item" onclick="toggleCheck(event, this)">
           <input type="checkbox" value="inclusao">
           <div class="check-icon"></div>
           <span class="check-label">♿ Acessibilidade e inclusão</span>
         </label>
       </div>
-      <p class="form-note">Escolha apenas os materiais que deseja receber. Conteúdo e foto/PDF são opcionais e podem ser incluídos somente quando ajudarem a personalizar a aula.</p>
-      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar estratégias de aula</button>
+      <p class="form-note">O conteúdo ou tema é obrigatório. Foto/PDF é opcional. Escolha apenas os materiais que deseja receber.</p>
+      <button class="btn-generate" onclick="generate()">✨ &nbsp;Gerar reposição de aprendizagem</button>
     </div>
   </div>
 
@@ -448,7 +453,7 @@ let uploadedB64 = null, uploadedMime = null;
 let generatedContent = {}, currentRef = '', currentComponente = '';
 
 const CFG = {
-  plano:          {icon:'🎯', title:'Roteiro de Aula',            cls:'mod-atividades',   badge:'Roteiro'},
+  plano:          {icon:'🎯', title:'Reposição de Aprendizagem', cls:'mod-atividades',   badge:'Reposição'},
   estrategias:    {icon:'🔁', title:'Estratégias Alternativas',       cls:'mod-complementar', badge:'Estratégias'},
   quadro:         {icon:'🧑‍🏫', title:'Exercícios para Quadro',        cls:'mod-quadro',        badge:'Quadro'},
   tela:           {icon:'🖥️', title:'Exercícios para Tela',          cls:'mod-tela',         badge:'Tela'},
@@ -508,10 +513,14 @@ zone.addEventListener('drop', e => {
 });
 
 /* ── Checkbox ── */
-function toggleCheck(el) {
-  el.classList.toggle('checked');
+function toggleCheck(event, el) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
   const cb = el.querySelector('input');
   cb.checked = !cb.checked;
+  el.classList.toggle('checked', cb.checked);
   el.querySelector('.check-icon').textContent = cb.checked ? '✓' : '';
 }
 function getChecked() {
@@ -531,11 +540,11 @@ CONTEXTO DA AULA
 - Turma/ano: ${ctx.ano}
 - Disciplina: ${ctx.componenteAula}
 - Duração: ${ctx.duracao}
-- Conteúdo ou objetivo informado pelo professor: ${ctx.contexto || 'não informado; proponha uma atividade introdutória coerente com a disciplina e a turma'}
+- Conteúdo ou tema que precisa de reposição: ${ctx.contexto}
 - Arquivo enviado: ${ctx.arquivo ? 'sim; use a foto ou PDF como referência do conteúdo quando conseguir interpretá-lo' : 'não'}
 
 OBJETIVO
-Entregar propostas que o professor consiga entender rapidamente, preparar com poucos passos e aplicar em uma turma real. Quando houver conteúdo ou arquivo, adapte a proposta a ele. Quando não houver, crie uma sugestão geral, pertinente à disciplina e à idade, sem inventar uma habilidade, código BNCC ou conteúdo específico que não tenha sido informado.
+Entregar uma reposição de aprendizagem que o professor consiga entender rapidamente, preparar com poucos passos e aplicar em uma turma real. O foco obrigatório é o conteúdo ou tema informado: identifique o que precisa ser reconstruído, proponha uma forma objetiva de retomada e inclua uma verificação imediata. A foto/PDF é apenas uma referência opcional; se não puder ser interpretada, não invente seu conteúdo.
 
 REGRAS PEDAGÓGICAS
 1. Escreva em português brasileiro, com frases curtas, títulos claros e instruções na ordem de aplicação.
@@ -558,23 +567,23 @@ function buildResourcePrompt(key, ctx) {
 Disciplina: ${ctx.componenteAula}
 Turma/ano: ${ctx.ano}
 Duração: ${ctx.duracao}
-Conteúdo ou objetivo: ${ctx.contexto || 'não informado'}${ctx.arquivo ? ' (Há uma foto ou PDF anexado como referência opcional.)' : ''}`;
+Conteúdo ou tema para reposição: ${ctx.contexto}${ctx.arquivo ? ' (Há uma foto ou PDF anexado como referência opcional.)' : ''}`;
   if (key === 'plano') return `${base}
 
-Crie um ROTEIRO DE AULA PRÁTICO em no máximo 420 palavras. Estruture exatamente assim:
+Crie uma REPOSIÇÃO DE APRENDIZAGEM em no máximo 420 palavras para retomar o conteúdo que a turma ainda não domina bem. Não trate a proposta como uma aula comum nem como revisão genérica: identifique o ponto central que precisa ser reconstruído, proponha uma sequência curta de retomada e inclua uma verificação imediata da compreensão. Estruture exatamente assim:
 
-DADOS GERAIS E OBJETIVO
+FOCO DA REPOSIÇÃO
 MATERIAIS
-ABERTURA
+RETOMADA DO ESSENCIAL
 DESENVOLVIMENTO EM ETAPAS
 ALTERNATIVA COM POUCOS RECURSOS
 COMO VERIFICAR A COMPREENSÃO
-ENCERRAMENTO E SÍNTESE
+ENCERRAMENTO E PRÓXIMO PASSO
 
-Informe passos essenciais, evitando repetir os dados da aula ou criar explicações teóricas longas.`;
+Use linguagem objetiva, passos aplicáveis e exemplos diretamente relacionados ao conteúdo informado. Evite repetir os dados da aula ou criar explicações teóricas longas.`;
   if (key === 'estrategias') return `${base}
 
-Crie ESTRATÉGIAS ALTERNATIVAS em no máximo 320 palavras. Apresente 3 opções breves para o mesmo objetivo: 1) ativa, com movimento ou manipulação; 2) colaborativa, em pares ou grupos; 3) visual, com tecnologia opcional e uma versão equivalente no quadro ou em papel. Para cada opção, informe quando usar, materiais e até 3 passos. Evite repetir explicações, objetivos ou apoios já apresentados no roteiro.`;
+Crie ESTRATÉGIAS ALTERNATIVAS em no máximo 320 palavras para fortalecer o conteúdo informado. Apresente 3 opções breves para atacar a dificuldade por caminhos diferentes: 1) ativa, com movimento ou manipulação; 2) colaborativa, em pares ou grupos; 3) visual, com tecnologia opcional e uma versão equivalente no quadro ou em papel. Para cada opção, informe quando usar, materiais e até 3 passos. Evite repetir explicações, objetivos ou apoios já apresentados na reposição.`;
   if (key === 'quadro') return `${base}
 
 Crie uma atividade pronta para o QUADRO, em no máximo 260 palavras e para 15 a 25 minutos. Inclua título, comando do professor, 3 exercícios graduados, gabarito ou respostas esperadas, uma pergunta de intervenção e uma forma de participação que não dependa de escrita extensa. Para Língua Inglesa ou outro idioma, use os comandos no idioma da aula e um glossário curto.`;
@@ -666,6 +675,12 @@ async function generate() {
   if (!componenteAula) { alert('Selecione a disciplina.'); return; }
   if (!ano) { alert('Selecione a turma/ano.'); return; }
   if (!duracao) { alert('Selecione quantos períodos a aula terá.'); return; }
+  if (!contexto) {
+    alert('Informe o conteúdo ou tema que precisa de reposição.');
+    const campo = document.getElementById('descricao');
+    campo.focus();
+    return;
+  }
   if (recursos.length === 0) { alert('Selecione pelo menos um material.'); return; }
 
   document.getElementById('formSection').style.display = 'none';
@@ -900,7 +915,7 @@ function exportPDF() {
   // === PÁGINA 1 — Cabeçalho ===
   drawHeader(true);
 
-  writeLine('Roteiro de Aula', 14, true, [20,40,100]);
+  writeLine('Reposição de Aprendizagem', 14, true, [20,40,100]);
   const pdfRef = currentRef || (document.getElementById('componente').value + ' · ' + document.getElementById('ano').value + ' · ' + document.getElementById('volume').value);
   writeLine(sanitize(pdfRef), 11, false, [70,85,130]);
   writeLine('Gerado em ' + new Date().toLocaleDateString('pt-BR'), 9, false, [150,155,165]);
