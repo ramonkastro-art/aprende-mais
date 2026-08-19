@@ -35,8 +35,10 @@ aprende-mais/
 │   └── ...
 ├── api/
 │   ├── generate.js       # Geração multimodal com fallbacks
-│   ├── avaliacao.js      # Geração de avaliações
-│   ├── corrigir.js       # Correção de respostas
+│   ├── avaliacao-view.js # Página do gerador de avaliações
+│   ├── avaliacao-salvar.js # Persistência e atualização das avaliações
+│   ├── avaliacao-buscar.js # Leitura usada pelo QR de correção
+│   ├── corrigir-view.js  # Página de correção pelo celular
 │   ├── painel.js         # Registro administrativo
 │   └── ...
 ├── PROMPT_IA_BNCC.md     # Comando pedagógico versionado e revisável
@@ -86,7 +88,7 @@ O backend consulta os catálogos dos provedores habilitados antes de cada materi
 | Cerebras | `GET /v1/models` | Fallback rápido para texto com modelos atualmente disponíveis. |
 | OpenAI | `GET /v1/models` | Fallback final e visão quando o catálogo confirmar compatibilidade. |
 
-O catálogo fica em cache por apenas um minuto para evitar consultas repetidas durante a geração dos quatro materiais. Caso uma consulta de catálogo falhe, o backend usa `gemini-2.5-flash`, `gemini-2.5-flash-lite` e demais candidatos de emergência, conforme as chaves disponíveis. O backend diferencia `429` real de quota/rate limit, `502` de modelo ou configuração incompatível e `503` de indisponibilidade geral; erro de saída ou contexto não é mais classificado automaticamente como limite da conta. Os limites permanecem em 2.048 tokens por chamada.
+O catálogo fica em cache por apenas um minuto para evitar consultas repetidas durante a geração dos quatro materiais. Caso uma consulta de catálogo falhe, o backend usa `gemini-2.5-flash`, `gemini-2.5-flash-lite` e demais candidatos de emergência, conforme as chaves disponíveis. O backend diferencia `429` real de quota/rate limit, `502` de modelo ou configuração incompatível e `503` de indisponibilidade geral; erro de saída ou contexto não é mais classificado automaticamente como limite da conta. O gerador principal usa até 4.096 tokens por chamada; no Gemini 2.5 Flash, o orçamento de pensamento é zerado para reservar espaço ao texto visível.
 
 ## Como publicar no GitHub
 
@@ -124,7 +126,7 @@ A redação oficial de códigos e habilidades deve ser conferida na [Base Nacion
 [2]: https://console.groq.com/docs/models "GroqDocs — Models"
 [3]: https://inference-docs.cerebras.ai/api-reference/models/list-models "Cerebras Inference — List models"
 
-O comando completo usado pelo sistema está em [`PROMPT_IA_BNCC.md`](./PROMPT_IA_BNCC.md). Ele exige linguagem acessível, atividades observáveis, alternativas de baixo recurso e apoios pedagógicos inclusivos sem diagnóstico ou prescrição.
+O comando completo usado pelo sistema principal está em [`PROMPT_IA_BNCC.md`](./PROMPT_IA_BNCC.md). O prompt independente do gerador de avaliações está em [`PROMPT_AVALIACAO.md`](./PROMPT_AVALIACAO.md), com regras de item, gabarito e JSON. As avaliações também validam a resposta da IA no navegador antes de renderizar, escapam conteúdo dinâmico, preservam edições antes do PDF e mantêm fallback local quando a persistência do Supabase estiver indisponível.
 
 ## Segurança
 

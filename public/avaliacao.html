@@ -328,6 +328,55 @@ const LETRAS = ['A','B','C','D','E'];
 let avaliacaoAtual = null; // { questoes, gabarito, config }
 let avaliacaoId = null;    // ID salvo no Supabase ex: AV-2505-X3K2
 let respostasAluno = [];   // ['A','','C',...]
+let salvamentoPendente = null;
+let salvamentoTimer = null;
+let avaliacaoVersao = 0;
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+  }[char]));
+}
+
+function normalizarQuestao(q) {
+  if (!q || typeof q !== 'object' || !q.alternativas || typeof q.alternativas !== 'object') return null;
+  const gabarito = String(q.gabarito || '').trim().toUpperCase();
+  if (!LETRAS.includes(gabarito)) return null;
+  const enunciado = String(q.enunciado || '').trim();
+  if (!enunciado) return null;
+  const alternativas = {};
+  for (const letra of LETRAS) {
+    alternativas[letra] = String(q.alternativas[letra] || '').trim();
+    if (!alternativas[letra]) return null;
+  }
+  return { enunciado, alternativas, gabarito };
+}
+
+function validarAvaliacao(parsed, qtd) {
+  if (!parsed || !Array.isArray(parsed.questoes) || parsed.questoes.length !== qtd) {
+    throw new Error(`A IA retornou ${parsed?.questoes?.length || 0} questões; eram esperadas ${qtd}. Tente novamente.`);
+  }
+  const questoes = parsed.questoes.map(normalizarQuestao);
+  if (questoes.some(q => !q)) throw new Error('Uma ou mais questões vieram incompletas. Tente novamente.');
+  return questoes;
+}
+
+function enfileirarSalvamentoAtual() {
+  if (!avaliacaoAtual) return Promise.resolve();
+  const anterior = salvamentoPendente || Promise.resolve();
+  salvamentoPendente = anterior
+    .catch(() => {})
+    .then(() => salvarAvaliacao(avaliacaoAtual.questoes, avaliacaoAtual.config));
+  return salvamentoPendente;
+}
+
+function agendarSalvamento() {
+  clearTimeout(salvamentoTimer);
+  salvamentoTimer = setTimeout(() => {
+    salvamentoTimer = null;
+    enfileirarSalvamentoAtual();
+  }, 700);
+}
 
 // ══════════════════════════════════════════════
 // TABS
@@ -372,35 +421,38 @@ async function gerarAvaliacao() {
   }, 2500);
 
   try {
-   const systemPrompt = `Você é um professor experiente do Ensino Fundamental brasileiro, especialista em elaborar avaliações pedagógicas alinhadas à BNCC.
+   const systemPrompt = `Você é um professor brasileiro experiente em avaliação da Educação Básica, com domínio de elaboração de itens objetivos, inclusão e habilidades da BNCC. Produza uma avaliação pronta para revisão do professor.
 
-TAREFA: Gere exatamente ${qtd} questões de múltipla escolha para ${comp} - ${ano} - nível ${nivel}.
+TAREFA: Gere exatamente ${qtd} questões de múltipla escolha para ${comp}, ${ano}, nível ${nivel}, usando exclusivamente o conteúdo/tópicos informado pelo professor.
 
-REGRAS PEDAGÓGICAS:
-- Questões claras, objetivas e adequadas à faixa etária do ${ano}
-- Cada questão avalia UMA habilidade específica do conteúdo
-- Alternativas incorretas devem ser plausíveis (erros comuns dos alunos)
-- Linguagem simples para anos iniciais (1º-5º), mais técnica para finais (6º-9º)
+REGRAS PEDAGÓGICAS E DE QUALIDADE:
+- Cada questão deve avaliar um único conhecimento ou habilidade diretamente relacionado ao conteúdo informado.
+- O enunciado deve ser claro, completo, objetivo e adequado à idade do ${ano}; não dependa de imagem, tabela ou informação externa que não esteja no JSON.
+- Deve existir uma única alternativa claramente correta. Não use “todas as anteriores”, “nenhuma das anteriores” ou alternativas parcialmente corretas.
+- As quatro alternativas incorretas devem ser plausíveis, baseadas em erros comuns, semanticamente distintas e ter extensão/estrutura semelhantes à correta.
+- Evite pegadinhas, dupla negação, ambiguidades, generalizações absolutas e pistas gramaticais que revelem a resposta.
+- Em Matemática, confira a operação e o resultado; em Língua Portuguesa e demais componentes, confira ortografia, conceito e coerência antes de responder.
+- Para anos iniciais, use linguagem concreta e frases curtas; para anos finais, use vocabulário compatível com a faixa etária sem tornar o item artificialmente complexo.
+- Se o conteúdo for amplo, distribua os itens entre seus subtemas mais relevantes sem sair do assunto. Não invente código ou habilidade BNCC que não tenha sido fornecido.
+- Não inclua explicações, comentários, referências ou observações fora do JSON.
 
-REGRAS DO GABARITO — CRÍTICO E OBRIGATÓRIO:
-- O gabarito de cada questão DEVE ser escolhido de forma ALEATÓRIA entre A, B, C, D e E
-- É PROIBIDO usar sequência previsível como A,B,C,D,E ou A,A,B,B,C,C
-- É PROIBIDO repetir a mesma letra mais de 2 vezes consecutivas
-- Para ${qtd} questões, distribua as letras de forma equilibrada e imprevisível
-- Exemplo de gabarito CORRETO para 10 questões: C, A, E, B, D, A, C, E, B, D
-- Exemplo de gabarito ERRADO (proibido): A, B, C, D, E, A, B, C, D, E
-- Após montar todas as questões, REVISE o gabarito e reorganize se houver padrão sequencial
-- A alternativa correta deve estar na posição indicada pelo gabarito escolhido aleatoriamente
+REGRAS DO GABARITO — OBRIGATÓRIAS:
+- O campo "gabarito" deve indicar a letra da alternativa realmente correta.
+- Distribua as respostas de forma equilibrada e imprevisível entre A, B, C, D e E, sem sequência A-B-C-D-E, sem padrão alternado e sem repetir a mesma letra mais de duas vezes seguidas.
+- Depois de escrever cada item, confira se a alternativa indicada pelo gabarito é a correta; depois confira novamente todos os itens antes de responder.
+- A posição da alternativa correta deve variar, mas nunca altere o conteúdo correto apenas para forçar uma distribuição.
 
-REGRAS DE FORMATO — CRÍTICO:
-- Responda SOMENTE com o JSON abaixo, sem nenhum texto antes ou depois
-- Não use markdown, não use blocos de código, não use \`\`\`
-- Todas as strings devem usar aspas duplas
-- Não deixe vírgula após o último elemento de arrays/objetos
-- O campo "gabarito" deve conter APENAS uma letra maiúscula: A, B, C, D ou E — escolhida aleatoriamente, nunca em sequência
+REGRAS DE FORMATO — CRÍTICAS:
+- Responda SOMENTE com JSON válido, sem texto antes ou depois, sem markdown e sem blocos de código.
+- Use aspas duplas em todas as chaves e strings; escape aspas internas, barras invertidas e quebras de linha quando necessário.
+- Gere exatamente ${qtd} objetos no array "questoes", nem mais nem menos.
+- Cada objeto deve conter exatamente "enunciado", "alternativas" e "gabarito".
+- "alternativas" deve conter exatamente as chaves A, B, C, D e E, todas com texto não vazio.
+- "gabarito" deve conter somente uma letra maiúscula entre A, B, C, D ou E.
+- Não interrompa uma questão, não deixe propriedades vazias e não use vírgula sobrando.
 
-JSON ESPERADO (siga exatamente esta estrutura):
-{"questoes":[{"enunciado":"texto da questao","alternativas":{"A":"texto A","B":"texto B","C":"texto C","D":"texto D","E":"texto E"},"gabarito":"C"}]}`;
+JSON ESPERADO:
+{"questoes":[{"enunciado":"texto da questão","alternativas":{"A":"texto A","B":"texto B","C":"texto C","D":"texto D","E":"texto E"},"gabarito":"C"}]}`;
 
     const userContent = `DADOS DA AVALIAÇÃO:
 - Componente: ${comp}
@@ -416,8 +468,14 @@ Gere exatamente ${qtd} questões seguindo as regras. Responda APENAS com o JSON,
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({ userContent, systemPrompt })
     });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error) {
+      if (data.code === 'AI_LIMIT') throw new Error('A IA está temporariamente indisponível. Tente novamente mais tarde.');
+      throw new Error(data.error || 'Não foi possível gerar a avaliação. Tente novamente.');
+    }
+    if (typeof data.text !== 'string' || !data.text.trim()) {
+      throw new Error('A IA não retornou conteúdo. Tente novamente.');
+    }
 
     // Parse JSON — robusto para Groq (LLaMA) e Gemini
     let parsed;
@@ -442,12 +500,10 @@ Gere exatamente ${qtd} questões seguindo as regras. Responda APENAS com o JSON,
       }
     }
 
-    if (!parsed.questoes || !Array.isArray(parsed.questoes)) {
-      throw new Error('Formato inválido. Tente novamente.');
-    }
+    const questoesValidadas = validarAvaliacao(parsed, parseInt(qtd, 10));
 
     avaliacaoAtual = {
-      questoes: parsed.questoes,
+      questoes: questoesValidadas,
       config: {
         ano, comp, qtd: parseInt(qtd), nivel, conteudo,
         turma: document.getElementById('av-turma').value,
@@ -456,9 +512,10 @@ Gere exatamente ${qtd} questões seguindo as regras. Responda APENAS com o JSON,
       }
     };
 
+    avaliacaoVersao += 1;
     renderizarQuestoes();
     // Salva no Supabase em background e armazena o ID
-    salvarAvaliacao(parsed.questoes, avaliacaoAtual.config);
+    salvamentoPendente = salvarAvaliacao(avaliacaoAtual.questoes, avaliacaoAtual.config);
 
   } catch(err) {
     showToast('Erro: ' + err.message);
@@ -486,8 +543,8 @@ function renderizarQuestoes() {
           ${l}
         </div>
         <input class="alt-input" 
-               value="${(q.alternativas[l]||'').replace(/"/g,'&quot;')}" 
-               oninput="avaliacaoAtual.questoes[${qi}].alternativas['${l}']=this.value"
+               value="${escapeHtml(q.alternativas[l] || '')}" 
+               oninput="avaliacaoAtual.questoes[${qi}].alternativas['${l}']=this.value; agendarSalvamento()"
                placeholder="Alternativa ${l}">
       </div>
     `).join('');
@@ -497,8 +554,8 @@ function renderizarQuestoes() {
     card.innerHTML = `
       <div class="questao-num">Questão ${qi+1}</div>
       <textarea class="questao-enunciado" rows="3"
-        oninput="avaliacaoAtual.questoes[${qi}].enunciado=this.value"
-      >${q.enunciado}</textarea>
+        oninput="avaliacaoAtual.questoes[${qi}].enunciado=this.value; agendarSalvamento()"
+      >${escapeHtml(q.enunciado)}</textarea>
       <div class="alternativas">${altsHTML}</div>
       <div class="gabarito-hint">
         <span>✓</span> Gabarito: <strong>${q.gabarito}</strong> &nbsp;(clique na letra para alterar)
@@ -514,6 +571,7 @@ function renderizarQuestoes() {
 function toggleGabarito(qi, letra) {
   avaliacaoAtual.questoes[qi].gabarito = letra;
   renderizarQuestoes();
+  agendarSalvamento();
 }
 
 // ══════════════════════════════════════════════
@@ -534,12 +592,14 @@ function setupCorrecao() {
 
   const c = avaliacaoAtual.config;
   document.getElementById('infoAvaliacao').innerHTML = `
-    <strong>${c.comp}</strong> · ${c.ano}${c.turma ? ' · '+c.turma:''} · ${c.qtd} questões<br>
-    ${c.conteudo}
+    <strong>${escapeHtml(c.comp)}</strong> · ${escapeHtml(c.ano)}${c.turma ? ' · '+escapeHtml(c.turma):''} · ${c.qtd} questões<br>
+    ${escapeHtml(c.conteudo)}
   `;
 
-  respostasAluno = new Array(avaliacaoAtual.questoes.length).fill('');
-  document.getElementById('resultadoBox').style.display = 'none';
+  if (respostasAluno.length !== avaliacaoAtual.questoes.length) {
+    respostasAluno = new Array(avaliacaoAtual.questoes.length).fill('');
+    document.getElementById('resultadoBox').style.display = 'none';
+  }
   renderizarGrade();
 }
 
@@ -593,6 +653,7 @@ function verificarCompleto() {
   const respondidas = respostasAluno.filter(r => r !== '').length;
   const total = avaliacaoAtual.questoes.length;
   if (respondidas === total) mostrarResultado();
+  else document.getElementById('resultadoBox').style.display = 'none';
 }
 
 function mostrarResultado() {
@@ -607,9 +668,12 @@ function mostrarResultado() {
 }
 
 function calcularNota() {
-  const total = avaliacaoAtual.questoes.length;
+  const total = avaliacaoAtual?.questoes?.length || 0;
+  if (!total) { document.getElementById('notaFinal').textContent = '0,0'; return; }
   const acertos = avaliacaoAtual.questoes.filter((q,i) => respostasAluno[i] === q.gabarito).length;
-  const valor = parseFloat(document.getElementById('valorProva').value) || 10;
+  const campo = document.getElementById('valorProva');
+  const valor = Math.min(100, Math.max(1, parseFloat(campo.value) || 10));
+  campo.value = valor;
   const nota = (acertos / total) * valor;
   document.getElementById('notaFinal').textContent = nota.toFixed(1).replace('.',',');
 }
@@ -625,31 +689,32 @@ function novaCorrecao() {
 // SALVAR NO SUPABASE
 // ══════════════════════════════════════════════
 async function salvarAvaliacao(questoes, config) {
-  // Gabarito codificado localmente — garante QR funcional mesmo sem Supabase
+  const versao = avaliacaoVersao;
   const gabStr = questoes.map(q => q.gabarito).join('');
-  avaliacaoId = 'LOCAL-' + gabStr; // fallback imediato
+  const localId = 'LOCAL-' + gabStr;
+  if (!avaliacaoId || !/^AV-\d{4}-[A-Z0-9]{4,8}$/.test(avaliacaoId)) avaliacaoId = localId;
 
   const badge = document.getElementById('avIdBadge');
   if (badge) { badge.textContent = '🔑 Gabarito pronto'; badge.style.display = 'inline-flex'; }
 
-  // Tenta salvar no Supabase em background para persistência real
   try {
+    const persistId = /^AV-\d{4}-[A-Z0-9]{4,8}$/.test(avaliacaoId) ? avaliacaoId : null;
     const res = await fetch('/api/avaliacao-salvar', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ questoes, config })
+      body: JSON.stringify({ id: persistId, questoes, config })
     });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.id) {
-        avaliacaoId = data.id;
-        if (badge) badge.textContent = '🔑 ' + avaliacaoId;
-        console.log('Avaliação salva no Supabase:', avaliacaoId);
-      }
-    } else {
-      console.warn('Supabase indisponível, usando modo local');
+    const data = await res.json().catch(() => ({}));
+    if (data.id && versao === avaliacaoVersao) {
+      avaliacaoId = data.id;
+      if (badge) badge.textContent = '🔑 ' + avaliacaoId;
+      console.log('Avaliação salva no Supabase:', avaliacaoId);
+    } else if (data.warning) {
+      console.warn(data.warning);
     }
-  } catch(e) { console.warn('Supabase offline, modo local ativo:', e.message); }
+  } catch(e) {
+    console.warn('Persistência indisponível, modo local ativo:', e.message);
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -657,7 +722,17 @@ async function salvarAvaliacao(questoes, config) {
 // ══════════════════════════════════════════════
 async function exportarPDF() {
   if (!avaliacaoAtual) return;
-  // Tenta aguardar o ID por até 3s, mas não bloqueia o PDF
+  // Enfileira imediatamente uma edição recente que ainda aguardava o debounce.
+  if (salvamentoTimer) {
+    clearTimeout(salvamentoTimer);
+    salvamentoTimer = null;
+    enfileirarSalvamentoAtual();
+  }
+  // Aguarda uma gravação pendente, mas preserva a exportação local se o banco estiver indisponível.
+  if (salvamentoPendente) {
+    try { await salvamentoPendente; } catch (e) { console.warn('PDF usando modo local:', e.message); }
+    salvamentoPendente = null;
+  }
   if (!avaliacaoId) {
     showToast('Aguardando salvamento...');
     for (let i = 0; i < 6; i++) {
@@ -725,7 +800,8 @@ async function exportarPDF() {
   for (let qi = 0; qi < questoes.length; qi++) {
     const q = questoes[qi];
     // Estima altura necessária
-    const enuncLines = doc.setFontSize(11) || doc.splitTextToSize(`${qi+1}. ${q.enunciado}`, cW);
+    doc.setFontSize(11);
+    const enuncLines = doc.splitTextToSize(`${qi+1}. ${q.enunciado}`, cW);
     const altLines = LETRAS.reduce((acc,l) => acc + doc.splitTextToSize(`    ${l}) ${q.alternativas[l]||''}`, cW-6).length, 0);
     const needed = (enuncLines.length * 5.5) + (altLines * 5) + 12;
 
@@ -768,7 +844,7 @@ async function exportarPDF() {
   const qrIdParaUsar = avaliacaoId || ('LOCAL-' + questoes.map(q=>q.gabarito).join(''));
   {
     try {
-      const qrUrl = 'https://aprendemaisvac.vercel.app/corrigir?id=' + qrIdParaUsar;
+      const qrUrl = `${window.location.origin}/corrigir?id=${encodeURIComponent(qrIdParaUsar)}`;
       const qrDiv = document.createElement('div');
       qrDiv.style.cssText = 'position:absolute;left:-9999px;top:-9999px;';
       document.body.appendChild(qrDiv);
@@ -875,7 +951,8 @@ async function exportarPDF() {
     doc.text('Professor(a)', M, qrY + 18);
   }
 
-  doc.save(`Avaliacao_${c.comp.replace(/\s/g,'_')}_${c.ano}_${c.geradaEm.replace(/\//g,'-')}.pdf`);
+  const nomeSeguro = value => String(value || '').replace(/[^a-zA-Z0-9À-ÿ]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 80) || 'Avaliacao';
+  doc.save(`${nomeSeguro(`Avaliacao_${c.comp}_${c.ano}_${c.geradaEm}`)}.pdf`);
   showToast('PDF gerado com sucesso!');
 }
 
@@ -883,7 +960,12 @@ async function exportarPDF() {
 // UTILITÁRIOS
 // ══════════════════════════════════════════════
 function novaAvaliacao() {
+  avaliacaoVersao += 1;
+  clearTimeout(salvamentoTimer);
+  salvamentoPendente = null;
   avaliacaoAtual = null;
+  avaliacaoId = null;
+  respostasAluno = [];
   document.getElementById('questoesContainer').style.display = 'none';
   document.getElementById('av-conteudo').value = '';
   window.scrollTo({top:0,behavior:'smooth'});
